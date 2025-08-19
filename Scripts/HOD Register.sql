@@ -213,3 +213,6 @@ FROM latest_7 l7
 LEFT JOIN latest_11 l11 ON l7.grievance_id = l11.grievance_id;
 --------------------------------
 
+
+
+--------------- NEW UPDATE --------------------
