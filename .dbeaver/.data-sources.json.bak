@@ -1,0 +1,241 @@
+{
+	"folders": {},
+	"connections": {
+		"postgres-jdbc-1983ca8700a-4e735cae4e6f511": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "FAMS",
+			"save-password": true,
+			"configuration": {
+				"host": "dev.msqube.com",
+				"port": "5444",
+				"database": "fams",
+				"url": "jdbc:postgresql://dev.msqube.com:5444/fams",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false"
+				},
+				"auth-model": "native"
+			}
+		},
+		"postgres-jdbc-198738c5c23-3a4863b3e2f006b6": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "CMO-Main-Prod-DB",
+			"save-password": true,
+			"show-system-objects": true,
+			"configuration": {
+				"host": "172.25.135.231",
+				"port": "5432",
+				"database": "cmo_grievance_portal_prod",
+				"url": "jdbc:postgresql://172.25.135.231:5432/cmo_grievance_portal_prod",
+				"configurationType": "MANUAL",
+				"home": "postgresql_client",
+				"type": "prod",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false",
+					"@dbeaver-chosen-role@": "",
+					"@dbeaver-show-template-db@": "false",
+					"@dbeaver-show-unavailable-db@": "false",
+					"show-database-statistics": "false",
+					"@dbeaver-read-all-data-types-db@": "false",
+					"read-keys-with-columns": "false",
+					"replace-legacy-timezone": "false",
+					"@dbeaver-use-prepared-statements-db@": "false",
+					"postgresql.dd.plain.string": "false",
+					"postgresql.dd.tag.string": "false"
+				},
+				"auth-model": "native",
+				"bootstrap": {
+					"autocommit": true,
+					"txnIsolation": 2
+				}
+			},
+			"custom-properties": {
+				"resultset.confirm.beforeSave": "false",
+				"resultset.datetime.editor": "false",
+				"resultset.maxrows": "1",
+				"transaction.auto.close.ttl": "3600",
+				"transaction.smart.commit": "true"
+			}
+		},
+		"postgres-jdbc-1987392a41c-43085f701e3c8ee6": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "CMO-Msqube-Data-Cleanup",
+			"save-password": true,
+			"configuration": {
+				"host": "172.25.142.167",
+				"port": "5432",
+				"database": "postgres",
+				"url": "jdbc:postgresql://172.25.142.167:5432/postgres",
+				"configurationType": "MANUAL",
+				"type": "test",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false"
+				},
+				"auth-model": "native"
+			}
+		},
+		"postgres-jdbc-198739bb6a6-7087d65dc86e57a8": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "CMO-Prod-Replica-DB",
+			"save-password": true,
+			"configuration": {
+				"host": "172.25.145.37",
+				"port": "5432",
+				"database": "cmo_grievance_portal_prod",
+				"url": "jdbc:postgresql://172.25.145.37:5432/cmo_grievance_portal_prod",
+				"configurationType": "MANUAL",
+				"type": "test",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "true"
+				},
+				"auth-model": "native"
+			}
+		},
+		"mysql8-19873a21207-15edd1c9de1b4236": {
+			"provider": "mysql",
+			"driver": "mysql8",
+			"name": "Eparimap Production",
+			"save-password": true,
+			"configuration": {
+				"host": "127.0.0.1",
+				"port": "3306",
+				"database": "eparimap",
+				"url": "jdbc:mysql://127.0.0.1:3306/eparimap",
+				"configurationType": "MANUAL",
+				"type": "prod",
+				"closeIdleConnection": true,
+				"auth-model": "native"
+			}
+		},
+		"postgres-jdbc-19873a76bbf-65446adc7468e1a8": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "Generic-Grievance-Dev-DB",
+			"save-password": true,
+			"configuration": {
+				"host": "13.234.80.230",
+				"port": "5444",
+				"database": "generic_grievance_dev",
+				"url": "jdbc:postgresql://13.234.80.230:5444/generic_grievance_dev",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false"
+				},
+				"auth-model": "native"
+			}
+		},
+		"postgres-jdbc-19873b26022-3c7d9ca07e934b75": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "WB-Investment-Synergy-Portal-Dev",
+			"save-password": true,
+			"configuration": {
+				"host": "dev.msqube.com",
+				"port": "5444",
+				"database": "wbidc",
+				"url": "jdbc:postgresql://dev.msqube.com:5444/wbidc",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false"
+				},
+				"auth-model": "native"
+			}
+		},
+		"postgres-jdbc-19873b6d6a6-7178ecaeae54383a": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "WBIDC-Main-Prod-DB",
+			"save-password": true,
+			"configuration": {
+				"host": "172.25.142.114",
+				"port": "5432",
+				"database": "wbidc_prod",
+				"url": "jdbc:postgresql://172.25.142.114:5432/wbidc_prod",
+				"configurationType": "MANUAL",
+				"type": "prod",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false"
+				},
+				"auth-model": "native"
+			}
+		},
+		"postgres-jdbc-19873e9b406-3973ac16b66307a9": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "CMO-Dev-DB",
+			"save-password": true,
+			"configuration": {
+				"host": "dev.msqube.com",
+				"port": "5432",
+				"database": "postgres",
+				"url": "jdbc:postgresql://dev.msqube.com:5432/postgres",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false"
+				},
+				"auth-model": "native"
+			}
+		}
+	},
+	"virtual-models": {"postgres-jdbc-198738c5c23-3a4863b3e2f006b6":{"cmo_grievance_portal_prod":{"public":{":griev_ids_pnrd_p3":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}},":griev_ids_pnrd_e_p2_road":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}}}}}},
+	"connection-types": {
+		"dev": {
+			"name": "Development",
+			"color": "255,128,128",
+			"description": "Regular development database",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": false,
+			"smart-commit": false,
+			"smart-commit-recover": true,
+			"auto-close-transactions": true,
+			"close-transactions-period": 1800,
+			"auto-close-connections": true,
+			"close-connections-period": 14400
+		},
+		"prod": {
+			"name": "Production",
+			"color": "org.jkiss.dbeaver.color.connectionType.prod.background",
+			"description": "Production database",
+			"auto-commit": false,
+			"confirm-execute": true,
+			"confirm-data-change": true,
+			"smart-commit": false,
+			"smart-commit-recover": false,
+			"auto-close-transactions": true,
+			"close-transactions-period": 600,
+			"auto-close-connections": true,
+			"close-connections-period": 3600
+		},
+		"test": {
+			"name": "Test",
+			"color": "255,128,0",
+			"description": "Test (QA) database",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": true,
+			"smart-commit": false,
+			"smart-commit-recover": true,
+			"auto-close-transactions": true,
+			"close-transactions-period": 900,
+			"auto-close-connections": true,
+			"close-connections-period": 7200
+		}
+	}
+}

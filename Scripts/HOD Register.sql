@@ -153,13 +153,12 @@ Select Count(1)
     ---------------------------------------------------------------------------------------------------------------------------
     
     select * from grievance_master gm where gm.status = 14; --2964622'
-    select * from grievance_lifecycle gl where gl.grievance_id = 60;
+    select * from grievance_lifecycle gl where gl.grievance_id = 32;
     
     
    select * from forwarded_latest_3_bh_mat_2 as bh where bh.assigned_on ;
  ---------------------------------------------------------------------------------------------------------------------------------
- ---------------------------------------------------------------------------------------------------------------------------------
- 
+   
    ------ Pendning Count For Received From CMO -----
    WITH latest_3 AS (
     SELECT DISTINCT ON (gl.grievance_id)
@@ -213,3 +212,4 @@ SELECT
 FROM latest_7 l7
 LEFT JOIN latest_11 l11 ON l7.grievance_id = l11.grievance_id;
 --------------------------------
+
