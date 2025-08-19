@@ -158,7 +158,8 @@ Select Count(1)
     
    select * from forwarded_latest_3_bh_mat_2 as bh where bh.assigned_on ;
  ---------------------------------------------------------------------------------------------------------------------------------
-   
+ ---------------------------------------------------------------------------------------------------------------------------------
+ 
    ------ Pendning Count For Received From CMO -----
    WITH latest_3 AS (
     SELECT DISTINCT ON (gl.grievance_id)
@@ -186,29 +187,29 @@ FROM latest_3 l3
 LEFT JOIN latest_14 l14 ON l3.grievance_id = l14.grievance_id;
 
     
------- Pendning Count For Received From HOD -----
-   WITH latest_3 AS (
+------ Pendning Count For Received From HOD 11-----
+WITH latest_7 AS (
     SELECT DISTINCT ON (gl.grievance_id)
            gl.grievance_id,
            gl.assigned_on AS last_assigned_on
     FROM grievance_lifecycle gl
-    WHERE gl.grievance_status = 3
+    WHERE gl.grievance_status = 7
     ORDER BY gl.grievance_id, gl.assigned_on DESC
 ),
-latest_14 AS (
+latest_11 AS (
     SELECT DISTINCT ON (gl.grievance_id)
            gl.grievance_id,
            gl.assigned_on AS last_update_on
     FROM grievance_lifecycle gl
-    WHERE gl.grievance_status = 14
+    WHERE gl.grievance_status = 11
     ORDER BY gl.grievance_id, gl.assigned_on DESC
 )
 SELECT 
-    l3.grievance_id,
+    l7.grievance_id,
     CASE 
-        WHEN l14.last_update_on IS NOT NULL AND l14.last_update_on > l3.last_assigned_on then 0
-        else EXTRACT(DAY from (CURRENT_DATE - l3.last_assigned_on))
+        WHEN l11.last_update_on IS NOT NULL AND l11.last_update_on > l7.last_assigned_on then 0
+        else EXTRACT(DAY from (CURRENT_DATE - l7.last_assigned_on))
     END AS pending_days
-FROM latest_3 l3
-LEFT JOIN latest_14 l14 ON l3.grievance_id = l14.grievance_id;
-
+FROM latest_7 l7
+LEFT JOIN latest_11 l11 ON l7.grievance_id = l11.grievance_id;
+--------------------------------
