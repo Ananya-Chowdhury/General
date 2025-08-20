@@ -1,1 +1,1 @@
-{"resources":{}}
+{"resources":{"Scripts/Script-1.sql":{"default-datasource":"postgres-jdbc-198738c5c23-3a4863b3e2f006b6","default-catalog":"cmo_grievance_portal_prod","default-schema":"public"},"Scripts/Script.sql":{"default-schema":"public","default-datasource":"postgres-jdbc-198738c5c23-3a4863b3e2f006b6","default-catalog":"cmo_grievance_portal_prod"}}}
