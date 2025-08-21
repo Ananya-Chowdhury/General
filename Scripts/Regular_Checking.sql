@@ -350,7 +350,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9999999999'
+WHERE uo.u_phone = '8981534337'
 ORDER BY created_on desc limit 5;
 
 SELECT * 
