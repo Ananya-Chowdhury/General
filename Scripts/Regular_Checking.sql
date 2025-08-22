@@ -350,12 +350,12 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '8981534337'
+WHERE uo.u_phone = '9297929297'
 ORDER BY created_on desc limit 5;
 
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '8101859077'
+WHERE uo.u_phone = '9999999999'
 ORDER BY created_on desc;
 
 SELECT otp 
@@ -443,7 +443,6 @@ select * from pg_stat_activity;
 --- Connection Lock Checking -----
 select * from pg_locks;
 
-
 select * from pg_stat_activity;
 
 -- Proccesed pid query identified --
@@ -452,7 +451,6 @@ count(1) AS query_count
 from pg_stat_activity
 inner join pg_locks on pg_locks.pid = pg_stat_activity.pid 
 group by 1 ;
-
 
 -- Proccesed pid query identified more than 1000 -- 
 SELECT 
@@ -465,7 +463,36 @@ HAVING
     COUNT(1) >= 1000;
    
 
- -------- pid search ------
+--- Postgres Locked Query ---
+SELECT
+    pg_locks.locktype,
+    pg_locks.mode,
+    pg_locks.granted,
+    pg_stat_activity.pid,
+    pg_stat_activity.usename,
+    pg_stat_activity.query,
+    pg_stat_activity.state,
+    pg_stat_activity.query_start
+FROM pg_locks
+JOIN pg_stat_activity ON pg_locks.pid = pg_stat_activity.pid
+ORDER BY pg_stat_activity.query_start;
+
+
+
+--- Finding Rapidly used query in Main Database ----
+--SELECT * FROM "hod_all_weekly_modified_othins"();
+--SELECT * FROM "hod_total"();
+--SELECT * FROM "get_dept"();
+--SELECT * FROM "hcm_mis"();
+
+------- Find PID Number From Stuck Query ------
+select * from pg_stat_activity where query = 'SELECT * FROM "hod_all_weekly_modified_othins"()';
+select * from pg_stat_activity where query = 'SELECT * FROM "hcm_mis"()';
+
+--------- Cancel PID Locks ---------
+select * from pg_cancel_backend(233362);
+
+ -------- Cancel pid Locks ------
 select * from pg_catalog.pg_cancel_backend(1412570);
    
 ------  kill function query ----------
@@ -500,7 +527,7 @@ JOIN pg_stat_activity ON pg_locks.pid = pg_stat_activity.pid
 LEFT JOIN pg_class ON pg_locks.relation = pg_class.oid
 WHERE pg_locks.relation IS NOT NULL;
 
-
+-------------------------------------------------------------------------------------------------------
 
 
 --------------- DATA CHECK -----------------
@@ -2926,3 +2953,9 @@ select *
 
 ------------------------------------------------------------------------------------------------------------------------------
 
+ ------ trancate Table Query -----
+-- TRUNCATE your_table_name RESTART IDENTITY;
+
+ 
+ ------------------------------------------------------------------------------------------------------------------------
+ 

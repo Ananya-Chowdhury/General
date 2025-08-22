@@ -250,17 +250,155 @@ left join close_count on gr.district_id = close_count.district_id
 --------------------------------------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------------------------------------
------------------------ HOD Dashboard Grievance and Atr My Office -----------------------------------------
-with user_grievances as (
-	select bh.assigned_by_id, count(1) as assigned_grievance 
-	from forwarded_latest_3_bh_mat_2 as bh 
-	inner join grievance_master_bh_mat_2 as gm on gm.grievance_id = bh.grievance_id
-	where bh.assigned_by_id is not null and bh.assigned_to_office_id in (35)
-	group by bh.assigned_by_id
-)
+----------------------- HOD dashboard ------>>>>>> Grievnace and ATRs Status of My Sub-Office -----------------------------------------
+with fwd_union_data as (		
+	select admin_position_master.sub_office_id, forwarded_latest_7_bh_mat.grievance_id, forwarded_latest_7_bh_mat.assigned_to_position
+        from
+            (
+              select forwarded_latest_3_bh_mat.grievance_id, forwarded_latest_3_bh_mat.assigned_on
+                  from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
+               where forwarded_latest_3_bh_mat.assigned_to_office_id in (35)
+                union
+              select forwarded_latest_5_bh_mat.grievance_id, forwarded_latest_5_bh_mat.assigned_on
+                 from forwarded_latest_5_bh_mat_2 as forwarded_latest_5_bh_mat
+               where forwarded_latest_5_bh_mat.assigned_to_office_id in (35)
+            ) as recev_cmo_othod
+        inner join forwarded_latest_7_bh_mat_2 as forwarded_latest_7_bh_mat on forwarded_latest_7_bh_mat.grievance_id = recev_cmo_othod.grievance_id
+        left join admin_position_master on forwarded_latest_7_bh_mat.assigned_to_position = admin_position_master.position_id
+        left join admin_user_position_mapping on admin_user_position_mapping.position_id = admin_position_master.position_id 
+        where 1=1 and forwarded_latest_7_bh_mat.assigned_by_office_id in (35)
+	), fwd_atr as (
+        select fwd_union_data.sub_office_id, count(fwd_union_data.grievance_id) as forwarded, fwd_union_data.assigned_to_position as position
+        from fwd_union_data
+        group by fwd_union_data.sub_office_id, fwd_union_data.assigned_to_position
+     ), atr_recv as (
+	        select fwd_union_data.sub_office_id, count(fwd_union_data.grievance_id) as atr_received
+	        	from fwd_union_data
+	        inner join atr_latest_11_bh_mat_2 as atr_latest_11_bh_mat on atr_latest_11_bh_mat.grievance_id = fwd_union_data.grievance_id
+	        where atr_latest_11_bh_mat.assigned_to_office_id in (35)
+	        group by fwd_union_data.sub_office_id
+	  )
+     select
+       '2025-08-21 16:30:01.231162+00:00':: timestamp as refresh_time_utc,
+       '2025-08-21 16:30:01.231162+00:00':: timestamp + interval '5 hour 30 minutes' as refresh_time_ist,
+       coalesce(cmo_sub_office_master.suboffice_name,'N/A') as office_name,
+       cmo_sub_office_master.suboffice_id,
+       coalesce(fwd_atr.forwarded, 0) AS grv_forwarded,
+       coalesce(atr_recv.atr_received, 0) AS atr_received,
+       coalesce(fwd_atr.position, 0) AS position
+--            coalesce(pnd.d_0_7_d, 0) AS d_0_7_d,
+--            coalesce(pnd.d_7_15, 0) AS d_7_15,
+--            coalesce(pnd.d_15_30, 0) AS d_15_30,
+--            coalesce(pnd.more_30_d, 0) AS more_30_d,
+--            coalesce(pnd.pending, 0) AS atr_pending
+        from fwd_atr
+        left join atr_recv on fwd_atr.sub_office_id = atr_recv.sub_office_id
+        left join cmo_sub_office_master on cmo_sub_office_master.suboffice_id = fwd_atr.sub_office_id
+--        full join pnd on fwd_atr.sub_office_id = pnd.sub_office_id and fwd_atr.grievance_category = pnd.grievance_category
+        where 1=1
+        order by cmo_sub_office_master.suboffice_name
 
+        
+        
+        select 
+    admin_user_details.official_name, 
+    admin_user_details.official_phone, 
+    admin_position_master.office_id, 
+    aurm.role_master_name, 
+    admin_position_master.position_id
+    from admin_user_details
+        inner join admin_user_position_mapping on admin_user_position_mapping.admin_user_id = admin_user_details.admin_user_id 
+        inner join admin_position_master on admin_position_master.position_id = admin_user_position_mapping.position_id
+        inner join admin_user_role_master aurm on aurm.role_master_id = admin_position_master.role_master_id
+    where /*admin_position_master.office_id = 35 and*/ admin_position_master.office_id is not null and admin_position_master.role_master_id in (4,5) and 
+    admin_user_position_mapping.status = 1  and admin_position_master.record_status= 1 /*and admin_position_master.position_id = 10140*/
+    group by admin_user_details.official_name, admin_user_details.official_phone, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id;
 
+----------------------------------------------------===========================================================================================
+---============================== HOD dashboard ------>>>>>> Grievnace and ATRs Status of My Sub-Office ==========================================
+---- MIS ------>>>>
+with pnd as (
+        select
+                admin_position_master.sub_office_id, grievance_master_bh_mat.grievance_category, count(1) as pending,
+                sum(case when ba.days_diff <= 7 then 1 else 0 end) as d_0_7_d,
+                sum(case when (15 >= ba.days_diff and ba.days_diff > 7) then 1 else 0 end) as d_7_15,
+                sum(case when (30 >= ba.days_diff and ba.days_diff > 15) then 1 else 0 end) as d_15_30,
+                sum(case when (ba.days_diff > 30) then 1 else 0 end) as more_30_d
+        from (
+            select forwarded_latest_3_bh_mat.grievance_id, forwarded_latest_3_bh_mat.assigned_on
+            from /* VARIABLE */ forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
+            left join /* VARIABLE */ atr_latest_14_bh_mat_2 as atr_latest_14_bh_mat on atr_latest_14_bh_mat.grievance_id = forwarded_latest_3_bh_mat.grievance_id
+                                                                                                and atr_latest_14_bh_mat.current_status in (14,15)
+            where atr_latest_14_bh_mat.grievance_id is null
+                /* VARIABLE */  and forwarded_latest_3_bh_mat.assigned_to_office_id in (35)
+            union
+                select bh.grievance_id, bh.assigned_on
+                from /* VARIABLE */ forwarded_latest_5_bh_mat_2 bh
+                left join /* VARIABLE */ atr_latest_13_bh_mat_2 as bm on bm.grievance_id = bh.grievance_id
+                where bm.grievance_id is null
+                    /* VARIABLE */  and bh.assigned_to_office_id in (35)
+        ) as pnd_union_data
+        inner join /* VARIABLE */ grievance_master_bh_mat_2 as grievance_master_bh_mat on grievance_master_bh_mat.grievance_id = pnd_union_data.grievance_id
+        left join admin_position_master on admin_position_master.position_id = grievance_master_bh_mat.assigned_to_position
+        left join /* VARIABLE */ pending_for_hoso_wise_mat_2 as ba on grievance_master_bh_mat.grievance_id = ba.grievance_id
+        where grievance_master_bh_mat.status not in (3, 5, 16) and admin_position_master.role_master_id in (7,8)
+            /* VARIABLE */ and admin_position_master.office_id in (35)
+            /* VARIABLE */
+        group by admin_position_master.sub_office_id, grievance_master_bh_mat.grievance_category
+    ), fwd_union_data as (
+        select admin_position_master.sub_office_id, forwarded_latest_7_bh_mat.grievance_category, forwarded_latest_7_bh_mat.grievance_id
+        from
+            (
+                select forwarded_latest_3_bh_mat.grievance_id, forwarded_latest_3_bh_mat.assigned_on
+                    from /* VARIABLE */ forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
+                where /* VARIABLE */ forwarded_latest_3_bh_mat.assigned_to_office_id in (35)
+                    union
+                select bh.grievance_id, bh.assigned_on
+                    from /* VARIABLE */ forwarded_latest_5_bh_mat_2 bh
+                where /* VARIABLE */ bh.assigned_to_office_id in (35)
+            )as XX
+        inner join /* VARIABLE */ forwarded_latest_7_bh_mat_2 forwarded_latest_7_bh_mat on forwarded_latest_7_bh_mat.grievance_id = XX.grievance_id
+        left join admin_position_master on forwarded_latest_7_bh_mat.assigned_to_position = admin_position_master.position_id
+        where 1=1 /* VARIABLE */
+                /* VARIABLE */ and forwarded_latest_7_bh_mat.assigned_by_office_id in (35)
+    ), fwd_atr as (
+        select fwd_union_data.sub_office_id, fwd_union_data.grievance_category, count(fwd_union_data.grievance_id) as forwarded
+        from fwd_union_data
+        group by fwd_union_data.sub_office_id, fwd_union_data.grievance_category
+    ), atr as (
+        select fwd_union_data.sub_office_id, fwd_union_data.grievance_category, count(fwd_union_data.grievance_id) as atr_received
+        from fwd_union_data
+        inner join /* VARIABLE */ atr_latest_11_bh_mat_2 atr_latest_11_bh_mat on atr_latest_11_bh_mat.grievance_id = fwd_union_data.grievance_id
+        where /* VARIABLE */ atr_latest_11_bh_mat.assigned_to_office_id in (35)
+        group by fwd_union_data.sub_office_id, fwd_union_data.grievance_category
+    ), processing_unit as (
+        select
+            /* VARIABLE */ '2025-08-21 16:30:01.231162+00:00':: timestamp as refresh_time_utc,
+            /* VARIABLE */ '2025-08-21 16:30:01.231162+00:00':: timestamp + interval '5 hour 30 minutes' as refresh_time_ist,
+            coalesce(cmo_sub_office_master.suboffice_name,'N/A') as office_name,
+            coalesce(cgcm.grievance_category_desc,'N/A') as grievance_category_desc,
+            cmo_sub_office_master.suboffice_id,
+            cgcm.parent_office_id,
+            coalesce(fwd_atr.forwarded, 0) AS grv_forwarded,
+            coalesce(atr.atr_received, 0) AS atr_received,
+            coalesce(pnd.d_0_7_d, 0) AS d_0_7_d,
+            coalesce(pnd.d_7_15, 0) AS d_7_15,
+            coalesce(pnd.d_15_30, 0) AS d_15_30,
+            coalesce(pnd.more_30_d, 0) AS more_30_d,
+            coalesce(pnd.pending, 0) AS atr_pending
+        from fwd_atr
+        left join atr on fwd_atr.sub_office_id = atr.sub_office_id and fwd_atr.grievance_category = atr.grievance_category
+        left join cmo_sub_office_master on cmo_sub_office_master.suboffice_id = fwd_atr.sub_office_id
+        left join cmo_grievance_category_master cgcm on cgcm.grievance_cat_id = fwd_atr.grievance_category
+        full join pnd on fwd_atr.sub_office_id = pnd.sub_office_id and fwd_atr.grievance_category = pnd.grievance_category
+        where 1=1
+                /* VARIABLE */
+                /* VARIABLE */
+        order by cmo_sub_office_master.suboffice_name, cgcm.grievance_category_desc
+    )
+    select row_number() over() as sl_no, processing_unit.* from processing_unit
 
+-----------------------------------------------------------------------------------------------------------------------
 ----- Sample -----------
 SELECT COUNT(1) as grievances_recieved_cnt, bh.district_id
         FROM forwarded_latest_3_bh_mat_2 as bh
@@ -271,11 +409,11 @@ SELECT COUNT(1) as grievances_recieved_cnt, bh.district_id
 select * from cmo_action_taken_note_master catnm ;
 select * from cmo_closure_reason_master ccrm  ;
 
-
+select * from cmo_sub_office_master csom where csom.office_id in (35);
+select * from grievance_master gm limit 1;
 
 
 ----------------------------------- HOD DASHBOARD UPDATE ---------------------------------
-
 with grievances_recieved as (
             SELECT COUNT(1) as grievances_recieved_cnt
             FROM forwarded_latest_3_bh_mat_2 as bh
