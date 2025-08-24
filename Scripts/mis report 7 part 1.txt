@@ -1,0 +1,53 @@
+Query Execution Time in Database :: ~7 Seconds
+
+API - /cmosvc/mis/v3/getsubofficewisegrievanceresolutionstatushod/
+
+Payload ::
+
+{
+   "date_start" : "2019-01-01",
+   "date_end" : "2024-11-11",
+   "office" :  3,
+   "source" : null,
+   "user_type" : null,
+   "excel_flag" : false
+}
+
+# for HOD view [ office = any_value and sub_office = null ] (office mandatory field)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# for CMO HOD view [ office = any value ] and "griv_stat" = 3 or 5 or null (not mandatory field)
+# for selecting particular office users [ office = any value and user_type = 1(hod user) or 2(other hods) or 3(sub offices) ]
