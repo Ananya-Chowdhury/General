@@ -330,11 +330,11 @@ select * from public.cmo_domain_lookup_master cdlm ;
 select * from public.admin_position_master apm where apm.record_status = 1 and apm.role_master_id = 9;
 select * from public.admin_user_position_mapping aupm where aupm.status = 1 and aupm.position_id = 1;
 select * from public.grievance_master gm where gm.status = 15;
-select * from public.grievance_lifecycle gl where gl.grievance_id ='2670392';
+select * from public.grievance_lifecycle gl where gl.grievance_id = 5740559;   --5740559
 select * from public.cmo_office_master com where office_name = 'Backward Classes Welfare Department'; --4
 select * from public.cmo_police_station_master cpsm where cpsm.ps_id in (165,183);
 select * from public.cmo_sub_districts_master csdm where csdm.sub_district_id in (21,60,26,35);
-select * from public.grievance_master gm where gm.grievance_id = 2670392;
+select * from public.grievance_master gm where gm.grievance_id = 5740559;
 select * from public.grievance_lifecycle gl where gl.lifecycle_id = 8186648;  --2670392
  
 
@@ -344,13 +344,14 @@ select * from public.cmo_closure_reason_master ccrm;
 
 
 ["9999999900","9999999999","8918939197","8777729301","9775761810","7719357638","7001322965","9297929297",
-"6292222444","8334822522","9874263537","9432331563","9434495405","9559000099","9874263537"]
+"6292222444","8334822522","9874263537","9432331563","9434495405","9559000099","9874263537"]  --SSM3481985
+
 
 
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9297929297'
+WHERE uo.u_phone = '7003662013'
 ORDER BY created_on desc limit 5;
 
 SELECT * 
@@ -389,7 +390,7 @@ select * from public.admin_user au where au.u_phone = '9999999999'; --8101859077
 select * from public.admin_user_details aud where aud.official_phone = '9999999999'; --9903821521
 select * from public.cmo_parameter_master cpm ;
 select * from public.grievance_master gm where gm.pri_cont_no = '9163479418';
-select * from public.grievance_master gm2 where gm2.grievance_no = 'CMO75581311';
+select * from public.grievance_master gm2 where gm2.grievance_no = 'SSM5026653';
 select * from public.cmo_closure_reason_master ccrm;
 
 
@@ -404,18 +405,29 @@ SELECT COUNT(DISTINCT gl.grievance_id) FROM grievance_lifecycle gl WHERE gl.crea
 SELECT COUNT(DISTINCT gm.grievance_id) FROM grievance_master gm WHERE gm.updated_on::date = '2025-08-06'; -- 11826
 SELECT COUNT(DISTINCT gm.grievance_id) FROM grievance_master gm WHERE gm.created_on::date = '2025-08-06'; -- 1852
 SELECT COUNT(1) FROM grievance_master gm WHERE gm.updated_on::date = '2025-08-06';
+SELECT COUNT(1) FROM grievance_master gm WHERE gm.updated_on::date = '2025-08-20';
+SELECT COUNT(1) FROM grievance_master gm WHERE gm.updated_on >= '2025-08-20 00:00:00' AND gm.updated_on <  '2025-08-20 12:00:00';
+select * from grievance_master gm where gm.status = 1;
+select * from grievance_lifecycle gl where gl.grievance_id = 5802305;
+
 
 SELECT COUNT(DISTINCT gl.grievance_id) FROM grievance_lifecycle gl 
-inner join grievance_master gm on gm.grievance_id = gl.grievance_id 
-WHERE gl.created_on::date = '2025-08-06';
+--inner join grievance_master gm on gm.grievance_id = gl.grievance_id 
+WHERE gl.assigned_on::date = '2025-08-20';
+--WHERE gl.created_on::date = '2025-08-06';
+
 
 SELECT distinct gm.* FROM grievance_lifecycle gl 
 inner join grievance_master gm on gm.grievance_id = gl.grievance_id 
-WHERE gl.created_on::date = '2025-08-06';
+WHERE gl.created_on::date = '2025-08-20';
+--WHERE gl.created_on::date = '2025-08-06';
 
 SELECT COUNT(DISTINCT gl.grievance_id) FROM grievance_lifecycle gl WHERE gl.created_on BETWEEN '2024-11-14 00:00:00' AND '2024-11-14 17:00:00';
 SELECT COUNT(1) FROM grievance_lifecycle gl WHERE gl.created_on::date = '2025-08-06';
-select count(1) from grievance_lifecycle gl where gl.created_on between '2024-11-14 00:00:00' AND '2024-11-14 17:00:00'; 
+
+select count(1) from grievance_lifecycle gl where gl.assigned_on between '2025-08-25 00:00:00' AND '2025-08-25 12:00:00'; 
+select count(DISTINCT gl.grievance_id) from grievance_lifecycle gl where gl.assigned_on between '2025-08-25 00:00:00' AND '2025-08-25 12:00:00';
+
 select count(1) from grievance_master gm where gm.created_on between '2024-11-14 00:00:00' AND '2024-11-14 17:00:00';
 
 
@@ -433,6 +445,7 @@ inner join grievance_master_sdc_timestamp_issue_20250806_bkp gm on gm.grievance_
 --create table grievance_lifecycle_sdc_timestamp_20250806_bkp;
 
 select count(1) from grievance_lifecycle_sdc_timestamp_20250806_bkp;
+select count(1) from grievance_master_sdc_timestamp_issue_20250806_bkp;
 ---------------------------------------------------------------------------------------------------
 
 -- Connection Count ---
@@ -551,6 +564,7 @@ select distinct gl.grievance_id, gl.lifecycle_id, gl.assigned_on
       
       
 ---- Atr return for review to SO but not Assigned to SO ---
+create materialized view public.return_for_rvw_mismatch as
 select distinct gl.grievance_id, gl.lifecycle_id, gl.assigned_on
        from grievance_lifecycle gl where gl.grievance_status = 10
        and assigned_to_office_cat != 3 and assigned_by_office_cat = 3
@@ -559,7 +573,7 @@ select distinct gl.grievance_id, gl.lifecycle_id, gl.assigned_on
       
 
 
-select * from grievance_lifecycle gl where grievance_id = 5734105;
+select * from grievance_lifecycle gl where grievance_id = 989819 order by gl.assigned_on asc;
 select gm.grievance_id, gm.grievance_no from grievance_master gm where grievance_id in (3416651);
 
 select distinct grievance_id from grievance_lifecycle gl   

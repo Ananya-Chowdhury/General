@@ -320,8 +320,9 @@ Select Count(1)
 --------------------------------------------------------------------------------------------------------------------------------
     
     select * from grievance_master gm where gm.status = 14; --2964622'
-    select * from grievance_lifecycle gl where gl.grievance_id = 5442634;
+    select * from grievance_lifecycle gl where gl.grievance_id = 2282781 order by gl.assigned_on asc;
     select * from grievance_master gm where gm.grievance_no = 'SSM4690533';
+    select * from grievance_master gm where gm.grievance_id = 2282781;
     
     
     
@@ -350,7 +351,7 @@ SELECT
     l3.grievance_id,
     CASE 
         WHEN l14.last_update_on IS NOT NULL AND l14.last_update_on > l3.last_assigned_on then 0
-        else EXTRACT(DAY from (CURRENT_DATE - l3.last_assigned_on))
+        else EXTRACT(DAY from (CURRENT_TIMESTAMP - l3.last_assigned_on))
     END AS pending_days
 FROM latest_3 l3
 LEFT JOIN latest_14 l14 ON l3.grievance_id = l14.grievance_id;
@@ -380,7 +381,7 @@ SELECT
     l7.grievance_id,
     CASE 
         WHEN l11.last_update_on IS NOT NULL AND l11.last_update_on > l7.last_assigned_on then 0
-        else EXTRACT(DAY from (CURRENT_DATE - l7.last_assigned_on))
+        else EXTRACT(DAY from (CURRENT_TIMESTAMP - l7.last_assigned_on))
     END AS pending_days
 FROM latest_7 l7
 LEFT JOIN latest_11 l11 ON l7.grievance_id = l11.grievance_id;
@@ -410,7 +411,7 @@ SELECT
     l5.grievance_id,
     CASE 
         WHEN l13.last_update_on IS NOT NULL AND l13.last_update_on > l5.last_assigned_on then 0
-        else EXTRACT(DAY from (CURRENT_DATE - l5.last_assigned_on))
+        else EXTRACT(DAY from (CURRENT_TIMESTAMP - l5.last_assigned_on))
     END AS pending_days
 FROM latest_5 l5
 LEFT JOIN latest_13 l13 ON l5.grievance_id = l13.grievance_id;
@@ -686,3 +687,45 @@ with uinion_part as (
                 left join pending_at_hoso_mat_2 ph on ph.grievance_id = md.grievance_id
                 left join pending_at_other_hod_mat_2 po on po.grievance_id = md.grievance_id        
                   order by (case when md.status = 1 then md.grievance_generate_date else md.updated_on end) asc 
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  ---------------------------------------
+WITH latest_3 AS (
+    SELECT DISTINCT ON (gl.grievance_id)
+           gl.grievance_id,
+           gl.assigned_on AS last_assigned_on
+    FROM grievance_lifecycle gl
+    WHERE gl.grievance_status = 3
+    ORDER BY gl.grievance_id, gl.assigned_on DESC
+),
+latest_14 AS (
+    SELECT DISTINCT ON (gl.grievance_id)
+           gl.grievance_id,
+           gl.assigned_on AS last_update_on
+    FROM grievance_lifecycle gl
+    WHERE gl.grievance_status = 14
+    ORDER BY gl.grievance_id, gl.assigned_on DESC
+)
+SELECT 
+    l3.grievance_id,
+    CASE 
+        WHEN l14.last_update_on IS NOT NULL AND l14.last_update_on > l3.last_assigned_on then 0
+        else EXTRACT(DAY from (CURRENT_DATE - l3.last_assigned_on))
+    END AS pending_days
+FROM latest_3 l3
+LEFT JOIN latest_14 l14 ON l3.grievance_id = l14.grievance_id
+
+
+
+select CURRENT_TIMESTAMP;
+
+
+select * from control_json cj;
