@@ -74,20 +74,20 @@ SELECT
     end AS missing_batch_timeslots
 FROM 
     (
-        SELECT 
-            cbrd.batch_date::date,
-            COUNT(cbrd.batch_id) AS batchs,
-            array_to_string(
-                ARRAY_AGG(cbrd.batch_id ORDER BY cbrd.batch_id ASC),
-                ', '
-            ) AS batch_ids
-        FROM cmo_batch_run_details cbrd
-        LEFT JOIN cmo_batch_time_master cbtm 
-            ON cbtm.batch_time_master_id = cbrd.batch_id
-        WHERE status = 'S'
-        GROUP BY cbrd.batch_date::date
-        ORDER BY cbrd.batch_date::date DESC
-    ) a
+    SELECT 
+        cbrd.batch_date::date,
+        COUNT(cbrd.batch_id) AS batchs,
+        array_to_string(
+            ARRAY_AGG(cbrd.batch_id ORDER BY cbrd.batch_id ASC),
+            ', '
+        ) AS batch_ids
+    FROM cmo_batch_run_details cbrd
+    LEFT JOIN cmo_batch_time_master cbtm 
+        ON cbtm.batch_time_master_id = cbrd.batch_id
+    WHERE status = 'S'
+    GROUP BY cbrd.batch_date::date
+    ORDER BY cbrd.batch_date::date DESC
+) a
 WHERE (a.batchs <= 96 or a.batchs > 96) ;
 ------------------------------------------------------------------------------
 
@@ -2952,10 +2952,14 @@ select *
         where gm.grievance_id > 0  and gm.emergency_flag = 'Y' and (gm.assigned_to_office_id = 94) and gm.status in (3,4,5);
 
 ------------------------------------------------------------------------------------------------------------------------------
-
+----------------------- ====================== CREDENTIALS ======================== -----------------------------------
+       
  ------ trancate Table Query -----
 -- TRUNCATE your_table_name RESTART IDENTITY;
 
+       
+-----------------------------------------
+--- pg_dump -U cmo_admin_dev -h 15.206.132.5 -p 5444 -d migration_testing -f cmo_dev_bkp_dump.sql
  
  ------------------------------------------------------------------------------------------------------------------------
  
