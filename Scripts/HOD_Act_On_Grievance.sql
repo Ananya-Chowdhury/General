@@ -1,5 +1,5 @@
 
------------------------------------- Count Query ------------------------------------
+------------------------------------ Previous Count Query On HOD Act on Grievance -->>> EMERGENCY TAB ------------------------------------
 -- /*table_type = Emergency, token_role_id = 4, code :: ['GM003', 'GM004', 'GM005', 'GM016'] NORMAL*/
                 WITH lastupdates AS (
                     SELECT grievance_lifecycle.grievance_id,
@@ -35,7 +35,7 @@
                               
                               
                               
- -------------------------------- Listing Query -------------------------------------                            
+ -------------------------------- Previous Listing Query On HOD Act on Grievance -->>> EMERGENCY TAB -------------------------------------                            
  -- /*table_type = Emergency, token_role_id = 4, code :: ['GM003', 'GM004', 'GM005', 'GM016'] NORMAL*/
                 WITH lastupdates AS (
                     SELECT grievance_lifecycle.grievance_id,
@@ -156,3 +156,12 @@
                                 left join lastupdates lu on lu.rn = 1 and lu.grievance_id = md.grievance_id and lu.assigned_to_office_id = 35 
                                 where ( 
                               (md.assigned_to_office_id = 35) and replace(lower(md.emergency_flag),' ','') like '%y%' and md.status in (3,4,5,16) ) order by (case when md.status = 1 then md.grievance_generate_date else md.updated_on end) asc  offset 0 limit 30 
+                              
+                              
+                              
+ 
+                              
+                              
+  select * from grievance_lifecycle gl where gl.grievance_id = 5388467 order by gl.assigned_on asc;
+  select * from admin_user_position_mapping aupm where aupm.position_id = 1227;
+  select * from admin_user_details aud where aud.admin_user_id = 1227;

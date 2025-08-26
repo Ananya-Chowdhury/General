@@ -218,7 +218,7 @@ select * from public.grievance_lifecycle gl where gl.grievance_id = 5631176;
 select * from public.grievance_master gm where gm.grievance_no = 'CMO18754331';
 select * from public.admin_position_master apm where apm.position_id = 10140;               -- assigned_to_postion = position_id      admin_postion_master
 select * from public.admin_user_position_mapping aupm where aupm.position_id = 11360;       --12745 (6) --10140 --12708 (7) --
-select * from public.admin_user au where au.admin_user_id = 10140;
+select * from public.admin_user au where au.admin_user_id = 10920;
 select * from public.user_token ut where ut.user_id = 105 order by ut.token_id desc;
 select * from public.cmo_closure_reason_master ccrm ;
 select * from public.grievance_master gm where gm.pri_cont_no = '8101859077';
@@ -238,6 +238,51 @@ select * from admin_position_master apm ;
 select * from admin_user_position_mapping aupm ;
 
 
+--------- Departmental Admin and Nodal User ------------
+
+select admin_user_details.official_name, admin_user_details.official_phone, admin_user_details.official_email, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name 
+from admin_user_details
+inner join admin_user_position_mapping on admin_user_position_mapping.admin_user_id = admin_user_details.admin_user_id 
+inner join admin_position_master on admin_position_master.position_id = admin_user_position_mapping.position_id
+inner join admin_user_role_master aurm on aurm.role_master_id = admin_position_master.role_master_id
+inner join cmo_office_master com on com.office_id = admin_position_master.office_id
+where /*admin_position_master.office_id = 35 and */ admin_position_master.office_id is not null and admin_position_master.role_master_id in (4,5) and 
+	  admin_user_position_mapping.status = 1  and admin_position_master.record_status= 1 and admin_user_details.official_phone  in ('9999999900','9999999999','8918939197','8777729301','9775761810','7719357638','7001322965','6292222444',
+'8334822522','9874263537','9432331563','9434495405','9559000099','9874263537')
+	 group by admin_user_details.official_name, admin_user_details.official_phone, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name, admin_user_details.official_email;
+
+
+select admin_user_details.official_name, admin_user_details.official_phone, admin_user_details.official_email, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name 
+from admin_user_details
+inner join admin_user_position_mapping on admin_user_position_mapping.admin_user_id = admin_user_details.admin_user_id 
+inner join admin_position_master on admin_position_master.position_id = admin_user_position_mapping.position_id
+inner join admin_user_role_master aurm on aurm.role_master_id = admin_position_master.role_master_id
+inner join cmo_office_master com on com.office_id = admin_position_master.office_id
+inner join admin_user au on au.admin_user_id = admin_user_details.admin_user_id 
+where /*admin_position_master.office_id = 35 and */ admin_position_master.office_id is not null /*and admin_position_master.role_master_id in (4,5)*/ 
+	  admin_user_position_mapping.status = 1  and admin_position_master.record_status= 1 and au.u_phone in ('9999999900','9999999999','8918939197','8777729301','9775761810','7719357638','7001322965','6292222444',
+'8334822522','9874263537','9432331563','9434495405','9559000099','9874263537') /*and au.admin_user_id in (3756,76,70,4263,10920,4,14206,16134,12595)*/
+	 group by admin_user_details.official_name, admin_user_details.official_phone, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name, admin_user_details.official_email
+	order by admin_user_details.official_name asc;
+
+
+
+
+select * from public.admin_user au where au.u_phone in ('9999999900','9999999999','8918939197','8777729301','9775761810','7719357638','7001322965','6292222444',
+'8334822522','9874263537','9432331563','9434495405','9559000099','9874263537') and au.status = 1;
+select * from admin_user_position_mapping aupm where aupm.admin_user_id = 10920;
+select * from admin_position_master apm where apm.position_id = 10920;
+select * from admin_user_details aud where aud.admin_user_id  = 10920;
+select * from public.admin_user au where au.u_phone in ('6292222444');  --9163479418 9999999999  shovanhalder9@gmail.com  ananyachowdhury002@gmail.com
+select * from public.admin_user_details aud where aud.official_phone  in ('6292222444');  --9163479418 9999999999  shovanhalder9@gmail.com  ananyachowdhury002@gmail.com
+
+
+--- 9297929297 -- Dr.P Ulaganathan,IAS --- secy.prd-wb@bangla.gov.in --- 10140 -- P&RD
+--- 6292222444 -- Sri Sumit Gupta, IAS --- dm-ali@nic.in --- 76 ---- DM.South.24
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+46
 ------- Grievance Category Mapping Check ----------
 select * from cmo_grievance_category_master cgcm ;
 select * from cmo_griev_cat_office_mapping cgcom ;
@@ -346,12 +391,13 @@ select * from public.cmo_closure_reason_master ccrm;
 ["9999999900","9999999999","8918939197","8777729301","9775761810","7719357638","7001322965","9297929297",
 "6292222444","8334822522","9874263537","9432331563","9434495405","9559000099","9874263537"]  --SSM3481985
 
-
+["9999999900","9999999999","8918939197","8777729301","9775761810","7719357638","7001322965","6292222444",
+"8334822522","9874263537","9432331563","9434495405","9559000099","9874263537"]
 
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '7003662013'
+WHERE uo.u_phone = '9163479418'
 ORDER BY created_on desc limit 5;
 
 SELECT * 
@@ -386,13 +432,16 @@ select count(1) from public.grievance_master gm where gm.assigned_to_position = 
 select count(1) from public.grievance_lifecycle gl where gl.assigned_to_position = 3433;
 select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = 'office_type';
 select * from cmo_police_station_master cpsm where cpsm.sub_district_id = 13;
-select * from public.admin_user au where au.u_phone = '9999999999'; --8101859077
+select * from public.admin_user au where au.u_phone = '9999999999'; --8101859077   --->>>> -105 -106 admin_user_id
 select * from public.admin_user_details aud where aud.official_phone = '9999999999'; --9903821521
 select * from public.cmo_parameter_master cpm ;
 select * from public.grievance_master gm where gm.pri_cont_no = '9163479418';
 select * from public.grievance_master gm2 where gm2.grievance_no = 'SSM5026653';
 select * from public.cmo_closure_reason_master ccrm;
 
+
+select * from public.admin_user au where au.u_phone in ('9999999900','9999999999','8918939197','8777729301','9775761810','7719357638','7001322965','6292222444',
+'8334822522','9874263537','9432331563','9434495405','9559000099','9874263537');
 
 
 -- Grievance Lifecycle & Master Count trail Query --
@@ -405,7 +454,7 @@ SELECT COUNT(DISTINCT gl.grievance_id) FROM grievance_lifecycle gl WHERE gl.crea
 SELECT COUNT(DISTINCT gm.grievance_id) FROM grievance_master gm WHERE gm.updated_on::date = '2025-08-06'; -- 11826
 SELECT COUNT(DISTINCT gm.grievance_id) FROM grievance_master gm WHERE gm.created_on::date = '2025-08-06'; -- 1852
 SELECT COUNT(1) FROM grievance_master gm WHERE gm.updated_on::date = '2025-08-06';
-SELECT COUNT(1) FROM grievance_master gm WHERE gm.updated_on::date = '2025-08-20';
+SELECT COUNT(1) FROM grievance_master gm WHERE gm.updated_on::date = '2025-08-20'; 	
 SELECT COUNT(1) FROM grievance_master gm WHERE gm.updated_on >= '2025-08-20 00:00:00' AND gm.updated_on <  '2025-08-20 12:00:00';
 select * from grievance_master gm where gm.status = 1;
 select * from grievance_lifecycle gl where gl.grievance_id = 5802305;
@@ -1797,9 +1846,101 @@ select gim.grievance_id, gim.action_taken_note, gim.remarks, gim.action_taken_no
     where not exists ( select 1 from cmo_bulk_status_update_closure_audit cbsuca where cbsuca.grievance_id = gim.grievance_id) /*and gim.grievance_id in (637618, 2565573)*/
 order by gim.grievance_id asc 
 
+--- Pair 1 For Eligible -- Using Currently
 griev_ids_pnrd_p3
 cmo_bulk_status_update_closure_audit
+
+
+--DELETE FROM griev_ids_pnrd_p3
+--WHERE grievance_no IS NOT NULL;
+
+
+--ALTER TABLE griev_ids_pnrd_p3
+--ADD COLUMN grievance_no VARCHAR(100);
+
+--- Pair 2 for Non Eligible ---
+griev_ids_mast
+cmo_bulk_status_update_closure_audit_noteligible
+
+
+griev_ids_mas
+griev_ids_pnrd_nte_p2
+
+
+
+select gim.grievance_id, gim.action_taken_note, gim.remarks, gim.action_taken_note_reason_only_for_not_eligible, gim.grievance_no 
+    from grievance_master gm
+    inner join griev_ids_pnrd_p3 as gim on gm.grievance_id = gim.grievance_id
+    where not exists ( select 1 from cmo_bulk_status_update_closure_audit as cbsuca where cbsuca.grievance_id = gim.grievance_id)
+order by gim.grievance_id asc;
+--limit 2 offset 0;
+
+
+select * from griev_ids_pnrd_p3;
+
+--update griev_ids_pnrd_p3
+--set grievance_id = (SELECT gm.grievance_id FROM grievance_master gm INNER JOIN griev_ids_pnrd_p3 gim ON gm.grievance_no = gim.grievance_no)
+--where grievance_id is null;
+
+
+
+---- Update Grievance ID Query -----
+UPDATE griev_ids_pnrd_p3 g
+SET grievance_id = gm.grievance_id
+FROM grievance_master gm
+WHERE g.grievance_no = gm.grievance_no
+  AND g.grievance_id IS NULL;
+
+
+--- Check The Multiple Time Entry In Excel ---
+select
+a.*
+from (
+select
+	xx.grievance_no,
+	xx.grievance_id,
+	count(xx.grievance_no) as c
+--	sum(count(xx.grievance_no)) over() as s
+from griev_ids_pnrd_p3 xx
+where not exists ( select 1 from cmo_bulk_status_update_closure_audit as cbsuca where cbsuca.grievance_id = xx.grievance_id)
+group by grievance_no,grievance_id
+) a
+where  a.c = 1 and a.grievance_id is not null and a.grievance_no is not null
+order by a.c desc
+
+
+--- Fetching Unique Grievance IDs Only (Having Count = 1) For Processing --- Phrase 2
+SELECT 
+    gim.grievance_id, gim.action_taken_note, gim.remarks, gim.action_taken_note_reason_only_for_not_eligible, gim.grievance_no
+FROM grievance_master gm
+INNER JOIN (
+    SELECT 
+        xx.grievance_no,
+        xx.grievance_id,
+        COUNT(xx.grievance_no) AS c
+    FROM griev_ids_pnrd_p3 xx
+    WHERE NOT EXISTS (
+        SELECT 1 
+        FROM cmo_bulk_status_update_closure_audit cbsuca 
+        WHERE cbsuca.grievance_id = xx.grievance_id
+    )
+    GROUP BY xx.grievance_no, xx.grievance_id
+    HAVING COUNT(xx.grievance_no) = 1 
+) uniq 
+    ON gm.grievance_id = uniq.grievance_id
+INNER JOIN griev_ids_pnrd_p3 gim 
+    ON gm.grievance_id = gim.grievance_id 
+   AND gm.grievance_no = gim.grievance_no
+WHERE uniq.grievance_id IS NOT NULL
+  AND uniq.grievance_no IS NOT NULL
+ORDER BY gim.grievance_id asc;       --30225
+
+
+
+
     
+
+
 --DELETE FROM cmo_bulk_status_update_closure_audit 
 --WHERE grievance_id IN (1094621)
 --AND created_on::date = '2025-07-23';
@@ -1812,14 +1953,15 @@ select * from cmo_closure_reason_master ccrm ;
 select * from cmo_action_taken_note_reason_master ;
 select * from cmo_grievance_category_master cgcm ;
 select * from cmo_office_master com ;
-select * from grievance_master gm where gm.grievance_id in (1431846);
-select * from grievance_master gm where gm.grievance_no in ('629741937004042024185825');	
-select * from grievance_lifecycle gl where gl.grievance_id in (1431846) order by gl.assigned_on desc;
+select * from grievance_master gm where gm.grievance_id in (61928, 3772990);
+select * from grievance_master gm where gm.grievance_no in ('747883829526092024151511');	
+select * from grievance_lifecycle gl where gl.grievance_id in (646) order by gl.assigned_on desc;
 select * from cmo_bulk_status_update_closure_audit_noteligible_pnrd where grievance_id = 2021018;
-select * from cmo_bulk_status_update_closure_audit where grievance_id = 854866;
+select * from cmo_bulk_status_update_closure_audit where grievance_id = 646;
 select * from cmo_bulk_status_update_closure_audit where id = 2159312;
 SELECT id FROM cmo_bulk_status_update_closure_audit ORDER BY id DESC LIMIT 1;
 select * from grievance_locking_history glh where glh.grievance_id = 347757;
+select * from cmo_parameter_master cpm ;
 
 select * from cmo_grievance_category_master cgcm ;
 select * from cmo_griev_cat_office_mapping cgcom ;
@@ -1851,6 +1993,8 @@ select gm.atn_reason_master_id from grievance_master gm where gm.grievance_id in
 --
 --DELETE FROM cmo_bulk_status_update_closure_audit_eligible_pnrd
 --DELETE FROM cmo_bulk_status_update_closure_audit_noteligible_pnrd
+--DELETE FROM cmo_bulk_status_update_closure_audit
+
 
 --DELETE FROM  
 --WHERE grievance_id IN (3647330,
@@ -2216,8 +2360,8 @@ inner join cmo_office_master com on com.office_id = admin_position_master.office
 where /*admin_position_master.office_id = 35 and */ admin_position_master.office_id is not null and admin_position_master.role_master_id in (4,5) and 
 	  admin_user_position_mapping.status = 1  and admin_position_master.record_status= 1
 	 group by admin_user_details.official_name, admin_user_details.official_phone, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name;
-	
-	
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 select * from bulk_griev_status_mesg_assign_office bgsmao;	
 select count(1) from bulk_griev_status_mesg_assign_office bgsmao ;
