@@ -1,6 +1,4 @@
 ---- CMO Grievance Register ----- 15.07.2025
-
-
 select 
 	bh.grievance_id,
 	bh.grievance_no,
@@ -121,7 +119,6 @@ order by bh.grievance_generate_date desc limit 10 offset 0;
 
 
 --- CMO GRievance Register Count Query ----
-
 select count(1)
 from grievance_master_bh_mat_2 as bh 
 --from grievance_master as bh  --2121
@@ -159,6 +156,7 @@ left join admin_user_role_master aurm2 on aurm2.role_master_id = apm3.role_maste
 left join cmo_domain_lookup_master cdlm4 on bh.status = cdlm4.domain_code and cdlm4.domain_type = 'grievance_status';
 
 --------------------------------------------------------------------------------------------------------------------------------------
+
 
 --- Update with Materalised View -----
 select 
@@ -393,11 +391,9 @@ WITH union_part AS (
     SELECT grievance_id, assigned_to_office_id
     FROM (
         SELECT grievance_id, assigned_to_office_id
-        FROM forwarded_latest_5_bh_mat_2 
-        WHERE assigned_to_office_id = 35
+        FROM forwarded_latest_5_bh_mat_2 WHERE assigned_to_office_id = 35
         UNION
-        SELECT grievance_id , assigned_to_office_id
-        FROM forwarded_latest_3_bh_mat_2 
+        SELECT grievance_id , assigned_to_office_id FROM forwarded_latest_3_bh_mat_2 
         WHERE assigned_to_office_id = 35
     ) x
 )

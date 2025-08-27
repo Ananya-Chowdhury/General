@@ -146,7 +146,7 @@ Select Count(1)
     left join cmo_municipality_master cmm on cmm.municipality_id = md.municipality_id
     left join cmo_gram_panchayat_master cgpm on cgpm.gp_id = md.gp_id
     left join cmo_wards_master cwm on cwm.ward_id = md.ward_id
-    left join cmo_sub_office_master csom on csom.suboffice_id = apm2.sub_office_id
+    left join cmo_sub_office_master csom on csom.suboffice_id = apm2.sub_office_id;
     
     
     
@@ -320,7 +320,7 @@ Select Count(1)
 --------------------------------------------------------------------------------------------------------------------------------
     
     select * from grievance_master gm where gm.status = 14; --2964622'
-    select * from grievance_lifecycle gl where gl.grievance_id = 2282781 order by gl.assigned_on asc;
+    select * from grievance_lifecycle gl where gl.grievance_id = 5714757 order by gl.assigned_on asc;
     select * from grievance_master gm where gm.grievance_no = 'SSM4690533';
     select * from grievance_master gm where gm.grievance_id = 2282781;
     
@@ -525,11 +525,6 @@ left join pending_at_hoso_mat_2 ph on ph.grievance_id = md.grievance_id
   where lu.assigned_to_office_id = 35   order by (case when md.status = 1 then md.grievance_generate_date else md.updated_on end) asc  offset 0 limit 10 
   
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  
-
-  
-  
-  
-  
   
 with uinion_part as (       
                     select grievance_id from forwarded_latest_5_bh_mat_2 where assigned_to_office_id = 35 
@@ -656,13 +651,22 @@ with uinion_part as (
                     cpsm.ps_name,
                     case 
                         when pa.pending_days is not null then pa.pending_days
-                        when po.pending_days is not null then po.pending_days
                         else 0
                     end as pending_days_at_hod,
                     case 
+	                    when po.pending_days is not null then po.pending_days
                         when ph.pending_days is not null then ph.pending_days
                         else 0
-                    end as pending_days_at_hoso  
+                    end as pending_days_at_hoso
+--                    case 
+--                        when pa.pending_days is not null then pa.pending_days
+--                        when po.pending_days is not null then po.pending_days 
+--                        else 0
+--                    end as pending_days_at_hod,
+--                    case 
+--                        when ph.pending_days is not null then ph.pending_days
+--                        else 0
+--                    end as pending_days_at_hoso  
                 from grievance_master md
                 inner join uinion_part as lu ON lu.grievance_id = md.grievance_id
                 left join cmo_grievance_category_master cgcm ON cgcm.grievance_cat_id = md.grievance_category
@@ -689,43 +693,37 @@ with uinion_part as (
                   order by (case when md.status = 1 then md.grievance_generate_date else md.updated_on end) asc 
                   
                   
+select CURRENT_TIMESTAMP;                  
+ Days pending with HoD for
+Days pending with HoSO/Other HoD for 
                   
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  ---------------------------------------
-WITH latest_3 AS (
-    SELECT DISTINCT ON (gl.grievance_id)
-           gl.grievance_id,
-           gl.assigned_on AS last_assigned_on
-    FROM grievance_lifecycle gl
-    WHERE gl.grievance_status = 3
-    ORDER BY gl.grievance_id, gl.assigned_on DESC
-),
-latest_14 AS (
-    SELECT DISTINCT ON (gl.grievance_id)
-           gl.grievance_id,
-           gl.assigned_on AS last_update_on
-    FROM grievance_lifecycle gl
-    WHERE gl.grievance_status = 14
-    ORDER BY gl.grievance_id, gl.assigned_on DESC
+------------------- HOD Register ALL Query Optimised For Pending ---------------------               
+with uinion_part as (
+        select grievance_id from forwarded_latest_5_bh_mat_2 where assigned_to_office_id = 75
+        union
+        select grievance_id from forwarded_latest_3_bh_mat_2 where assigned_to_office_id = 75
 )
-SELECT 
-    l3.grievance_id,
-    CASE 
-        WHEN l14.last_update_on IS NOT NULL AND l14.last_update_on > l3.last_assigned_on then 0
-        else EXTRACT(DAY from (CURRENT_DATE - l3.last_assigned_on))
-    END AS pending_days
-FROM latest_3 l3
-LEFT JOIN latest_14 l14 ON l3.grievance_id = l14.grievance_id
-
-
-
-select CURRENT_TIMESTAMP;
-
-
-select * from control_json cj;
+Select Count(1)
+    from grievance_master md
+    inner join uinion_part as lu on lu.grievance_id = md.grievance_id
+    left join cmo_grievance_category_master cgcm on cgcm.grievance_cat_id = md.grievance_category
+    left join cmo_office_master com on com.office_id = md.assigned_to_office_id
+    left join cmo_action_taken_note_master catnm on catnm.atn_id = md.atn_id
+    left join cmo_domain_lookup_master cdlm on cdlm.domain_type = 'grievance_status' and cdlm.domain_code = md.status
+    left join admin_user_position_mapping aupm on aupm.position_id = md.assigned_to_position and aupm.status = 1
+    left join admin_user_details ad on ad.admin_user_id = aupm.admin_user_id
+    left join cmo_police_station_master cpsm on cpsm.ps_id = md.police_station_id
+    left join admin_position_master apm on apm.position_id = md.updated_by_position
+    left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
+    left join cmo_designation_master cdm on cdm.designation_id = apm2.designation_id
+    left join cmo_office_master com2 on com2.office_id = apm2.office_id
+    left join admin_user_role_master aurm on aurm.role_master_id = apm2.role_master_id
+    left join cmo_districts_master cdm2 on cdm2.district_id = md.district_id
+    left join cmo_blocks_master cbm on cbm.block_id = md.block_id
+    left join cmo_municipality_master cmm on cmm.municipality_id = md.municipality_id
+    left join cmo_gram_panchayat_master cgpm on cgpm.gp_id = md.gp_id
+    left join cmo_wards_master cwm on cwm.ward_id = md.ward_id
+    left join cmo_sub_office_master csom on csom.suboffice_id = apm2.sub_office_id
+    left join pending_at_hod_mat_2 pa on pa.grievance_id = md.grievance_id
+    left join pending_at_hoso_mat_2 ph on ph.grievance_id = md.grievance_id
+    left join pending_at_other_hod_mat_2 po on po.grievance_id = md.grievance_id

@@ -273,8 +273,8 @@ select * from public.admin_user au where au.u_phone in ('9999999900','9999999999
 select * from admin_user_position_mapping aupm where aupm.admin_user_id = 10920;
 select * from admin_position_master apm where apm.position_id = 10920;
 select * from admin_user_details aud where aud.admin_user_id  = 10920;
-select * from public.admin_user au where au.u_phone in ('6292222444');  --9163479418 9999999999  shovanhalder9@gmail.com  ananyachowdhury002@gmail.com
-select * from public.admin_user_details aud where aud.official_phone  in ('6292222444');  --9163479418 9999999999  shovanhalder9@gmail.com  ananyachowdhury002@gmail.com
+select * from public.admin_user au where au.u_phone in ('8101859077');  --9163479418 9999999999  shovanhalder9@gmail.com  ananyachowdhury002@gmail.com
+select * from public.admin_user_details aud where aud.official_phone  in ('8101859077');  --9163479418 9999999999  shovanhalder9@gmail.com  ananyachowdhury002@gmail.com  -- 8101859077
 
 
 --- 9297929297 -- Dr.P Ulaganathan,IAS --- secy.prd-wb@bangla.gov.in --- 10140 -- P&RD
@@ -397,7 +397,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9163479418'
+WHERE uo.u_phone = '8101859077'
 ORDER BY created_on desc limit 5;
 
 SELECT * 
@@ -555,7 +555,7 @@ select * from pg_stat_activity where query = 'SELECT * FROM "hcm_mis"()';
 select * from pg_cancel_backend(233362);
 
  -------- Cancel pid Locks ------
-select * from pg_catalog.pg_cancel_backend(1412570);
+select * from pg_catalog.pg_cancel_backend(247443);
    
 ------  kill function query ----------
 SELECT * FROM manage_top_query(True);
@@ -1925,18 +1925,33 @@ INNER JOIN (
         WHERE cbsuca.grievance_id = xx.grievance_id
     )
     GROUP BY xx.grievance_no, xx.grievance_id
-    HAVING COUNT(xx.grievance_no) = 1 
+    HAVING COUNT(xx.grievance_no) = 1 limit 8000 offset 0
 ) uniq 
     ON gm.grievance_id = uniq.grievance_id
 INNER JOIN griev_ids_pnrd_p3 gim 
     ON gm.grievance_id = gim.grievance_id 
    AND gm.grievance_no = gim.grievance_no
 WHERE uniq.grievance_id IS NOT NULL
-  AND uniq.grievance_no IS NOT null and gm.status != 15
+  AND uniq.grievance_no IS NOT null and gm.status = 15
 ORDER BY gim.grievance_id asc;       --30225
 
 
-
+------ Processed  Grievance ID ------
+select gim.grievance_id, gim.action_taken_note, gim.remarks, gim.action_taken_note_reason_only_for_not_eligible, gim.grievance_no, gm.updated_on 
+    from grievance_master gm
+    inner join (
+        select
+            xx.grievance_no,
+            xx.grievance_id,
+            COUNT(xx.grievance_no) AS c
+        from griev_ids_pnrd_p3 as xx
+        where EXISTS ( select 1 from cmo_bulk_status_update_closure_audit as cbsuca where cbsuca.grievance_id = xx.grievance_id )
+        GROUP BY xx.grievance_no, xx.grievance_id
+        HAVING COUNT(xx.grievance_no) = 1 
+    ) uniq on gm.grievance_id = uniq.grievance_id
+    inner join griev_ids_pnrd_p3 as gim ON gm.grievance_id = gim.grievance_id and gm.grievance_no = gim.grievance_no
+    where uniq.grievance_id IS not NULL and uniq.grievance_no IS not null and gm.status = 15
+    ORDER BY gim.grievance_id asc ;
 
     
 
