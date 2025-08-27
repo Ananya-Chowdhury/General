@@ -1911,7 +1911,7 @@ order by a.c desc
 
 --- Fetching Unique Grievance IDs Only (Having Count = 1) For Processing --- Phrase 2
 SELECT 
-    gim.grievance_id, gim.action_taken_note, gim.remarks, gim.action_taken_note_reason_only_for_not_eligible, gim.grievance_no
+    gim.grievance_id, gim.action_taken_note, gim.remarks, gim.action_taken_note_reason_only_for_not_eligible, gim.grievance_no, gm.status, gm.updated_on 
 FROM grievance_master gm
 INNER JOIN (
     SELECT 
@@ -1932,7 +1932,7 @@ INNER JOIN griev_ids_pnrd_p3 gim
     ON gm.grievance_id = gim.grievance_id 
    AND gm.grievance_no = gim.grievance_no
 WHERE uniq.grievance_id IS NOT NULL
-  AND uniq.grievance_no IS NOT NULL
+  AND uniq.grievance_no IS NOT null and gm.status != 15
 ORDER BY gim.grievance_id asc;       --30225
 
 

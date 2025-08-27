@@ -57,6 +57,10 @@
 			"custom-properties": {
 				"resultset.confirm.beforeSave": "false",
 				"resultset.datetime.editor": "false",
+<<<<<<< HEAD
+=======
+				"resultset.maxrows": "2147483647",
+>>>>>>> ffd5dc04648a50575d2f084512be1036f7e2656f
 				"transaction.auto.close.ttl": "3600",
 				"transaction.smart.commit": "true"
 			}
@@ -239,7 +243,7 @@
 		},
 		"prod": {
 			"name": "Production",
-			"color": "org.jkiss.dbeaver.color.connectionType.prod.background",
+			"color": "255,0,0",
 			"description": "Production database",
 			"auto-commit": false,
 			"confirm-execute": true,
