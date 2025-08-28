@@ -555,7 +555,7 @@ select * from pg_stat_activity where query = 'SELECT * FROM "hcm_mis"()';
 select * from pg_cancel_backend(233362);
 
  -------- Cancel pid Locks ------
-select * from pg_catalog.pg_cancel_backend(247443);
+select * from pg_catalog.pg_cancel_backend(836619);
    
 ------  kill function query ----------
 SELECT * FROM manage_top_query(True);
@@ -1892,6 +1892,7 @@ WHERE g.grievance_no = gm.grievance_no
   AND g.grievance_id IS NULL;
 
 
+---------------------------------------------------------------------------------
 --- Check The Multiple Time Entry In Excel ---
 select
 a.*
@@ -1899,16 +1900,16 @@ from (
 select
 	xx.grievance_no,
 	xx.grievance_id,
-	count(xx.grievance_no) as c
---	sum(count(xx.grievance_no)) over() as s
+	count(xx.grievance_no) as c,
+	xx.action_taken_note_reason_only_for_not_eligible  as not_eligible
 from griev_ids_pnrd_p3 xx
 where not exists ( select 1 from cmo_bulk_status_update_closure_audit as cbsuca where cbsuca.grievance_id = xx.grievance_id)
-group by grievance_no,grievance_id
+group by grievance_no,grievance_id,action_taken_note_reason_only_for_not_eligible
 ) a
-where  a.c = 1 and a.grievance_id is not null and a.grievance_no is not null
-order by a.c desc
+where  a.c > 1 and a.grievance_id is not null and a.grievance_no is not null and a.not_eligible is not null
+order by a.c desc;
 
-
+-------------------------------------------------------------------------------------------
 --- Fetching Unique Grievance IDs Only (Having Count = 1) For Processing --- Phrase 2
 SELECT 
     gim.grievance_id, gim.action_taken_note, gim.remarks, gim.action_taken_note_reason_only_for_not_eligible, gim.grievance_no, gm.status, gm.updated_on 
@@ -1916,8 +1917,9 @@ FROM grievance_master gm
 INNER JOIN (
     SELECT 
         xx.grievance_no,
-        xx.grievance_id,
-        COUNT(xx.grievance_no) AS c
+	xx.grievance_id
+--	count(xx.grievance_no) as maximum_count
+--	xx.action_taken_note_reason_only_for_not_eligible  as not_eligible
     FROM griev_ids_pnrd_p3 xx
     WHERE NOT EXISTS (
         SELECT 1 
@@ -1925,15 +1927,45 @@ INNER JOIN (
         WHERE cbsuca.grievance_id = xx.grievance_id
     )
     GROUP BY xx.grievance_no, xx.grievance_id
-    HAVING COUNT(xx.grievance_no) = 1 limit 8000 offset 0
+    HAVING COUNT(xx.grievance_no) = 1  /*limit 1000 offset 0*/
+--    ORDER BY xx.grievance_id
+--    LIMIT 1000 
 ) uniq 
     ON gm.grievance_id = uniq.grievance_id
 INNER JOIN griev_ids_pnrd_p3 gim 
-    ON gm.grievance_id = gim.grievance_id 
-   AND gm.grievance_no = gim.grievance_no
-WHERE uniq.grievance_id IS NOT NULL
-  AND uniq.grievance_no IS NOT null and gm.status = 15
+    ON gm.grievance_id = gim.grievance_id AND gm.grievance_no = gim.grievance_no
+WHERE uniq.grievance_id IS NOT null AND uniq.grievance_no IS NOT null and gim.action_taken_note_reason_only_for_not_eligible is not null and gm.status = 15
 ORDER BY gim.grievance_id asc;       --30225
+
+
+---- Perfect Query ----
+WITH filtered AS (
+    SELECT gim.grievance_id, gim.action_taken_note, gim.remarks,
+           gim.action_taken_note_reason_only_for_not_eligible, gim.grievance_no,
+           gm.status, gm.updated_on
+    FROM grievance_master gm
+    INNER JOIN (
+        SELECT xx.grievance_no, xx.grievance_id
+        FROM griev_ids_pnrd_p3 xx
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM cmo_bulk_status_update_closure_audit cbsuca
+            WHERE cbsuca.grievance_id = xx.grievance_id
+        )
+        GROUP BY xx.grievance_no, xx.grievance_id
+        HAVING COUNT(xx.grievance_no) = 1
+    ) uniq 
+        ON gm.grievance_id = uniq.grievance_id
+    INNER JOIN griev_ids_pnrd_p3 gim ON gm.grievance_id = gim.grievance_id AND gm.grievance_no = gim.grievance_no
+    WHERE gim.action_taken_note_reason_only_for_not_eligible IS NOT null AND gm.status = 15
+)
+SELECT *
+FROM filtered
+ORDER BY grievance_id ASC
+LIMIT 1000;
+
+
+
 
 
 ------ Processed  Grievance ID ------
@@ -1942,15 +1974,15 @@ select gim.grievance_id, gim.action_taken_note, gim.remarks, gim.action_taken_no
     inner join (
         select
             xx.grievance_no,
-            xx.grievance_id,
-            COUNT(xx.grievance_no) AS c
+            xx.grievance_id
+--            COUNT(xx.grievance_no) AS c
         from griev_ids_pnrd_p3 as xx
         where EXISTS ( select 1 from cmo_bulk_status_update_closure_audit as cbsuca where cbsuca.grievance_id = xx.grievance_id )
         GROUP BY xx.grievance_no, xx.grievance_id
         HAVING COUNT(xx.grievance_no) = 1 
     ) uniq on gm.grievance_id = uniq.grievance_id
     inner join griev_ids_pnrd_p3 as gim ON gm.grievance_id = gim.grievance_id and gm.grievance_no = gim.grievance_no
-    where uniq.grievance_id IS not NULL and uniq.grievance_no IS not null and gm.status = 15
+    where uniq.grievance_id IS not NULL and uniq.grievance_no IS not null and gim.action_taken_note_reason_only_for_not_eligible is not null and gm.status = 15
     ORDER BY gim.grievance_id asc ;
 
     
