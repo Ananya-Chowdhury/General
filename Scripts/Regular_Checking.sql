@@ -2,7 +2,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-08-18' 
+WHERE batch_date::date = '2025-09-01' 
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -565,7 +565,7 @@ select * from pg_stat_activity where query = 'SELECT * FROM "hcm_mis"()';
 select * from pg_cancel_backend(233362);
 
  -------- Cancel pid Locks ------
-select * from pg_catalog.pg_cancel_backend(836619);
+select * from pg_catalog.pg_cancel_backend(6794);
    
 ------  kill function query ----------
 SELECT * FROM manage_top_query(True);
@@ -1037,7 +1037,7 @@ select count(1) from grievance_master gm
     
 
 select count(1) from grievance_master gm
-    where gm.status = 14 and gm.atn_id = 5;   ---atn_id = 5 not eligible to get benift
+    where gm.status = 14 and gm.grievance_category = 133 and gm.atn_id = 5;   ---atn_id = 5 not eligible to get benift
   
 select count(1) from grievance_master gm
     where gm.status = 14 and gm.grievance_category = 133 and gm.atn_id = 10;
@@ -3085,17 +3085,6 @@ select id from cmo_bulk_status_update_closure_audit order by id desc limit 1;
 select * from grievance_lifecycle gl where gl.grievance_id = 5734105;
 select * from grievance_lifecycle gl where gl.grievance_id = 5734105 and gl.action_taken_note is not null and gl.atn_id is not null
 order by gl.lifecycle_id desc ;
-
-
-
-select * from grievance_master_20250806_bkp bp 
-left join ;
-
-
-
-
-
-
 
 
 
