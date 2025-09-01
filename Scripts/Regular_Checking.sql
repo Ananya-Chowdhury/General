@@ -221,11 +221,12 @@ select * from public.admin_user_position_mapping aupm where aupm.position_id = 1
 select * from public.admin_user au where au.admin_user_id = 10920;
 select * from public.user_token ut where ut.user_id = 105 order by ut.token_id desc;
 select * from public.cmo_closure_reason_master ccrm ;
-select * from public.grievance_master gm where gm.pri_cont_no = '8101859077';
+select * from public.grievance_master gm where gm.pri_cont_no = '9163479418';  --8101859077
 select * from public.grievance_lifecycle gl where gl.grievance_id = 5235362;
 select count(1) from public.bulk_griev_status_mesg_assign bgsma;
 select * from grievance_master gm where gm.doc_updated ='Y' limit 10;
 select * from document_master dm where dm.doc_id = 106657; --100317
+select * from cmo_grievance_category_master cgcm ;
 
 
 ----------- Admin Position Fatch Query ----------
@@ -276,6 +277,9 @@ select * from admin_user_details aud where aud.admin_user_id  = 10920;
 select * from public.admin_user au where au.u_phone in ('8101859077');  --9163479418 9999999999  shovanhalder9@gmail.com  ananyachowdhury002@gmail.com
 select * from public.admin_user_details aud where aud.official_phone  in ('8101859077');  --9163479418 9999999999  shovanhalder9@gmail.com  ananyachowdhury002@gmail.com  -- 8101859077
 
+
+select * from admin_user_details aud where aud.official_name ='Subhendu Basu';
+select * from admin_user au where au.admin_user_id = 432;
 
 --- 9297929297 -- Dr.P Ulaganathan,IAS --- secy.prd-wb@bangla.gov.in --- 10140 -- P&RD
 --- 6292222444 -- Sri Sumit Gupta, IAS --- dm-ali@nic.in --- 76 ---- DM.South.24
@@ -348,7 +352,7 @@ ORDER BY cebrd.batch_id desc;
 select * from cmo_batch_grievance_line_item cbgli order by cbgli.cmo_batch_run_details_id desc;
 
 
-select * from public.grievance_master gm where grievance_no = 'SSM4524574'; 
+select * from public.grievance_master gm where grievance_no = 'CMO01794208'; 
 select * from public.cmo_batch_grievance_line_item cbgli where griev_id = 'SSM2962283';
 select * from public.grievance_lifecycle gl where gl.grievance_id = 3882162 order by assigned_on ;
 select * from public.admin_user_details aud where admin_user_id = 3186; -- Md. Ashif Ikbal
@@ -375,12 +379,14 @@ select * from public.cmo_domain_lookup_master cdlm ;
 select * from public.admin_position_master apm where apm.record_status = 1 and apm.role_master_id = 9;
 select * from public.admin_user_position_mapping aupm where aupm.status = 1 and aupm.position_id = 1;
 select * from public.grievance_master gm where gm.status = 15;
-select * from public.grievance_lifecycle gl where gl.grievance_id = 5740559;   --5740559
+select * from public.grievance_lifecycle gl where gl.grievance_id = 3554042 order by gl.assigned_on asc;   --5740559
 select * from public.cmo_office_master com where office_name = 'Backward Classes Welfare Department'; --4
 select * from public.cmo_police_station_master cpsm where cpsm.ps_id in (165,183);
 select * from public.cmo_sub_districts_master csdm where csdm.sub_district_id in (21,60,26,35);
-select * from public.grievance_master gm where gm.grievance_id = 5740559;
+select * from public.grievance_master gm where gm.grievance_id = 3554042;
 select * from public.grievance_lifecycle gl where gl.lifecycle_id = 8186648;  --2670392
+select * from grievance_master gm where gm.pri_cont_no = '9163479418';   --5809393
+select * from grievance_locking_history glh where glh.grievance_id = 5809393;
  
 
 select * from public.cmo_action_taken_note_master catnm;
@@ -397,12 +403,12 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '8101859077'
+WHERE uo.u_phone = '9434027101'   --9147888180
 ORDER BY created_on desc limit 5;
 
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9999999999'
+WHERE uo.u_phone = '7278061035'
 ORDER BY created_on desc;
 
 SELECT otp 
@@ -436,8 +442,12 @@ select * from public.admin_user au where au.u_phone = '9999999999'; --8101859077
 select * from public.admin_user_details aud where aud.official_phone = '9999999999'; --9903821521
 select * from public.cmo_parameter_master cpm ;
 select * from public.grievance_master gm where gm.pri_cont_no = '9163479418';
-select * from public.grievance_master gm2 where gm2.grievance_no = 'SSM5026653';
+select * from public.grievance_master gm where gm.grievance_id = 5516302;
+select * from public.grievance_master gm2 where gm2.grievance_no = 'SSM4767959';
 select * from public.cmo_closure_reason_master ccrm;
+select * from cmo_grievance_category_master cgcm ;
+
+
 
 
 select * from public.admin_user au where au.u_phone in ('9999999900','9999999999','8918939197','8777729301','9775761810','7719357638','7001322965','6292222444',
@@ -601,7 +611,7 @@ where gl.grievance_status = 4 and gl.assigned_by_office_id != gl.assigned_to_off
 select distinct gl.grievance_id, gl.lifecycle_id, gl.assigned_on
        from grievance_lifecycle gl where gl.grievance_status = 12
        and assigned_to_office_cat != 3
-       order by gl.assigned_on asc ;
+       order by gl.assigned_on desc ;
 --      limit 15 offset 0;
 
       
@@ -609,15 +619,15 @@ select distinct gl.grievance_id, gl.lifecycle_id, gl.assigned_on
 select distinct gl.grievance_id, gl.lifecycle_id, gl.assigned_on
        from grievance_lifecycle gl where gl.grievance_status = 6
        and assigned_to_office_cat != 2
-       order by gl.assigned_on asc ;    
+       order by gl.assigned_on desc ;    
       
       
 ---- Atr return for review to SO but not Assigned to SO ---
-create materialized view public.return_for_rvw_mismatch as
+--create materialized view public.return_for_rvw_mismatch as
 select distinct gl.grievance_id, gl.lifecycle_id, gl.assigned_on
        from grievance_lifecycle gl where gl.grievance_status = 10
        and assigned_to_office_cat != 3 and assigned_by_office_cat = 3
-       order by gl.assigned_on asc ;      
+       order by gl.assigned_on desc ;      
       
       
 
@@ -1015,11 +1025,15 @@ select count(1) from cmo_bulk_closure_audit cbca where cbca.status = 'S';
 
 
 select * from cmo_parameter_master cpm ;
+select * from cmo_grievance_category_master cgcm ;
+select * from cmo_action_taken_note_master catnm ;
+select * from admin_position_master apm where apm.position_id = 3171;
+select * from grievance_lifecycle gl where gl.grievance_id = 4675 order by gl.assigned_on desc;
 
 
 -------------------- Bulk Closure chcek --------------------------
 select count(1) from grievance_master gm
-    where gm.status = 14 and gm.grievance_category = 133 and gm.atn_id = 10; --40392  
+    where gm.status = 14 and gm.grievance_category = 133 and gm.atn_id = 10; --40392   --221679  --178957 + 73
     
 
 select count(1) from grievance_master gm
@@ -1934,7 +1948,7 @@ INNER JOIN (
     ON gm.grievance_id = uniq.grievance_id
 INNER JOIN griev_ids_pnrd_p3 gim 
     ON gm.grievance_id = gim.grievance_id AND gm.grievance_no = gim.grievance_no
-WHERE uniq.grievance_id IS NOT null AND uniq.grievance_no IS NOT null and gim.action_taken_note_reason_only_for_not_eligible is not null and gm.status = 15
+WHERE uniq.grievance_id IS NOT null AND uniq.grievance_no IS NOT null and gim.action_taken_note_reason_only_for_not_eligible is not null and gm.status != 15
 ORDER BY gim.grievance_id asc;       --30225
 
 
@@ -1962,7 +1976,7 @@ WITH filtered AS (
 SELECT *
 FROM filtered
 ORDER BY grievance_id ASC
-LIMIT 1000;
+--LIMIT 1000;
 
 
 
@@ -2002,7 +2016,7 @@ select * from cmo_grievance_category_master cgcm ;
 select * from cmo_office_master com ;
 select * from grievance_master gm where gm.grievance_id in (61928, 3772990);
 select * from grievance_master gm where gm.grievance_no in ('747883829526092024151511');	
-select * from grievance_lifecycle gl where gl.grievance_id in (646) order by gl.assigned_on desc;
+select * from grievance_lifecycle gl where gl.grievance_id in (65735) order by gl.assigned_on desc;
 select * from cmo_bulk_status_update_closure_audit_noteligible_pnrd where grievance_id = 2021018;
 select * from cmo_bulk_status_update_closure_audit where grievance_id = 646;
 select * from cmo_bulk_status_update_closure_audit where id = 2159312;
