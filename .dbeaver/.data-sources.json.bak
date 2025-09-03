@@ -57,7 +57,6 @@
 			"custom-properties": {
 				"resultset.confirm.beforeSave": "false",
 				"resultset.datetime.editor": "false",
-				"resultset.maxrows": "100000000",
 				"transaction.auto.close.ttl": "3600",
 				"transaction.smart.commit": "true"
 			}
@@ -98,6 +97,9 @@
 					"@dbeaver-show-non-default-db@": "true"
 				},
 				"auth-model": "native"
+			},
+			"custom-properties": {
+				"resultset.maxrows": "1000000000"
 			}
 		},
 		"mysql8-19873a21207-15edd1c9de1b4236": {
@@ -240,7 +242,7 @@
 		},
 		"prod": {
 			"name": "Production",
-			"color": "255,0,0",
+			"color": "org.jkiss.dbeaver.color.connectionType.prod.background",
 			"description": "Production database",
 			"auto-commit": false,
 			"confirm-execute": true,

@@ -2,7 +2,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-09-01' 
+WHERE batch_date::date = '2025-09-03' 
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -403,7 +403,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9434027101'   --9147888180
+WHERE uo.u_phone = '9434377937'   --9147888180
 ORDER BY created_on desc limit 5;
 
 SELECT * 
@@ -565,7 +565,7 @@ select * from pg_stat_activity where query = 'SELECT * FROM "hcm_mis"()';
 select * from pg_cancel_backend(233362);
 
  -------- Cancel pid Locks ------
-select * from pg_catalog.pg_cancel_backend(6794);
+select * from pg_catalog.pg_cancel_backend(539737);
    
 ------  kill function query ----------
 SELECT * FROM manage_top_query(True);
@@ -1882,15 +1882,62 @@ griev_ids_pnrd_nte_p2
 
 
 
-select gim.grievance_id, gim.action_taken_note, gim.remarks, gim.action_taken_note_reason_only_for_not_eligible, gim.grievance_no 
+select gim.grievance_id, gim.grievance_category  , gim.action_taken_note, gim.remarks, gim.action_taken_note_reason_only_for_not_eligible, gim.grievance_no, gm.status 
     from grievance_master gm
-    inner join griev_ids_pnrd_p3 as gim on gm.grievance_id = gim.grievance_id
+    inner join griev_ids_pnrd_p3 gim on gm.grievance_id = gim.grievance_id
     where not exists ( select 1 from cmo_bulk_status_update_closure_audit as cbsuca where cbsuca.grievance_id = gim.grievance_id)
+--    and gim.action_taken_note = 'Beyond State Govt. Purview'
+    and gim.grievance_category is not null 
+--    and gm.status = 15
 order by gim.grievance_id asc;
 --limit 2 offset 0;
 
 
+
+--DELETE FROM griev_ids_pnrd_p3 a
+--USING griev_ids_pnrd_p3 b
+--WHERE a.grievance_id = b.grievance_id
+--  AND a.ctid > b.ctid;
+
+
+
+--WITH duplicates AS (
+--    SELECT gim.*,
+--           ROW_NUMBER() OVER (PARTITION BY grievance_id ORDER BY grievance_id) AS rn
+--    FROM griev_ids_pnrd_p3 gim
+--)
+--SELECT * FROM duplicates WHERE rn > 1;
+
+
+
+
+--UPDATE griev_ids_pnrd_p3
+--SET grievance_no = NULL
+--FROM griev_ids_pnrd_p3 gim
+--INNER JOIN grievance_master gm 
+--    ON gm.grievance_id = gim.grievance_id
+--WHERE NOT EXISTS (
+--    SELECT 1
+--    FROM cmo_bulk_status_update_closure_audit cbsuca
+--    WHERE cbsuca.grievance_id = gim.grievance_id
+--)
+--AND gim.action_taken_note = 'Beyond State Govt. Purview';
+-- AND gm.status = 15;
+
+
+
+select gim.grievance_id, gim.action_taken_note, gim.remarks
+from griev_ids_pnrd_p3 gim
+left join cmo_bulk_status_update_closure_audit cbsuca on gim.grievance_id = cbsuca.grievance_id
+where cbsuca.grievance_id is null and gim.grievance_no is null;
+
+
+
+--delete from griev_ids_pnrd_p3 where grievance_id is null;
+
+
 select * from griev_ids_pnrd_p3;
+select * from cmo_bulk_status_update_closure_audit where grievance_id = 844618;
 
 --update griev_ids_pnrd_p3
 --set grievance_id = (SELECT gm.grievance_id FROM grievance_master gm INNER JOIN griev_ids_pnrd_p3 gim ON gm.grievance_no = gim.grievance_no)
@@ -1971,7 +2018,7 @@ WITH filtered AS (
     ) uniq 
         ON gm.grievance_id = uniq.grievance_id
     INNER JOIN griev_ids_pnrd_p3 gim ON gm.grievance_id = gim.grievance_id AND gm.grievance_no = gim.grievance_no
-    WHERE gim.action_taken_note_reason_only_for_not_eligible IS NOT null AND gm.status = 15
+    WHERE gim.action_taken_note_reason_only_for_not_eligible IS NOT null and*/ gm.status = 15
 )
 SELECT *
 FROM filtered
@@ -2014,11 +2061,11 @@ select * from cmo_closure_reason_master ccrm ;
 select * from cmo_action_taken_note_reason_master ;
 select * from cmo_grievance_category_master cgcm ;
 select * from cmo_office_master com ;
-select * from grievance_master gm where gm.grievance_id in (61928, 3772990);
+select * from grievance_master gm where gm.grievance_id in (844618, 1039718, 3539655);
 select * from grievance_master gm where gm.grievance_no in ('747883829526092024151511');	
-select * from grievance_lifecycle gl where gl.grievance_id in (65735) order by gl.assigned_on desc;
+select * from grievance_lifecycle gl where gl.grievance_id in (629032240809022024200129) order by gl.assigned_on desc;
 select * from cmo_bulk_status_update_closure_audit_noteligible_pnrd where grievance_id = 2021018;
-select * from cmo_bulk_status_update_closure_audit where grievance_id = 646;
+select * from cmo_bulk_status_update_closure_audit where grievance_id = 844618;
 select * from cmo_bulk_status_update_closure_audit where id = 2159312;
 SELECT id FROM cmo_bulk_status_update_closure_audit ORDER BY id DESC LIMIT 1;
 select * from grievance_locking_history glh where glh.grievance_id = 347757;
@@ -2026,12 +2073,12 @@ select * from cmo_parameter_master cpm ;
 
 select * from cmo_grievance_category_master cgcm ;
 select * from cmo_griev_cat_office_mapping cgcom ;
+select * from cmo_office_master com where com.office_id = 2;
 
 
-select * from grievance_lifecycle WHERE grievance_id IN (271720, 274415, 347431, 392126, 517153, 685447, 686862, 773273, 1100011, 1124673, 1164480, 1201541, 1396843,
-1457428, 1709326, 1732554, 1770219, 1938357, 1945691, 1977071, 2003745, 2065567, 2094897, 2297439, 2568000, 2707481, 2742092, 2780972, 2893202, 2893203, 2946135, 3078595, 
-3232202, 3251786, 3359392, 3480049, 3549070, 3684784, 4421128, 4580926, 4593571, 4640077, 4779760, 4780748, 4803410, 4809961, 4961991,
-5116479, 5216375, 5226903, 5233156, 5259152, 5321549, 5334687, 5362793, 5363163, 5390522, 5437318, 5446925, 5496257, 5500296, 5519725) 
+select * from grievance_lifecycle WHERE grievance_id IN (2844618
+1039718
+3539655) 
 AND created_on::date = '2025-08-05';
 
 
@@ -3170,4 +3217,16 @@ select *
 --- pg_dump -U cmo_admin_dev -h 15.206.132.5 -p 5444 -d migration_testing -f cmo_dev_bkp_dump.sql
  
  ------------------------------------------------------------------------------------------------------------------------
+ 
+ 
+ ---------------- Vacuum and Reindexing of Database ----------------------------
+--vacuum full grievance_master;
+--reindex table greivance_master;
+--
+--
+--vacuum full grievance_lifecyckle;
+--reindex table grievance_lifecyckle
+ 
+ -------------------------------------------------------------------------------------------------
+ 
  
