@@ -166,3 +166,53 @@ WITH lastupdates AS (
   select * from grievance_lifecycle gl where gl.grievance_id = 5388467 order by gl.assigned_on asc;
   select * from admin_user_position_mapping aupm where aupm.position_id = 1227;
   select * from admin_user_details aud where aud.admin_user_id = 1227;
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /* TAB_ID: 2B1 | TBL: ATR Returned for Review >> Role: 4 Ofc: 75 | G_Codes: ('GM006') */  
+                with lastupdates AS (
+                    select 
+                        grievance_lifecycle.grievance_id,
+                        grievance_lifecycle.grievance_status,
+                        grievance_lifecycle.assigned_on,
+                        grievance_lifecycle.assigned_to_office_id,
+                        grievance_lifecycle.assigned_by_position,
+                        grievance_lifecycle.assigned_to_position,
+                        row_number() OVER (PARTITION BY grievance_lifecycle.grievance_id,grievance_lifecycle.assigned_to_office_id ORDER BY grievance_lifecycle.assigned_on DESC) AS rn
+                    from grievance_lifecycle
+                    where grievance_lifecycle.grievance_status in (3,5) and grievance_lifecycle.assigned_to_office_id = 75
+                )
+--                master_district_block_grv_data AS (
+                    select count(1) 
+                    from master_district_block_grv md
+                    left join lastupdates lu on lu.rn = 1 and lu.grievance_id = md.grievance_id and lu.assigned_to_office_id = 75
+                    left join admin_position_master apm on apm.position_id = md.updated_by_position
+                    left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
+                    where md.status in (6) 
+                    -- and md.assigned_to_office_id = 75
+                       -- and (md.assigned_by_office_id = 75 or md.assigned_to_office_id = 75)    -- Previously it was included currently removed as not required --
+                        and replace(lower(md.emergency_flag),' ','') like '%n%'
+  
+  
+  
+  
+  
+  
+  
+  

@@ -517,12 +517,33 @@ select * from pg_locks;
 
 select * from pg_stat_activity;
 
+show max_connections;
+
 -- Proccesed pid query identified --
-select pg_stat_activity.query,
+select pg_stat_activity.query, pg_locks.mode, pg_stat_activity.client_addr,
 count(1) AS query_count
 from pg_stat_activity
 inner join pg_locks on pg_locks.pid = pg_stat_activity.pid 
-group by 1 ;
+group by 1,2,3
+order by 2,4 desc;
+
+
+select pg_stat_activity.query, pg_stat_activity.client_addr,
+count(1) AS query_count
+from pg_stat_activity
+inner join pg_locks on pg_locks.pid = pg_stat_activity.pid 
+group by 1,2
+order by 2,3 desc;
+
+
+select pg_stat_activity.query, pg_locks.mode,
+count(1) AS query_count
+from pg_stat_activity
+inner join pg_locks on pg_locks.pid = pg_stat_activity.pid 
+group by 1,2
+order by 2,3 desc;
+
+
 
 -- Proccesed pid query identified more than 1000 -- 
 SELECT 
@@ -562,10 +583,10 @@ select * from pg_stat_activity where query = 'SELECT * FROM "hod_all_weekly_modi
 select * from pg_stat_activity where query = 'SELECT * FROM "hcm_mis"()';
 
 --------- Cancel PID Locks ---------
-select * from pg_cancel_backend(233362);
+select * from pg_cancel_backend(2636372);
 
  -------- Cancel pid Locks ------
-select * from pg_catalog.pg_cancel_backend(539737);
+select * from pg_catalog.pg_cancel_backend(2865443);
    
 ------  kill function query ----------
 SELECT * FROM manage_top_query(True);
@@ -598,6 +619,9 @@ FROM pg_locks
 JOIN pg_stat_activity ON pg_locks.pid = pg_stat_activity.pid
 LEFT JOIN pg_class ON pg_locks.relation = pg_class.oid
 WHERE pg_locks.relation IS NOT NULL;
+
+
+select  * from  home_page_grievance_counts 
 
 -------------------------------------------------------------------------------------------------------
 
@@ -3228,5 +3252,51 @@ select *
 --reindex table grievance_lifecyckle
  
  -------------------------------------------------------------------------------------------------
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ /* TAB_ID: 2B3 | TBL: ATR Received from Other HoD >> Role: 5 Ofc: 35 | G_Codes: ('GM013') */  
+with lastupdates AS (
+    select 
+        grievance_lifecycle.grievance_id,
+        grievance_lifecycle.grievance_status,
+        grievance_lifecycle.assigned_on,
+        grievance_lifecycle.assigned_to_office_id,
+        grievance_lifecycle.assigned_by_position,
+        grievance_lifecycle.assigned_to_position,
+        row_number() OVER (PARTITION BY grievance_lifecycle.grievance_id,grievance_lifecycle.assigned_to_office_id ORDER BY grievance_lifecycle.assigned_on DESC) AS rn
+    from grievance_lifecycle
+    where grievance_lifecycle.grievance_status in (3,5)
+) 
+    select count(1) 
+    from master_district_block_grv md
+--    left join lastupdates lu on lu.rn = 1 and lu.grievance_id = md.grievance_id and lu.assigned_to_office_id = 35
+--    left join admin_position_master apm on apm.position_id = md.updated_by_position
+--    left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
+    where md.status in (13) and md.assigned_to_office_id = 35
+        and md.assigned_to_position = 1227 
+        and replace(lower(md.emergency_flag),' ','') like '%n%';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
  
