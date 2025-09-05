@@ -2,7 +2,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-09-03' 
+WHERE batch_date::date = '2025-09-05' 
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -24,9 +24,11 @@ select
 	cspd.from_row_no,
 	cspd.to_row_no,
 	cspd.data_count,
-	cspd.response
+	cspd.response,
+	cspd.created_no
 from cmo_ssm_push_details cspd 
-order by cmo_ssm_push_details_id desc limit 100;
+where cspd.actual_push_date::date = '2025-08-29'
+order by cmo_ssm_push_details_id desc; -- limit 100;
 
 
 ----------------------- SSM APi PULL CHecK IF Any ID NOT Processed -------------------------------
@@ -170,6 +172,8 @@ from cmo_batch_run_details cbrd
 where cbrd.batch_date::date = '2025-08-07'::date
 order by cbrd.batch_id desc;
 
+--------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
 -- For CMO Batch Pull Data Count Check
 -- ARRAY_AGG(cbrd.batch_id) for list of batch detail ids
 -- distinct(cbrd.batch_date::date), for perticular distinct date where the process odne
@@ -196,7 +200,7 @@ select * from public.grievance_master gm where grievance_no in ( select griev_id
 select * from cmo_ssm_push_details cspd;
 select cspd.cmo_ssm_push_details_id, cspd.status,cspd.data_count,response from cmo_ssm_push_details cspd where cspd.status = 'F';
 select * from public.cmo_ssm_api_push_data_count();
-select * from master_district_block_grv where atr;
+select * from master_district_block_grv ;
 select * from cmo_ssm_api_push_data(50,0);
 select * from cmo_ssm_push_details cspd order by cmo_ssm_push_details_id desc limit 1;
 
@@ -253,6 +257,7 @@ where /*admin_position_master.office_id = 35 and */ admin_position_master.office
 	 group by admin_user_details.official_name, admin_user_details.official_phone, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name, admin_user_details.official_email;
 
 
+
 select admin_user_details.official_name, admin_user_details.official_phone, admin_user_details.official_email, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name 
 from admin_user_details
 inner join admin_user_position_mapping on admin_user_position_mapping.admin_user_id = admin_user_details.admin_user_id 
@@ -265,7 +270,6 @@ where /*admin_position_master.office_id = 35 and */ admin_position_master.office
 '8334822522','9874263537','9432331563','9434495405','9559000099','9874263537') /*and au.admin_user_id in (3756,76,70,4263,10920,4,14206,16134,12595)*/
 	 group by admin_user_details.official_name, admin_user_details.official_phone, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name, admin_user_details.official_email
 	order by admin_user_details.official_name asc;
-
 
 
 
@@ -512,36 +516,39 @@ select query, count(1) from pg_stat_activity group by query order by count desc;
 select count(1) from pg_stat_activity;
 select * from pg_stat_activity;
 
---- Connection Lock Checking -----
-select * from pg_locks;
+--==================================================================================
+--- ===================== Connection Lock Checking =========================== -----
+--==================================================================================
 
+select * from pg_locks;
 select * from pg_stat_activity;
 
+
+-- ===== Showing Maxiimum Connection ===== ---
 show max_connections;
 
+
 -- Proccesed pid query identified --
-select pg_stat_activity.query, pg_locks.mode, pg_stat_activity.client_addr,
-count(1) AS query_count
+select 
+	pg_stat_activity.query, 
+	pg_locks.mode, 
+	pg_stat_activity.client_addr,
+	count(1) AS query_count
 from pg_stat_activity
 inner join pg_locks on pg_locks.pid = pg_stat_activity.pid 
 group by 1,2,3
 order by 2,4 desc;
 
 
-select pg_stat_activity.query, pg_stat_activity.client_addr,
-count(1) AS query_count
+select 
+	pg_stat_activity.query, 
+	pg_stat_activity.client_addr,
+	pg_locks.mode,
+	count(1) AS query_count
 from pg_stat_activity
 inner join pg_locks on pg_locks.pid = pg_stat_activity.pid 
-group by 1,2
-order by 2,3 desc;
-
-
-select pg_stat_activity.query, pg_locks.mode,
-count(1) AS query_count
-from pg_stat_activity
-inner join pg_locks on pg_locks.pid = pg_stat_activity.pid 
-group by 1,2
-order by 2,3 desc;
+group by 1,2,3
+order by 2,4 desc;
 
 
 
@@ -554,6 +561,16 @@ INNER JOIN pg_locks ON pg_locks.pid = pg_stat_activity.pid
 GROUP BY pg_stat_activity.query
 HAVING 
     COUNT(1) >= 1000;
+
+
+SELECT 
+    pg_stat_activity.query, 
+    COUNT(1) AS query_count
+FROM pg_stat_activity
+INNER JOIN pg_locks ON pg_locks.pid = pg_stat_activity.pid
+GROUP BY pg_stat_activity.query
+HAVING 
+    COUNT(1) >= 1;
    
 
 --- Postgres Locked Query ---
@@ -620,8 +637,6 @@ JOIN pg_stat_activity ON pg_locks.pid = pg_stat_activity.pid
 LEFT JOIN pg_class ON pg_locks.relation = pg_class.oid
 WHERE pg_locks.relation IS NOT NULL;
 
-
-select  * from  home_page_grievance_counts 
 
 -------------------------------------------------------------------------------------------------------
 
@@ -1132,99 +1147,8 @@ select * from cmo_action_taken_note_reason_master catnrm ;
 select * from atn_closure_reason_mapping acrm ;
 select * from cmo_grievance_category_master cgcm ;
 select * from cmo_domain_lookup_master cdlm ;
-
-
-
-
-select
-	gm.grievance_id as griev_id,
-    gm.grievance_no as griev_no,
-    case
-        when gm.atn_id is not null then catnm.atn_desc
-        else 'NA'
-    end as "Action_Taken",
-    case 
-        when gm.action_taken_note is not null then gm.action_taken_note
-        else 'NA'
-    end as "Action_Taken_Desc",
-    case 
-        when gm.atn_id is not null then catnrm.atn_reason_master_desc
-        else 'NA'
-    end as "ATN_Reason_Desc",
-    gm.status as Status_Code,
-    cdlm.domain_value as Status_Name,
-	gm.grievance_generate_date::date as "Grievance_Lodge_Date",           -- New Required Field Added --
-	gm.applicant_name as "Complainant_Name",
-	gm.pri_cont_no as "Phone_no",
-	case
-		when gm.applicant_address is not null then gm.applicant_address
-		else 'NA'
-	end as "Address",
-	case 
-		when gm.district_id is not null then cdm3.district_name 
-		else 'NA'
-	end as "District",
-	case 
-		when gm.block_id is not null then cbm.block_name
-		when gm.municipality_id is not null then cmm.municipality_name
-		else 'NA'
-	end as "Block_Municipality",
-	case
-		when gm.gp_id is not null then cgpm.gp_name
-		when gm.ward_id is not null then cwm.ward_name
-		else 'NA'
-	end as "GP_Ward",
-	case
-		when gm.police_station_id is not null then cpsm.ps_name
-		else 'NA'
-	end as "Police_Station",
-	case
-		when gm.received_at is not null then cdlm1.domain_value
-		else 'NA'
-	end as "Received_at",
-	case
-		when gm.emergency_flag = 'Y' then 'Yes'
-		else 'No'
-	end as "Whether_Emergency",
-	case
-		when gm.grievance_category is not null then cgcm.grievance_category_desc
-		else 'NA'
-	end as "Grievance_category",
-	case
-		when gm.grievance_description is not null then gm.grievance_description
-		else 'NA'
-	end as "Grievance_Description",
-	case 
-		when gm.status in (3,4,5,6,11,13) and gm.assigned_to_office_id is not null then com.office_name
-		else 'NA'
-	end as "HOD"
-from grievance_master gm 
-left join cmo_closure_reason_master ccrm on gm.closure_reason_id = ccrm.closure_reason_id
-left join cmo_action_taken_note_master catnm on gm.atn_id = catnm.atn_id
-left join cmo_action_taken_note_reason_master catnrm on catnrm.atn_reason_master_id = gm.atn_id
-left join admin_user_details aud2 on gm.assigned_to_id = aud2.admin_user_id
-left join cmo_domain_lookup_master cdlm on gm.status = cdlm.domain_code and cdlm.domain_type = 'grievance_status'
-left join cmo_domain_lookup_master cdlm1 on gm.received_at = cdlm1.domain_code and cdlm1.domain_type = 'received_at_location'
-left join cmo_districts_master cdm3 on cdm3.district_id = gm.district_id
-left join cmo_blocks_master cbm on cbm.block_id = gm.block_id
-left join cmo_municipality_master cmm on cmm.municipality_id = gm.municipality_id
-left join cmo_gram_panchayat_master cgpm on cgpm.gp_id = gm.gp_id
-left join cmo_wards_master cwm on cwm.ward_id = gm.ward_id
-left join cmo_police_station_master cpsm on cpsm.ps_id = gm.police_station_id
-left join cmo_grievance_category_master cgcm on cgcm.grievance_cat_id = gm.grievance_category
-left join cmo_office_master com on com.office_id = gm.assigned_by_office_id 
-left join cmo_office_master com3 on com3.office_id = gm.atr_submit_by_lastest_office_id
-where gm.atn_id in (12,9) and gm.grievance_category = 133 and gm.status in (3,4,5,6,11,13);
-	
-
-
-
-
 select * from cmo_sub_office_master csom where csom.suboffice_id = 1462;
 select * from cmo_office_master com where com.office_id = 23;
-
-
-
 
 
 --1) office_ id = 51, sub_office_id = 5740 -- 937 HOSO
@@ -1234,14 +1158,21 @@ select * from cmo_office_master com where com.office_id = 23;
 --grievance_id = 834, 993, 1627, 1632, 1825
 
 
-
-select * from cmo_sub_office_master where suboffice_id = 5740;
-
-
 select 
-	gl.assigned_by_office_cat, gl.assigned_to_office_cat, apm.role_master_id as by_role, apm2.role_master_id as to_role,
-	apm.sub_office_id as by_sub, apm2.sub_office_id as to_sub, gl.assigned_by_office_id , gl.assigned_to_office_id ,
-	gl.grievance_status , gl.assigned_on , gl.lifecycle_id , gl.*, apm.record_status, apm2.record_status 
+	gl.assigned_by_office_cat, 
+	gl.assigned_to_office_cat, 
+	apm.role_master_id as by_role, 
+	apm2.role_master_id as to_role,
+	apm.sub_office_id as by_sub, 
+	apm2.sub_office_id as to_sub, 
+	gl.assigned_by_office_id , 
+	gl.assigned_to_office_id ,
+	gl.grievance_status , 
+	gl.assigned_on , 
+	gl.lifecycle_id , 
+	gl.*, 
+	apm.record_status, 
+	apm2.record_status 
 from grievance_lifecycle gl
 left join admin_position_master apm on apm.position_id = gl.assigned_by_position 
 left join admin_position_master apm2 on apm2.position_id = gl.assigned_to_position 
@@ -1249,215 +1180,7 @@ where grievance_id = 834 order by assigned_on ;
 
 
 select * from admin_position_master apm where sub_office_id = 5740;
-
 select * from admin_position_master apm where sub_office_id = 5740 and role_master_id = 7-- and record_status = 2;
-
-
-
-
-
-with
-		grievance_trail_data as (
-			select
-				gl.lifecycle_id,
-				gl.grievance_id,
-				gl.grievance_status,
-				gl.assigned_by_position,
-				gl.assigned_by_id,
-				gl.assigned_to_position,
-				gl.assigned_to_id,
-	            gl.current_atr_date,
-	            gl.created_on,
-	            gl.assigned_on,
-	            gl.atn_id,
-	            gl.action_taken_note,
-	            gl.atn_reason_master_id,
-	            gl.action_proposed,
-	            gl.contact_date,
-	            gl.tentative_date,
-	            gl.prev_recv_date,
-	            gl.prev_atr_date,
-	            gl.closure_reason_id,
-	            gl.assign_comment
-			from grievance_lifecycle gl
-			where gl.grievance_status != 1 
-				and gl.assigned_on::DATE = effective_date::DATE
-				/*and gl.assigned_on::DATE = (current_date - interval '1 day')::DATE*/
-				/* and gl.assigned_on::DATE = '2025-04-20'::DATE */
-		),
-		grievance_master_data as (
-			select
-				gm.grievance_no as griev_id_no,
-			    case 
-			        when gm.usb_unique_id is null then gm.grievance_no
-			        else gm.usb_unique_id
-			    end as "USB_Unique_ID",
-			    aud1.official_code as "Sender_Official_Code",
-			    aud2.official_code as "Receiver_Official_Code",
-			    /*case
-			        when LC.closure_reason_id  is not null then ccrm.closure_reason_code
-			        else 'NA'
-			    end as "Closure_Reason_Code",*/
-			    case
-			        when gm.closure_reason_id  is not null then ccrm.closure_reason_code
-			        else 'NA'
-			    end as "Closure_Reason_Code",
-			    case 
-			        when LC.assign_comment is not null then LC.assign_comment
-			        else 'NA'
-			    end as "Incoming_Remarks",
-			    case
-			        when gm.status = 15 then 'C'
-			        else 'F'
-			    end as "Griev_Active_Status",
-			    'NA' as attachments,
-			    case
-				    when LC.current_atr_date is null then
-		    			case 
-			    			when LC.grievance_status in (9,11,13,14,15) then LC.assigned_on
-		    				else null
-		    			end
-		    		else LC.current_atr_date
-				end as "Action_Taken_Date",
-			    case
-			        when LC.atn_id is not null then catnm.atn_desc
-			        else 'NA'
-			    end as "Action_Taken",
-			    case 
-			        when LC.action_taken_note is not null then LC.action_taken_note
-			        else 'NA'
-			    end as "Action_Taken_Desc",
-			    case
-			        when LC.assigned_by_id is not null 
-			        then concat(
-			            coalesce(aud1.official_name,''), ', ',
-			            coalesce(cdm1.designation_name,''), ', ',
-			            coalesce(case when apm1.role_master_id in (7,8) then csom1.suboffice_name else com1.office_name end,'')
-	                )
-			        else 'NA'
-			    end as "Action_Taken_By",
-			    case 
-			        when LC.atn_reason_master_id is not null then catnrm.atn_reason_master_desc
-			        else 'NA'
-			    end as "ATN_Reason_Desc",
-	            LC.grievance_status as griev_trans_no,
-			    LC.action_proposed as "Action_Proposed",
-			    LC.contact_date as "Contact_Date",
-			    LC.tentative_date as "Tentative_Date",
-			    LC.prev_recv_date as "Previous_Receipt_Date",
-			    LC.prev_atr_date as "Previous_ATR_Date",
-			    case
-			        when LC.assigned_by_position is not null then case when apm1.role_master_id in (7,8) then csom1.suboffice_name else com1.office_name end
-			        else 'NA'
-			    end as "Sender_Office_Name",
-			    case
-			        when LC.assigned_by_position is not null then cdm1.designation_name
-			        else 'NA'
-			    end as "Sender_Details",
-			    case
-			        when LC.assigned_to_id is not null then case when apm2.role_master_id in (7,8) then csom2.suboffice_name else com2.office_name end
-			        else 'NA'
-			    end as "Receiver_Office_Name",
-			    case
-			        when LC.assigned_to_position is not null then cdm2.designation_name
-			        else 'NA'
-			    end as "Receiver_Details",
-			    case 
-			    	when gm.status = 15 then 'Disposed'
-			        else 'Pending'
-			    end as "Status",
-			    cdlm.domain_value as griev_trans_no_description,
-				gm.grievance_generate_date as "Grievance_Lodge_Date",           -- New Required Field Added --
-				gm.applicant_name as "Complainant_Name",
-				gm.pri_cont_no as "Phone_no",
-				gm.applicant_address as "Address",
-				case 
-					when gm.district_id is not null then cdm3.district_name 
-					else 'NA'
-				end as "District",
-				case 
-					when gm.block_id is not null then cbm.block_name
-					when gm.municipality_id is not null then cmm.municipality_name
-					else 'NA'
-				end as "Block_Municipality",
-				case
-					when gm.gp_id is not null then cgpm.gp_name
-					when gm.ward_id is not null then cwm.ward_name
-					else 'NA'
-				end as "GP_Ward",
-				case
-					when gm.police_station_id is not null then cpsm.ps_name
-					else 'NA'
-				end as "Police_Station",
-				case
-					when gm.received_at is not null then cdlm1.domain_value
-					else 'NA'
-				end as "Received_at",
-				case
-					when gm.emergency_flag = 'Y' then 'Yes'
-					else 'No'
-				end as "Whether_Emergency",
-				case 
-					when gm.status = 15 then gm.grievence_close_date
-					else null
-				end as "Disposal_Date",
-				case
-					when gm.grievance_category is not null then cgcm.grievance_category_desc
-					else 'NA'
-				end as "Grievance_category",
-				gm.grievance_description as "Grievance_Description",
-				case 
-					when gm.status = 15 and gm.atr_submit_by_lastest_office_id is not null then com3.office_name
-					when gm.status in (13, 14) and gm.assigned_by_office_id is not null then com.office_name
-					else 'NA'
-				end as "HOD",
-				case
-					when gm.status = 14 then gm.action_taken_note
-					else 'NA'
-				end as "HODs_Last_Remarks",
-				case
-			        when gm.closure_reason_id  is not null then ccrm.closure_reason_name
-			        else 'NA'
-			    end as "ATR_Closure_Reason"
-			from grievance_trail_data LC
-			inner join grievance_master gm on gm.grievance_id = LC.grievance_id and (gm.grievance_source = 5 or gm.received_at = 6) /*gm.received_at = 6*/
-			left join admin_position_master apm1 on LC.assigned_by_position = apm1.position_id
-			left join admin_position_master apm2 on LC.assigned_to_position = apm2.position_id
-			left join cmo_closure_reason_master ccrm on gm.closure_reason_id = ccrm.closure_reason_id
-			left join cmo_action_taken_note_master catnm on LC.atn_id = catnm.atn_id
-			left join cmo_action_taken_note_reason_master catnrm on catnrm.atn_reason_master_id = LC.atn_reason_master_id
-			left join admin_user_details aud1 on LC.assigned_by_id = aud1.admin_user_id
-			left join cmo_designation_master cdm1 on apm1.designation_id = cdm1.designation_id
-			left join cmo_office_master com1 on com1.office_id = apm1.office_id
-			left join cmo_sub_office_master csom1 on csom1.suboffice_id = apm1.sub_office_id
-			left join admin_user_details aud2 on LC.assigned_to_id = aud2.admin_user_id
-			left join cmo_designation_master cdm2 on apm2.designation_id = cdm2.designation_id
-			left join cmo_office_master com2 on com2.office_id = apm2.office_id
-			left join cmo_sub_office_master csom2 on csom2.suboffice_id = apm2.sub_office_id
-			left join cmo_domain_lookup_master cdlm on LC.grievance_status = cdlm.domain_code and cdlm.domain_type = 'grievance_status'
-			left join cmo_domain_lookup_master cdlm1 on gm.received_at = cdlm1.domain_code and cdlm.domain_type = 'received_at_location'
-			left join cmo_districts_master cdm3 on cdm3.district_id = gm.district_id
-			left join cmo_blocks_master cbm on cbm.block_id = gm.block_id
-			left join cmo_municipality_master cmm on cmm.municipality_id = gm.municipality_id
-			left join cmo_gram_panchayat_master cgpm on cgpm.gp_id = gm.gp_id
-			left join cmo_wards_master cwm on cwm.ward_id = gm.ward_id
-			left join cmo_police_station_master cpsm on cpsm.ps_id = gm.police_station_id
-			left join cmo_grievance_category_master cgcm on cgcm.grievance_cat_id = gm.grievance_category
-			left join cmo_office_master com on com.office_id = gm.assigned_by_office_id /*or com.office_id = gm.atr_submit_by_lastest_office_id*/
-			left join cmo_office_master com3 on com3.office_id = gm.atr_submit_by_lastest_office_id
-			order by LC.grievance_id, LC.lifecycle_id asc
-		)
-	select
-		count(1) as total_count,
-		effective_date::DATE AS push_date
-		/*(current_date - interval '1 day')::DATE as push_date*/
-		/*'2025-04-20'::DATE as push_date */ /* Backdated -> 2024-11-12 to 2025-01-01 | 2025-04-11 - 2025-04-22 */ 
-	from grievance_master_data M;
-
-
-
-
-
 
 
 --------------------------------------------------------------------------------------- BULK STATUS UPDATE CLOSE API ------------------------------------------------------------------------------------------------
@@ -1475,46 +1198,46 @@ inner join grievance_master_sdc_timestamp_issue_20250806_bkp gm on gm.grievance_
 
 
 
-CREATE TABLE public.grievance_lifecycle_sdc_timestamp_20250806_bkp (
-	lifecycle_id int8,
-	"comment" text NULL,
-	grievance_status int2 NOT NULL,
-	assigned_on timestamptz(6) NULL,
-	assigned_by_id int8 NULL,
-	assign_comment text NULL,
-	assigned_to_id int8 NULL,
-	assign_reply text NULL,
-	accepted_on timestamptz(6) NULL,
-	atr_type int2 NULL,
-	atr_proposed_date timestamptz(6) NULL,
-	official_code varchar(100) NULL,
-	action_taken_note text NULL,
-	atn_id int8 NULL,
-	atn_reason_master_id int8 NULL,
-	action_proposed text NULL,
-	contact_date timestamptz(6) NULL,
-	tentative_date timestamptz(6) NULL,
-	prev_recv_date timestamptz(6) NULL,
-	prev_atr_date timestamptz(6) NULL,
-	closure_reason_id int8 NULL,
-	atr_submit_on timestamptz(6) NULL,
-	created_by int8 NULL,
-	created_on timestamptz(6) NULL,
-	grievance_id int8 NULL,
-	assigned_by_position int8 NULL,
-	assigned_to_position int8 NULL,
-	urgency_type int2 NULL,
-	addl_doc_id jsonb NULL,
-	current_atr_date timestamptz(6) NULL,
-	atr_doc_id jsonb NULL,
-	assigned_by_office_id int8 NULL,
-	assigned_to_office_id int8 NULL,
-	assigned_by_office_cat int8 NULL,
-	assigned_to_office_cat int8 NULL,
-	migration_id int4 NULL,
-	migration_id_ac_tkn int4 NULL
---	CONSTRAINT grievance_lifecycle_sdc_timestamp_20250806_bkp_pkey PRIMARY KEY (lifecycle_id, grievance_status)
-)
+--CREATE TABLE public.grievance_lifecycle_sdc_timestamp_20250806_bkp (
+--	lifecycle_id int8,
+--	"comment" text NULL,
+--	grievance_status int2 NOT NULL,
+--	assigned_on timestamptz(6) NULL,
+--	assigned_by_id int8 NULL,
+--	assign_comment text NULL,
+--	assigned_to_id int8 NULL,
+--	assign_reply text NULL,
+--	accepted_on timestamptz(6) NULL,
+--	atr_type int2 NULL,
+--	atr_proposed_date timestamptz(6) NULL,
+--	official_code varchar(100) NULL,
+--	action_taken_note text NULL,
+--	atn_id int8 NULL,
+--	atn_reason_master_id int8 NULL,
+--	action_proposed text NULL,
+--	contact_date timestamptz(6) NULL,
+--	tentative_date timestamptz(6) NULL,
+--	prev_recv_date timestamptz(6) NULL,
+--	prev_atr_date timestamptz(6) NULL,
+--	closure_reason_id int8 NULL,
+--	atr_submit_on timestamptz(6) NULL,
+--	created_by int8 NULL,
+--	created_on timestamptz(6) NULL,
+--	grievance_id int8 NULL,
+--	assigned_by_position int8 NULL,
+--	assigned_to_position int8 NULL,
+--	urgency_type int2 NULL,
+--	addl_doc_id jsonb NULL,
+--	current_atr_date timestamptz(6) NULL,
+--	atr_doc_id jsonb NULL,
+--	assigned_by_office_id int8 NULL,
+--	assigned_to_office_id int8 NULL,
+--	assigned_by_office_cat int8 NULL,
+--	assigned_to_office_cat int8 NULL,
+--	migration_id int4 NULL,
+--	migration_id_ac_tkn int4 NULL
+----	CONSTRAINT grievance_lifecycle_sdc_timestamp_20250806_bkp_pkey PRIMARY KEY (lifecycle_id, grievance_status)
+--)
 
 
 --create table mobile_sms();
@@ -1675,7 +1398,6 @@ select * from cmo_bulk_status_update_closure_audit_nte_pnrd_road cm;
 
 
 
-
 select gim.grievance_id, gim.action_taken_note, gm.status
 from grievance_master gm
 inner join griev_ids_mas gim on gm.grievance_id = gim.grievance_id 
@@ -1748,8 +1470,6 @@ GROUP BY grievance_id, status
 HAVING not COUNT(*) > 1;
 
 
-
-
 SELECT COUNT(*) AS total_count
 FROM cmo_bulk_status_update_closure_audit
 GROUP BY grievance_id, status
@@ -1766,8 +1486,6 @@ HAVING not COUNT(*) > 1;
 --        GROUP BY grievance_id
 --    ) AS latest_rows
 --);
-
-
 
 
 
@@ -1789,6 +1507,8 @@ DELETE FROM grievance_lifecycle
 WHERE lifecycle_id IN (
     SELECT lifecycle_id FROM ordered_duplicates WHERE rn > 1
 );
+
+
 
 --- Data Clean UP Query For todays entry ----
 WITH ordered_duplicates AS (
@@ -1993,6 +1713,7 @@ group by grievance_no,grievance_id,action_taken_note_reason_only_for_not_eligibl
 ) a
 where  a.c > 1 and a.grievance_id is not null and a.grievance_no is not null and a.not_eligible is not null
 order by a.c desc;
+
 
 -------------------------------------------------------------------------------------------
 --- Fetching Unique Grievance IDs Only (Having Count = 1) For Processing --- Phrase 2
