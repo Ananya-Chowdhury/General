@@ -27,8 +27,22 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-08-29'
+where cspd.actual_push_date::date = '2025-09-05'
 order by cmo_ssm_push_details_id desc; -- limit 100;
+
+
+select 
+	cspd.push_date,
+	cspd.actual_push_date, 
+	cspd.status_code, 
+	cspd.status,
+	cspd.from_row_no,
+	cspd.to_row_no,
+	cspd.data_count,
+	cspd.response,
+	cspd.created_no
+from cmo_ssm_push_details cspd 
+order by cmo_ssm_push_details_id desc limit 100;
 
 
 ----------------------- SSM APi PULL CHecK IF Any ID NOT Processed -------------------------------
@@ -407,7 +421,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9434377937'   --9147888180
+WHERE uo.u_phone = '9732525502'   --9147888180
 ORDER BY created_on desc limit 5;
 
 SELECT * 
@@ -594,7 +608,8 @@ ORDER BY pg_stat_activity.query_start;
 --SELECT * FROM "hod_total"();
 --SELECT * FROM "get_dept"();
 --SELECT * FROM "hcm_mis"();
-
+--select * from public.category_all() --172.19.20.55
+--
 ------- Find PID Number From Stuck Query ------
 select * from pg_stat_activity where query = 'SELECT * FROM "hod_all_weekly_modified_othins"()';
 select * from pg_stat_activity where query = 'SELECT * FROM "hcm_mis"()';
@@ -617,7 +632,7 @@ select a.pid, a.usename, a.application_name, a.client_addr, a.state, l.mode, l.g
 	join pg_namespace n ON n.oid = c.relnamespace;
 
 
-
+---------- BLOCKED QUERY CHECK -----------------
 SELECT 
     pg_stat_activity.pid,
     pg_stat_activity.query AS blocked_query,
