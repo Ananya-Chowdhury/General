@@ -1235,64 +1235,6 @@ WHERE aula.active_status = 1
   AND DATE_TRUNC('minute', aula.login_time) = DATE_TRUNC('minute', NOW())
 ORDER BY aula.login_time DESC;
 
-------------- Re-Indexing -----------
-vacuum full grievance_master;
-reindex table greivance_master;
-
-
-vacuum full grievance_lifecyckle;
-reindex table grievance_lifecyckle;
-
-
-
-
-select * from user_otp;
-
-select aud.official_name ,user_token.* 
-from user_token 
-left join admin_user_details aud on aud.admin_user_id = user_token.user_id
-left join admin_user_position_mapping aupm on aupm.admin_user_id = aud.admin_user_id and aupm.status = 1
-left join admin_position_master apm on apm.position_id = aupm.position_id 
-where user_id is not null and user_token.updated_on::date = '2025-09-04' and expiry_time > now()  and apm.user_type = 1;
-
-
-
-select aud.official_name ,user_token.* 
-from user_token 
-left join admin_user_details aud on aud.admin_user_id = user_token.user_id
-left join admin_user_position_mapping aupm on aupm.admin_user_id = aud.admin_user_id and aupm.status = 1
-left join admin_position_master apm on apm.position_id = aupm.position_id 
-where /*user_id is not null and*/ user_token.updated_on::date = '2025-09-03' and expiry_time > now()  /*and apm.user_type = 3*/;
-
-
-
-select aud.official_name ,user_token.* 
-from user_token 
-left join admin_user_details aud on aud.admin_user_id = user_token.user_id
-where user_id is not null and user_token.updated_on::date = '2025-09-04' and expiry_time > now();
-
-
-
-select aud.official_name ,user_token.* 
-from user_token 
-left join admin_user_details aud on aud.admin_user_id = user_token.user_id
-where /*user_id is not null and*/ user_token.updated_on::date = '2025-09-03' --and expiry_time > now();
-
-
-select * from cmo_parameter_master cpm ;
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

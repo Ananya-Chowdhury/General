@@ -1448,3 +1448,10 @@ with lastupdates AS (
         order by cmo_sub_office_master.suboffice_name;                       
                         
                         
+ 
+ 
+ select * from cmo_parameter_master cpm;
+ 
+ 
+ 
+ SELECT * FROM get_login_activity('2025-09-08 11:00:00');

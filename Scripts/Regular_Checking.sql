@@ -62,7 +62,7 @@ from
 	order by cbrd.batch_date desc) a
 where a.batchs < 96;
 
------------------------- Update Final Query ------------------------------
+------------------------ Update Final Query ------------------------------   --06.09.2025 --07.09.2025
 SELECT
     a.*,
     '[' || array_to_string(
@@ -2875,7 +2875,8 @@ SELECT
    order by com.office_id;
   
 
-  
+select * from cmo_parameter_master cpm;
+
 select com.office_name, count(1)
 from forwarded_latest_5_bh_mat as forwarded_latest_5_bh_mat
 left join atr_latest_13_bh_mat atr_latest_13_bh_mat on atr_latest_13_bh_mat.grievance_id = forwarded_latest_5_bh_mat.grievance_id
@@ -2988,51 +2989,284 @@ select *
 --reindex table grievance_lifecyckle
  
  -------------------------------------------------------------------------------------------------
+ ----============================= Current Login User Count Check ================================
+ --===============================================================================================
+ 
+select * from user_otp;
+
+select aud.official_name ,user_token.* 
+from user_token 
+left join admin_user_details aud on aud.admin_user_id = user_token.user_id
+left join admin_user_position_mapping aupm on aupm.admin_user_id = aud.admin_user_id and aupm.status = 1
+left join admin_position_master apm on apm.position_id = aupm.position_id 
+where user_id is not null and user_token.updated_on::date = '2025-09-04' and expiry_time > now()  and apm.user_type = 1;
+
+
+
+select aud.official_name ,user_token.* 
+from user_token 
+left join admin_user_details aud on aud.admin_user_id = user_token.user_id
+left join admin_user_position_mapping aupm on aupm.admin_user_id = aud.admin_user_id and aupm.status = 1
+left join admin_position_master apm on apm.position_id = aupm.position_id 
+where /*user_id is not null and*/ user_token.updated_on::date = '2025-09-03' and expiry_time > now()  /*and apm.user_type = 3*/;
+
+
+
+select aud.official_name ,user_token.* 
+from user_token 
+left join admin_user_details aud on aud.admin_user_id = user_token.user_id
+where user_id is not null and user_token.updated_on::date = '2025-09-04' and expiry_time > now();
+
+
+
+select aud.official_name ,user_token.* 
+from user_token 
+left join admin_user_details aud on aud.admin_user_id = user_token.user_id
+where /*user_id is not null and*/ user_token.updated_on::date = '2025-09-08' --and expiry_time > now();
+
+
+select aud.official_name ,user_token.* 
+from user_token 
+left join admin_user_details aud on aud.admin_user_id = user_token.user_id
+where user_id is not null and user_token.updated_on::date = '2025-09-08' --and expiry_time > now();
+ 
+
+-- Active User Count Details For 
+ select * from citizen_login_activity cla order by cla.id desc limit 1;
+ select * from user_token ut where ut.c_m_no = '8597510571';
+ select * from admin_user_login_activity aula order by aula.la_id desc limit 2000;
+ select * from admin_user_login_activity aula order by aula.la_id desc limit 1;
+select * from user_token ut limit 1;
+select * from cmo_parameter_master cpm ;
+ 
+-------------------- ACTIVE USER LOGIN COUNT QUERY -------------------------
+(
+select
+	-- apm.role_master_id,
+    aurm.role_master_name as role_name,
+	count(aula.la_id),
+	'2025-09-08 11:00:00' as login_upto
+from admin_user_login_activity aula
+inner join admin_position_master apm on aula.position_id = apm.position_id
+inner join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id and aurm.role_master_id in (1,2,3,4,5,6,7,8)
+where aula.login_time::date = current_timestamp::date and aula.login_time::timestamp <= '2025-09-08 11:00:00'::timestamp and aula.logout_time is Null
+group by aurm.role_master_name, aurm.role_master_id
+order by aurm.role_master_id asc
+)
+union all
+(
+select
+	'Citizen' as role_name,
+	count(cla.id),
+	'2025-09-08 11:00:00' as login_upto
+from citizen_login_activity cla
+where cla.login_time::date = current_timestamp::date and cla.login_time::timestamp <= '2025-09-08 11:00:00'::timestamp and cla.logout_time is Null
+)
+------------------------------------------------------------------
+ 
+ ---- Total User still Logged in Query  ----
+SELECT COUNT(*) AS total_logged_in_users_today
+FROM user_token ut
+WHERE DATE(ut.updated_on) = CURRENT_DATE;
+ 
+---===================================================================================================================================================== 
  
  
+
+--DROP FUNCTION public.get_login_activity(timestamp);
+--
+--CREATE OR REPLACE FUNCTION get_login_activity(p_login_upto TIMESTAMP)
+--RETURNS TABLE (
+--    role_name TEXT,
+--    login_count BIGINT,
+--    login_upto TIMESTAMP
+--)
+--LANGUAGE plpgsql
+--AS $$
+--BEGIN
+--    RETURN QUERY
+--    (
+--        -- Admin Users
+--        SELECT
+--            aurm.role_master_name::TEXT AS role_name,
+--            COUNT(aula.la_id) AS login_count,
+--            p_login_upto AS login_upto
+--        FROM admin_user_login_activity aula
+--        INNER JOIN admin_position_master apm 
+--            ON aula.position_id = apm.position_id
+--        INNER JOIN admin_user_role_master aurm 
+--            ON aurm.role_master_id = apm.role_master_id 
+--           AND aurm.role_master_id IN (1,2,3,4,5,6,7,8)
+--        WHERE aula.login_time::date = current_timestamp::date
+--          AND aula.login_time <= p_login_upto
+--          AND aula.logout_time IS NULL
+--        GROUP BY aurm.role_master_name, aurm.role_master_id
+--
+--        UNION ALL
+--
+--        -- Citizens
+--        SELECT
+--            'Citizen'::TEXT AS role_name,
+--            COUNT(cla.id) AS login_count,
+--            p_login_upto AS login_upto
+--        FROM citizen_login_activity cla
+--        WHERE cla.login_time::date = current_timestamp::date
+--          AND cla.login_time <= p_login_upto
+--          AND cla.logout_time IS NULL
+--    );
+--END;
+--$$;
+
  
+
+ SELECT * FROM get_login_activity('2025-09-08 17:00:00');
  
- 
- 
- 
- 
- 
- /* TAB_ID: 2B3 | TBL: ATR Received from Other HoD >> Role: 5 Ofc: 35 | G_Codes: ('GM013') */  
-with lastupdates AS (
-    select 
-        grievance_lifecycle.grievance_id,
-        grievance_lifecycle.grievance_status,
-        grievance_lifecycle.assigned_on,
-        grievance_lifecycle.assigned_to_office_id,
-        grievance_lifecycle.assigned_by_position,
-        grievance_lifecycle.assigned_to_position,
-        row_number() OVER (PARTITION BY grievance_lifecycle.grievance_id,grievance_lifecycle.assigned_to_office_id ORDER BY grievance_lifecycle.assigned_on DESC) AS rn
-    from grievance_lifecycle
-    where grievance_lifecycle.grievance_status in (3,5)
-) 
-    select count(1) 
-    from master_district_block_grv md
---    left join lastupdates lu on lu.rn = 1 and lu.grievance_id = md.grievance_id and lu.assigned_to_office_id = 35
---    left join admin_position_master apm on apm.position_id = md.updated_by_position
---    left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
-    where md.status in (13) and md.assigned_to_office_id = 35
-        and md.assigned_to_position = 1227 
-        and replace(lower(md.emergency_flag),' ','') like '%n%';
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+
+(
+select
+	-- apm.role_master_id,
+    aurm.role_master_name as role_name,
+	count(aula.la_id),
+	'2025-09-08 11:00:00' as login_upto
+from admin_user_login_activity aula
+inner join admin_position_master apm on aula.position_id = apm.position_id
+inner join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id and aurm.role_master_id in (1,2,3,4,5,6,7,8)
+left join user_token ut on ut.user_id = aula.admin_user_id 
+where aula.login_time::date = current_timestamp::date and aula.login_time::timestamp <= '2025-09-08 11:00:00'::timestamp and aula.logout_time is null and ut.expiry_time::timestamp >= '2025-09-08 11:00:00'::timestamp and ut.user_type = 1
+group by aurm.role_master_name, aurm.role_master_id
+order by aurm.role_master_id asc
+)
+union all
+(
+select
+	'Citizen' as role_name,
+	count(cla.id),
+	'2025-09-08 11:00:00' as login_upto
+from citizen_login_activity cla
+left join user_token ut on ut.c_m_no  = cla.m_no  
+where cla.login_time::date = current_timestamp::date and cla.login_time::timestamp <= '2025-09-08 11:00:00'::timestamp and cla.logout_time is null and ut.expiry_time::timestamp >= '2025-09-08 11:00:00'::timestamp
+)
+
+
+
+
+SELECT
+    aurm.role_master_name AS role_name,
+    COUNT(aula.la_id) AS login_count,
+    '2025-09-08 11:00:00'::timestamp AS login_upto
+FROM admin_user_login_activity aula
+INNER JOIN admin_position_master apm 
+    ON aula.position_id = apm.position_id
+INNER JOIN admin_user_role_master aurm 
+    ON aurm.role_master_id = apm.role_master_id 
+   AND aurm.role_master_id IN (1,2,3,4,5,6,7,8)
+LEFT JOIN user_token ut ON ut.user_id = aula.admin_user_id AND ut.user_type = 1
+WHERE aula.login_time::date = current_timestamp::date
+  AND aula.login_time <= '2025-09-08 11:00:00'::timestamp
+  AND aula.logout_time IS NOT NULL
+  AND (
+        ut.expiry_time >= '2025-09-08 11:00:00'::timestamp
+        OR ut.expiry_time <= now()
+      )
+GROUP BY aurm.role_master_name, aurm.role_master_id
+ORDER BY aurm.role_master_id ASC;
+
+
+
+
+
+------ PERFECT ----
+select
+	-- apm.role_master_id,
+    aurm.role_master_name as role_name,
+--	count(aula.la_id),
+	count(distinct aula.position_id),
+	'2025-09-08 11:00:00' as login_upto
+from admin_user_login_activity aula
+inner join admin_position_master apm on aula.position_id = apm.position_id
+inner join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id and aurm.role_master_id in (1,2,3,4,5,6,7,8)
+where aula.login_time::date = current_timestamp::date and aula.logout_time is null and aula.login_time::timestamp <= '2025-09-08 11:00:00'::timestamp
+group by aurm.role_master_name, aurm.role_master_id
+order by aurm.role_master_id asc
+
+
+select
+	-- apm.role_master_id,
+    aurm.role_master_name as role_name,
+	count(aula.la_id),
+	'2025-09-08 11:00:00' as login_upto
+from admin_user_login_activity aula
+inner join admin_position_master apm on aula.position_id = apm.position_id
+inner join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id and aurm.role_master_id in (1,2,3,4,5,6,7,8)
+where aula.login_time::date = current_timestamp::date and aula.logout_time is null AND aula.login_time::timestamp BETWEEN '2025-09-08 15:00:00'::timestamp AND '2025-09-08 17:00:00'::timestamp
+group by aurm.role_master_name, aurm.role_master_id
+order by aurm.role_master_id asc
+
+
+
+
+SELECT
+    apm.position_id,
+    aurm.role_master_name AS role_name,
+    COUNT(aula.la_id) AS login_count,
+    '2025-09-08 11:00:00'::timestamp AS login_upto
+FROM admin_user_login_activity aula
+INNER JOIN admin_position_master apm 
+    ON aula.position_id = apm.position_id
+INNER JOIN admin_user_role_master aurm 
+    ON aurm.role_master_id = apm.role_master_id 
+   AND aurm.role_master_id IN (1,2,3,4,5,6,7,8)
+WHERE aula.login_time::date = current_timestamp::date
+  AND aula.logout_time IS NULL
+  AND aula.login_time <= '2025-09-08 11:00:00'::timestamp
+GROUP BY apm.position_id, aurm.role_master_name, aurm.role_master_id
+ORDER BY aurm.role_master_id ASC, apm.position_id ASC;
+
+
+select
+	-- apm.role_master_id,
+    aurm.role_master_name as role_name,
+	count(aula.la_id),
+	'2025-09-08 11:00:00' as login_upto
+from admin_user_login_activity aula
+inner join admin_position_master apm on aula.position_id = apm.position_id
+inner join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id and aurm.role_master_id in (1,2,3,4,5,6,7,8)
+left join user_token ut on ut.user_id = aula.admin_user_id 
+where aula.login_time::date = current_timestamp::date and aula.login_time::timestamp <= '2025-09-08 11:00:00'::timestamp and aula.logout_time is null and ut.expiry_time::timestamp >= '2025-09-08 11:00:00'::timestamp and ut.user_type = 1
+group by aurm.role_master_name, aurm.role_master_id
+order by aurm.role_master_id asc
+
+
+
+
+
+
+select
+	-- apm.role_master_id,
+    aurm.role_master_name as role_name,
+	count(aula.la_id),
+	'2025-09-08 11:00:00' as login_upto
+from admin_user_login_activity aula
+inner join admin_position_master apm on aula.position_id = apm.position_id
+inner join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id and aurm.role_master_id in (1,2,3,4,5,6,7,8)
+left join user_token ut on ut.user_id = aula.admin_user_id 
+where aula.login_time::date = current_timestamp::date 
+--and ut.expiry_time::timestamp between '2025-09-08 11:00:00'::timestamp and '2025-09-08 12:59:00'::timestamp 
+and aula.login_time::timestamp between '2025-09-08 11:00:00'::timestamp and '2025-09-08 12:59:00'::timestamp 
+/*and aula.logout_time is not null*/ /*and ut.expiry_time::timestamp = '2025-09-08 11:00:00'::timestamp*/ and ut.user_type = 1
+group by aurm.role_master_name, aurm.role_master_id
+order by aurm.role_master_id asc
+
+
+select *
+from admin_user_login_activity aula
+inner join admin_position_master apm on aula.position_id = apm.position_id
+inner join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id and aurm.role_master_id in (1,2,3,4,5,6,7,8)
+left join user_token ut on ut.user_id = aula.admin_user_id 
+where aula.login_time::date = current_timestamp::date 
+and (ut.expiry_time::timestamp between '2025-09-08 11:00:00'::timestamp and '2025-09-08 12:59:00'::timestamp 
+or aula.login_time::timestamp between '2025-09-08 11:00:00'::timestamp and '2025-09-08 12:59:00'::timestamp )
+/*and aula.logout_time is not null*/ /*and ut.expiry_time::timestamp = '2025-09-08 11:00:00'::timestamp*/ and ut.user_type = 1
+--group by aurm.role_master_name, aurm.role_master_id
+order by aurm.role_master_id asc
+
