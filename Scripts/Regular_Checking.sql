@@ -421,7 +421,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9732525502'   --9147888180
+WHERE uo.u_phone = '9635821533'   --9147888180
 ORDER BY created_on desc limit 5;
 
 SELECT * 
@@ -464,8 +464,18 @@ select * from public.grievance_master gm where gm.grievance_id = 5516302;
 select * from public.grievance_master gm2 where gm2.grievance_no = 'SSM4767959';
 select * from public.cmo_closure_reason_master ccrm;
 select * from cmo_grievance_category_master cgcm ;
+select * from user_token ut where ut.c_m_no = '9635821533';
+select * from user_token ut order by ut.token_id desc limit 10;
 
 
+--- FOR CHECKING POSITION AND USER MAPPING ---- ( One Position never HAVE two different User but One User can have two different positions)
+select * from admin_user_position_mapping aupm where aupm.position_id = 15380 and aupm.status = 1;  -- position (15380)
+select * from admin_position_master apm where apm.position_id = 15380;
+select * from admin_user_details aud where aud.admin_user_id in (15586, 16108);
+select * from admin_user au where au.admin_user_id in (15586, 16108);
+
+
+--------------------------------------------------------------------------------------------------------
 
 
 select * from public.admin_user au where au.u_phone in ('9999999900','9999999999','8918939197','8777729301','9775761810','7719357638','7001322965','6292222444',
@@ -3071,54 +3081,6 @@ WHERE DATE(ut.updated_on) = CURRENT_DATE;
  
 ---===================================================================================================================================================== 
  
- 
-
---DROP FUNCTION public.get_login_activity(timestamp);
---
---CREATE OR REPLACE FUNCTION get_login_activity(p_login_upto TIMESTAMP)
---RETURNS TABLE (
---    role_name TEXT,
---    login_count BIGINT,
---    login_upto TIMESTAMP
---)
---LANGUAGE plpgsql
---AS $$
---BEGIN
---    RETURN QUERY
---    (
---        -- Admin Users
---        SELECT
---            aurm.role_master_name::TEXT AS role_name,
---            COUNT(aula.la_id) AS login_count,
---            p_login_upto AS login_upto
---        FROM admin_user_login_activity aula
---        INNER JOIN admin_position_master apm 
---            ON aula.position_id = apm.position_id
---        INNER JOIN admin_user_role_master aurm 
---            ON aurm.role_master_id = apm.role_master_id 
---           AND aurm.role_master_id IN (1,2,3,4,5,6,7,8)
---        WHERE aula.login_time::date = current_timestamp::date
---          AND aula.login_time <= p_login_upto
---          AND aula.logout_time IS NULL
---        GROUP BY aurm.role_master_name, aurm.role_master_id
---
---        UNION ALL
---
---        -- Citizens
---        SELECT
---            'Citizen'::TEXT AS role_name,
---            COUNT(cla.id) AS login_count,
---            p_login_upto AS login_upto
---        FROM citizen_login_activity cla
---        WHERE cla.login_time::date = current_timestamp::date
---          AND cla.login_time <= p_login_upto
---          AND cla.logout_time IS NULL
---    );
---END;
---$$;
-
- 
-
  SELECT * FROM get_login_activity('2025-09-08 17:00:00');
  
 
@@ -3236,11 +3198,6 @@ where aula.login_time::date = current_timestamp::date and aula.login_time::times
 group by aurm.role_master_name, aurm.role_master_id
 order by aurm.role_master_id asc
 
-
-
-
-
-
 select
 	-- apm.role_master_id,
     aurm.role_master_name as role_name,
@@ -3270,3 +3227,329 @@ or aula.login_time::timestamp between '2025-09-08 11:00:00'::timestamp and '2025
 --group by aurm.role_master_name, aurm.role_master_id
 order by aurm.role_master_id asc
 
+
+
+select 
+	aurm.role_master_name as role_name,
+	count(1),
+	'2025-09-02 11:00:00' as login_upto
+from user_token 
+inner join admin_position_master apm on user_token.user_id  = apm.position_id
+inner join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id and aurm.role_master_id in (1,2,3,4,5,6,7,8)
+where user_token.user_type = 1 and user_token.updated_on::date = '2025-09-02' 
+and (user_token.updated_on between '2025-09-02 00:00:00' and '2025-09-02 00:59:00' or user_token.expiry_time between '2025-09-02 00:00:00' and '2025-09-02 00:59:00') 
+group by aurm.role_master_name, aurm.role_master_id
+order by aurm.role_master_id asc;
+
+
+
+select 
+	aurm.role_master_name as role_name,
+	count(user_token.token_id) as active_login,
+	'2025-09-08 11:00:00' as login_upto
+from user_token 
+inner join admin_position_master apm on user_token.user_id  = apm.position_id
+inner join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id and aurm.role_master_id in (1,2,3,4,5,6,7,8)
+where user_token.user_type = 1 and (user_token.updated_on between '2025-09-08 11:00:00' and '2025-09-08 12:59:00' or user_token.expiry_time > '2025-09-08 11:00:00' )
+--where user_token.user_type = 1 and (user_token.updated_on between '2025-09-08 11:00:00' and '2025-09-08 12:59:00' or user_token.expiry_time > '2025-09-08 11:00:00' )
+group by aurm.role_master_name, aurm.role_master_id
+order by aurm.role_master_id asc;
+
+
+----- PERFECT -----
+select aurm.role_master_name as role_name,
+count(user_token.token_id) as active_login, 
+'2025-09-08 17:00:00' as login_upto 
+from user_token 
+inner join admin_position_master apm on user_token.user_id = apm.position_id 
+inner join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id and aurm.role_master_id in (1,2,3,4,5,6,7,8) 
+--where user_token.updated_on::date = '2025-09-08' and user_token.user_type = 1 and (user_token.updated_on between '2025-09-08 15:00:00' and '2025-09-08 16:59:00' or user_token.expiry_time > '2025-09-08 15:00:00' ) 
+where user_token.updated_on::date = '2025-09-08' and user_token.user_type = 1 and (user_token.updated_on > '2025-09-08 17:00:00' or user_token.expiry_time > '2025-09-08 17:00:00' ) 
+group by aurm.role_master_name, aurm.role_master_id 
+order by aurm.role_master_id asc;
+
+
+-----------------------
+select * from user_token 
+where user_token.user_type = 1 and user_token.updated_on::date = '2025-09-08' 
+and (user_token.updated_on between '2025-09-08 11:00:00' and '2025-09-08 12:59:00'
+	  or user_token.expiry_time > '2025-09-08 11:00:00') ;
+
+-------------------------
+SELECT 
+    aurm.role_master_name AS role_name,
+
+    COUNT(CASE 
+            WHEN (ut.updated_on BETWEEN '2025-09-08 11:00:00' AND '2025-09-08 12:59:00' 
+                  OR ut.expiry_time > '2025-09-08 11:00:00') 
+            THEN 1 END
+    ) AS time_at_11,
+
+    COUNT(CASE 
+            WHEN (ut.updated_on BETWEEN '2025-09-08 13:00:00' AND '2025-09-08 14:59:00' 
+                  OR ut.expiry_time > '2025-09-08 13:00:00') 
+            THEN 1 END
+    ) AS time_at_01,
+
+    COUNT(CASE 
+            WHEN (ut.updated_on BETWEEN '2025-09-08 15:00:00' AND '2025-09-08 16:59:00' 
+                  OR ut.expiry_time > '2025-09-08 15:00:00') 
+            THEN 1 END
+    ) AS time_at_03,
+
+    COUNT(CASE 
+            WHEN (ut.updated_on > '2025-09-08 17:00:00' 
+                  OR ut.expiry_time > '2025-09-08 17:00:00') 
+            THEN 1 END
+    ) AS time_as_on_05
+
+FROM user_token ut
+INNER JOIN admin_position_master apm 
+    ON ut.user_id = apm.position_id
+INNER JOIN admin_user_role_master aurm 
+    ON aurm.role_master_id = apm.role_master_id
+   AND aurm.role_master_id IN (1,2,3,4,5,6,7,8)
+WHERE ut.user_type = 1
+  AND ut.updated_on::date = '2025-09-08'
+GROUP BY aurm.role_master_name, aurm.role_master_id
+ORDER BY aurm.role_master_id ASC;
+
+
+------------------------------------
+
+SELECT 
+--    aurm.role_master_name AS role_name,
+	CASE 
+        WHEN aurm.role_master_id IN (1,2,3,9) THEN 'CMO'
+        WHEN aurm.role_master_id IN (4,5,6)   THEN 'HOD'
+        WHEN aurm.role_master_id = 7          THEN 'HOSO'
+        WHEN aurm.role_master_id = 8          THEN 'SO'
+    END AS role_group,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 00:00:00' AND '2025-09-08 00:59:59' OR ut.expiry_time > '2025-09-08 00:00:00') THEN 1 END) AS time_at_00,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 01:00:00' AND '2025-09-08 01:59:59' OR ut.expiry_time > '2025-09-08 01:00:00') THEN 1 END) AS time_at_01,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 02:00:00' AND '2025-09-08 02:59:59' OR ut.expiry_time > '2025-09-08 02:00:00') THEN 1 END) AS time_at_02,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 03:00:00' AND '2025-09-08 03:59:59' OR ut.expiry_time > '2025-09-08 03:00:00') THEN 1 END) AS time_at_03,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 04:00:00' AND '2025-09-08 04:59:59' OR ut.expiry_time > '2025-09-08 04:00:00') THEN 1 END) AS time_at_04,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 05:00:00' AND '2025-09-08 05:59:59' OR ut.expiry_time > '2025-09-08 05:00:00') THEN 1 END) AS time_at_05,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 06:00:00' AND '2025-09-08 06:59:59' OR ut.expiry_time > '2025-09-08 06:00:00') THEN 1 END) AS time_at_06,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 07:00:00' AND '2025-09-08 07:59:59' OR ut.expiry_time > '2025-09-08 07:00:00') THEN 1 END) AS time_at_07,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 08:00:00' AND '2025-09-08 08:59:59' OR ut.expiry_time > '2025-09-08 08:00:00') THEN 1 END) AS time_at_08,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 09:00:00' AND '2025-09-08 09:59:59' OR ut.expiry_time > '2025-09-08 09:00:00') THEN 1 END) AS time_at_09,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 10:00:00' AND '2025-09-08 10:59:59' OR ut.expiry_time > '2025-09-08 10:00:00') THEN 1 END) AS time_at_10,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 11:00:00' AND '2025-09-08 11:59:59' OR ut.expiry_time > '2025-09-08 11:00:00') THEN 1 END) AS time_at_11,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 12:00:00' AND '2025-09-08 12:59:59' OR ut.expiry_time > '2025-09-08 12:00:00') THEN 1 END) AS time_at_12,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 13:00:00' AND '2025-09-08 13:59:59' OR ut.expiry_time > '2025-09-08 13:00:00') THEN 1 END) AS time_at_13,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 14:00:00' AND '2025-09-08 14:59:59' OR ut.expiry_time > '2025-09-08 14:00:00') THEN 1 END) AS time_at_14,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 15:00:00' AND '2025-09-08 15:59:59' OR ut.expiry_time > '2025-09-08 15:00:00') THEN 1 END) AS time_at_15,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 16:00:00' AND '2025-09-08 16:59:59' OR ut.expiry_time > '2025-09-08 16:00:00') THEN 1 END) AS time_at_16,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 17:00:00' AND '2025-09-08 17:59:59' OR ut.expiry_time > '2025-09-08 17:00:00') THEN 1 END) AS time_at_17,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 18:00:00' AND '2025-09-08 18:59:59' OR ut.expiry_time > '2025-09-08 18:00:00') THEN 1 END) AS time_at_18,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 19:00:00' AND '2025-09-08 19:59:59' OR ut.expiry_time > '2025-09-08 19:00:00') THEN 1 END) AS time_at_19,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 20:00:00' AND '2025-09-08 20:59:59' OR ut.expiry_time > '2025-09-08 20:00:00') THEN 1 END) AS time_at_20,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 21:00:00' AND '2025-09-08 21:59:59' OR ut.expiry_time > '2025-09-08 21:00:00') THEN 1 END) AS time_at_21,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 22:00:00' AND '2025-09-08 22:59:59' OR ut.expiry_time > '2025-09-08 22:00:00') THEN 1 END) AS time_at_22,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-08 23:00:00' AND '2025-09-08 23:59:59' OR ut.expiry_time > '2025-09-08 23:00:00') THEN 1 END) AS time_at_23
+FROM user_token ut
+INNER JOIN admin_position_master apm 
+    ON ut.user_id = apm.position_id
+INNER JOIN admin_user_role_master aurm 
+    ON aurm.role_master_id = apm.role_master_id
+   AND aurm.role_master_id IN (1,2,3,4,5,6,7,8,9)
+WHERE ut.user_type = 1
+  AND ut.updated_on::date = '2025-09-08'
+--GROUP BY aurm.role_master_name, aurm.role_master_id
+GROUP BY role_group
+ORDER BY role_group ASC;
+
+
+
+
+----- PERFECT QUERY WITH TOTAL FOR DEPARTMENTAL ----
+WITH role_data AS (
+    SELECT 
+        CASE 
+            WHEN aurm.role_master_id IN (1,2,3,9) THEN 'CMO'
+            WHEN aurm.role_master_id IN (4,5,6)   THEN 'HOD'
+            WHEN aurm.role_master_id = 7          THEN 'HOSO'
+            WHEN aurm.role_master_id = 8          THEN 'SO'
+        END AS role_group,
+ 	COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 00:00:00' AND '2025-09-01 00:59:59' OR ut.expiry_time BETWEEN '2025-09-01 00:00:00' AND '2025-09-01 00:59:59') THEN 1 END) AS time_at_00,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 01:00:00' AND '2025-09-01 01:59:59' OR ut.expiry_time BETWEEN '2025-09-01 01:00:00' AND '2025-09-01 01:59:59') THEN 1 END) AS time_at_01,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 02:00:00' AND '2025-09-01 02:59:59' OR ut.expiry_time BETWEEN '2025-09-01 02:00:00' AND '2025-09-01 02:59:59') THEN 1 END) AS time_at_02,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 03:00:00' AND '2025-09-01 03:59:59' OR ut.expiry_time BETWEEN '2025-09-01 03:00:00' AND '2025-09-01 03:59:59') THEN 1 END) AS time_at_03,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 04:00:00' AND '2025-09-01 04:59:59' OR ut.expiry_time BETWEEN '2025-09-01 04:00:00' AND '2025-09-01 04:59:59') THEN 1 END) AS time_at_04,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 05:00:00' AND '2025-09-01 05:59:59' OR ut.expiry_time BETWEEN '2025-09-01 05:00:00' AND '2025-09-01 05:59:59') THEN 1 END) AS time_at_05,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 06:00:00' AND '2025-09-01 06:59:59' OR ut.expiry_time BETWEEN '2025-09-01 06:00:00' AND '2025-09-01 06:59:59') THEN 1 END) AS time_at_06,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 07:00:00' AND '2025-09-01 07:59:59' OR ut.expiry_time BETWEEN '2025-09-01 07:00:00' AND '2025-09-01 07:59:59') THEN 1 END) AS time_at_07,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 08:00:00' AND '2025-09-01 08:59:59' OR ut.expiry_time BETWEEN '2025-09-01 08:00:00' AND '2025-09-01 08:59:59') THEN 1 END) AS time_at_08,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 09:00:00' AND '2025-09-01 09:59:59' OR ut.expiry_time BETWEEN '2025-09-01 09:00:00' AND '2025-09-01 09:59:59') THEN 1 END) AS time_at_09,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 10:00:00' AND '2025-09-01 10:59:59' OR ut.expiry_time BETWEEN '2025-09-01 10:00:00' AND '2025-09-01 10:59:59') THEN 1 END) AS time_at_10,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 11:00:00' AND '2025-09-01 11:59:59' OR ut.expiry_time BETWEEN '2025-09-01 11:00:00' AND '2025-09-01 11:59:59') THEN 1 END) AS time_at_11,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 12:00:00' AND '2025-09-01 12:59:59' OR ut.expiry_time BETWEEN '2025-09-01 12:00:00' AND '2025-09-01 12:59:59') THEN 1 END) AS time_at_12,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 13:00:00' AND '2025-09-01 13:59:59' OR ut.expiry_time BETWEEN '2025-09-01 13:00:00' AND '2025-09-01 13:59:59') THEN 1 END) AS time_at_13,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 14:00:00' AND '2025-09-01 14:59:59' OR ut.expiry_time BETWEEN '2025-09-01 14:00:00' AND '2025-09-01 14:59:59') THEN 1 END) AS time_at_14,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 15:00:00' AND '2025-09-01 15:59:59' OR ut.expiry_time BETWEEN '2025-09-01 15:00:00' AND '2025-09-01 15:59:59') THEN 1 END) AS time_at_15,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 16:00:00' AND '2025-09-01 16:59:59' OR ut.expiry_time BETWEEN '2025-09-01 16:00:00' AND '2025-09-01 16:59:59') THEN 1 END) AS time_at_16,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 17:00:00' AND '2025-09-01 17:59:59' OR ut.expiry_time BETWEEN '2025-09-01 17:00:00' AND '2025-09-01 17:59:59') THEN 1 END) AS time_at_17,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 18:00:00' AND '2025-09-01 18:59:59' OR ut.expiry_time BETWEEN '2025-09-01 18:00:00' AND '2025-09-01 18:59:59') THEN 1 END) AS time_at_18,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 19:00:00' AND '2025-09-01 19:59:59' OR ut.expiry_time BETWEEN '2025-09-01 19:00:00' AND '2025-09-01 19:59:59') THEN 1 END) AS time_at_19,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 20:00:00' AND '2025-09-01 20:59:59' OR ut.expiry_time BETWEEN '2025-09-01 20:00:00' AND '2025-09-01 20:59:59') THEN 1 END) AS time_at_20,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 21:00:00' AND '2025-09-01 21:59:59' OR ut.expiry_time BETWEEN '2025-09-01 21:00:00' AND '2025-09-01 21:59:59') THEN 1 END) AS time_at_21,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 22:00:00' AND '2025-09-01 22:59:59' OR ut.expiry_time BETWEEN '2025-09-01 22:00:00' AND '2025-09-01 22:59:59') THEN 1 END) AS time_at_22,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 23:00:00' AND '2025-09-01 23:59:59' OR ut.expiry_time BETWEEN '2025-09-01 23:00:00' AND '2025-09-01 23:59:59') THEN 1 END) AS time_at_23
+    FROM user_token ut
+    INNER JOIN admin_position_master apm ON ut.user_id = apm.position_id
+    INNER JOIN admin_user_role_master aurm ON aurm.role_master_id = apm.role_master_id AND aurm.role_master_id IN (1,2,3,4,5,6,7,8,9)
+    WHERE ut.user_type = 1 AND ut.updated_on::date = '2025-09-01'
+    GROUP BY role_group
+)
+-- Add total row
+SELECT * FROM role_data
+UNION ALL
+SELECT 
+    'TOTAL',
+    SUM(time_at_00), SUM(time_at_01), SUM(time_at_02), SUM(time_at_03),
+    SUM(time_at_04), SUM(time_at_05), SUM(time_at_06), SUM(time_at_07),
+    SUM(time_at_08), SUM(time_at_09), SUM(time_at_10), SUM(time_at_11),
+    SUM(time_at_12), SUM(time_at_13), SUM(time_at_14), SUM(time_at_15),
+    SUM(time_at_16), SUM(time_at_17), SUM(time_at_18), SUM(time_at_19),
+    SUM(time_at_20), SUM(time_at_21), SUM(time_at_22), SUM(time_at_23)
+FROM role_data
+ORDER BY role_group;
+
+
+------ FOR CITIZEN -----
+SELECT 
+    'Citizen' AS role_group,
+ 	COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 00:00:00' AND '2025-09-01 01:00:00') THEN 1 END) AS time_at_00,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 01:00:00' AND '2025-09-01 02:00:00') THEN 1 END) AS time_at_01,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 02:00:00' AND '2025-09-01 03:00:00') THEN 1 END) AS time_at_02,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 03:00:00' AND '2025-09-01 04:00:00') THEN 1 END) AS time_at_03,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 04:00:00' AND '2025-09-01 05:00:00') THEN 1 END) AS time_at_04,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 05:00:00' AND '2025-09-01 06:00:00') THEN 1 END) AS time_at_05,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 06:00:00' AND '2025-09-01 07:00:00') THEN 1 END) AS time_at_06,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 07:00:00' AND '2025-09-01 08:00:00') THEN 1 END) AS time_at_07,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 08:00:00' AND '2025-09-01 09:00:00') THEN 1 END) AS time_at_08,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 09:00:00' AND '2025-09-01 10:00:00') THEN 1 END) AS time_at_09,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 10:00:00' AND '2025-09-01 11:00:00') THEN 1 END) AS time_at_10,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 11:00:00' AND '2025-09-01 12:00:00') THEN 1 END) AS time_at_11,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 12:00:00' AND '2025-09-01 13:00:00') THEN 1 END) AS time_at_12,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 13:00:00' AND '2025-09-01 14:00:00') THEN 1 END) AS time_at_13,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 14:00:00' AND '2025-09-01 15:00:00') THEN 1 END) AS time_at_14,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 15:00:00' AND '2025-09-01 16:00:00') THEN 1 END) AS time_at_15,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 16:00:00' AND '2025-09-01 17:00:00') THEN 1 END) AS time_at_16,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 17:00:00' AND '2025-09-01 18:00:00') THEN 1 END) AS time_at_17,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 18:00:00' AND '2025-09-01 19:00:00') THEN 1 END) AS time_at_18,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 19:00:00' AND '2025-09-01 20:00:00') THEN 1 END) AS time_at_19,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 20:00:00' AND '2025-09-01 21:00:00') THEN 1 END) AS time_at_20,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 21:00:00' AND '2025-09-01 22:00:00') THEN 1 END) AS time_at_21,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 22:00:00' AND '2025-09-01 23:00:00') THEN 1 END) AS time_at_22,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 23:00:00' AND '2025-09-01 00:00:00') THEN 1 END) AS time_at_23
+    FROM user_token ut
+    WHERE ut.user_type = 3 AND ut.updated_on::date = '2025-09-01'
+    GROUP BY role_group
+    
+    
+    
+    ------ For Citizen Number of People Login-----
+SELECT 
+    'Citizen' AS role_group,
+    '2025-09-08' as login_date,
+ 	COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 00:00:00' AND '2025-09-08 01:00:00') THEN 1 END) AS time_at_00,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 01:00:00' AND '2025-09-08 02:00:00') THEN 1 END) AS time_at_01,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 02:00:00' AND '2025-09-08 03:00:00') THEN 1 END) AS time_at_02,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 03:00:00' AND '2025-09-08 04:00:00') THEN 1 END) AS time_at_03,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 04:00:00' AND '2025-09-08 05:00:00') THEN 1 END) AS time_at_04,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 05:00:00' AND '2025-09-08 06:00:00') THEN 1 END) AS time_at_05,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 06:00:00' AND '2025-09-08 07:00:00') THEN 1 END) AS time_at_06,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 07:00:00' AND '2025-09-08 08:00:00') THEN 1 END) AS time_at_07,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 08:00:00' AND '2025-09-08 09:00:00') THEN 1 END) AS time_at_08,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 09:00:00' AND '2025-09-08 10:00:00') THEN 1 END) AS time_at_09,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 10:00:00' AND '2025-09-08 11:00:00') THEN 1 END) AS time_at_10,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 11:00:00' AND '2025-09-08 12:00:00') THEN 1 END) AS time_at_11,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 12:00:00' AND '2025-09-08 13:00:00') THEN 1 END) AS time_at_12,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 13:00:00' AND '2025-09-08 14:00:00') THEN 1 END) AS time_at_13,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 14:00:00' AND '2025-09-08 15:00:00') THEN 1 END) AS time_at_14,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 15:00:00' AND '2025-09-08 16:00:00') THEN 1 END) AS time_at_15,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 16:00:00' AND '2025-09-08 17:00:00') THEN 1 END) AS time_at_16,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 17:00:00' AND '2025-09-08 18:00:00') THEN 1 END) AS time_at_17,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 18:00:00' AND '2025-09-08 19:00:00') THEN 1 END) AS time_at_18,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 19:00:00' AND '2025-09-08 20:00:00') THEN 1 END) AS time_at_19,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 20:00:00' AND '2025-09-08 21:00:00') THEN 1 END) AS time_at_20,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 21:00:00' AND '2025-09-08 22:00:00') THEN 1 END) AS time_at_21,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 22:00:00' AND '2025-09-08 23:00:00') THEN 1 END) AS time_at_22,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 23:00:00' AND '2025-09-08 23:59:59') THEN 1 END) AS time_at_23
+    FROM citizen_login_activity cla 
+    WHERE cla.login_time::date = '2025-09-08'
+    GROUP BY role_group;
+    
+    select * from citizen_login_activity cla limit 1
+------------------------------------------
+
+-------- checking department-----------
+select * 
+	from user_token 
+	where user_token.user_type = 1 and user_token.updated_on::date = '2025-09-08' 
+and (user_token.updated_on BETWEEN '2025-09-08 23:00:00' AND '2025-09-08 23:59:59' OR user_token.expiry_time BETWEEN '2025-09-08 23:00:00' AND '2025-09-08 23:59:59') ;
+------------------------------------------------
+
+select * 
+	from user_token 
+	where user_token.user_type = 3 and user_token.updated_on::date = '2025-09-01' 
+and (user_token.updated_on BETWEEN '2025-09-01 00:00:00' AND '2025-09-01 01:00:00') ;
+
+------ checking CITIZEN -----
+select * 
+	from citizen_login_activity cla  
+	where cla.login_time::date = '2025-09-03'
+and cla.login_time BETWEEN '2025-09-03 02:00:00' AND '2025-09-03 03:00:00';
+
+---------
+select 
+	aurm.role_master_name as role_name,
+	count(1),
+	'2025-09-02 11:00:00' as login_upto
+from user_token 
+inner join admin_position_master apm on user_token.user_id  = apm.position_id
+inner join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id and aurm.role_master_id in (1,2,3,4,5,6,7,8)
+where user_token.user_type = 1 and user_token.updated_on::date = '2025-09-02' 
+and (user_token.updated_on between '2025-09-02 00:00:00' and '2025-09-02 00:59:00' or user_token.expiry_time between '2025-09-02 00:00:00' and '2025-09-02 00:59:00') 
+group by aurm.role_master_name, aurm.role_master_id
+order by aurm.role_master_id asc;
+---------------------------------
+
+
+-------------------------
+SELECT 
+    ut.token_id,
+    ut.user_id,
+    ut.updated_on,
+    ut.expiry_time,
+    aurm.role_master_id,
+    ut.user_type,
+    CASE 
+        WHEN aurm.role_master_id IN (1,2,3,9) THEN 'CMO'
+        WHEN aurm.role_master_id IN (4,5,6)   THEN 'HOD'
+        WHEN aurm.role_master_id = 7          THEN 'HOSO'
+        WHEN aurm.role_master_id = 8          THEN 'SO'
+    END AS role_group,
+    CASE 
+        WHEN ((ut.updated_on BETWEEN '2025-09-08 23:00:00' AND '2025-09-08 23:59:59') OR (ut.expiry_time BETWEEN '2025-09-08 23:00:00' AND '2025-09-08 23:59:59')) THEN 'COUNTED_IN_12AM'
+        ELSE 'NOT_INCLUDED'
+    END AS bucket_flag
+FROM user_token ut
+JOIN admin_position_master apm 
+    ON ut.user_id = apm.position_id
+JOIN admin_user_role_master aurm 
+    ON aurm.role_master_id = apm.role_master_id
+WHERE ut.user_type = 1
+  AND (ut.updated_on BETWEEN '2025-09-08 23:00:00' AND '2025-09-08 23:59:59' OR ut.expiry_time BETWEEN '2025-09-08 23:00:00' AND '2025-09-08 23:59:59')
+ORDER BY ut.updated_on;
+
+
+
+
+select * from admin_user au where au.admin_user_id = 8485;
+select * from admin_user_details aud where aud.admin_user_id = 8485;
+select * from admin_user_position_mapping aupm where aupm.admin_user_id = 8485;
+select * from admin_position_master apm where apm.position_id = 8485;
