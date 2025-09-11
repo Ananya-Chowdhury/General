@@ -2,13 +2,13 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-09-05' 
+WHERE batch_date::date = '2025-09-11' 
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-08-07'
+WHERE batch_date::date = '2025-09-11'
 ORDER by data_count desc; 
 
 
@@ -232,7 +232,7 @@ select * from cmo_ssm_push_details cspd order by cmo_ssm_push_details_id desc li
 ---------------- Grievance Query ---------------
 select * from public.grievance_master gm where grievance_no in ('SSM4837610');
 select * from public.grievance_master gm where gm.grievance_id = 5235053;
-select * from public.grievance_lifecycle gl where gl.grievance_id = 5631176;
+select * from public.grievance_lifecycle gl where gl.grievance_id = 3049654 order by gl.assigned_on desc;
 select * from public.grievance_master gm where gm.grievance_no = 'CMO18754331';
 select * from public.admin_position_master apm where apm.position_id = 10140;               -- assigned_to_postion = position_id      admin_postion_master
 select * from public.admin_user_position_mapping aupm where aupm.position_id = 11360;       --12745 (6) --10140 --12708 (7) --
@@ -250,7 +250,8 @@ select * from cmo_grievance_category_master cgcm ;
 ----------- Admin Position Fatch Query ----------
 select * from cmo_office_master com; --35 --53 --68
 select * from cmo_sub_office_master csom where csom.office_id = 53;
-select * from admin_user au ;
+select * from admin_user au where au.u_phone = '9147889068';
+select * from admin_user_details aud where aud.admin_user_id in (562, 14172);
 select * from admin_position_master apm where apm.sub_office_id = 3101;
 select * from admin_position_master apm where apm.position_id = 398;
 select * from admin_position_master apm ;
@@ -304,7 +305,6 @@ select * from admin_user au where au.admin_user_id = 432;
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-46
 ------- Grievance Category Mapping Check ----------
 select * from cmo_grievance_category_master cgcm ;
 select * from cmo_griev_cat_office_mapping cgcom ;
@@ -421,7 +421,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9635821533'   --9147888180
+WHERE uo.u_phone = '9874263537'   --9147888180
 ORDER BY created_on desc limit 5;
 
 SELECT * 
@@ -460,8 +460,9 @@ select * from public.admin_user au where au.u_phone = '9999999999'; --8101859077
 select * from public.admin_user_details aud where aud.official_phone = '9999999999'; --9903821521
 select * from public.cmo_parameter_master cpm ;
 select * from public.grievance_master gm where gm.pri_cont_no = '9163479418';
-select * from public.grievance_master gm where gm.grievance_id = 5516302;
+select * from public.grievance_master gm where gm.grievance_id = 2512493;
 select * from public.grievance_master gm2 where gm2.grievance_no = 'SSM4767959';
+select * from public.grievance_lifecycle gl where gl.grievance_id = 2512493 order by gl.assigned_on  desc;
 select * from public.cmo_closure_reason_master ccrm;
 select * from cmo_grievance_category_master cgcm ;
 select * from user_token ut where ut.c_m_no = '9635821533';
@@ -1708,6 +1709,41 @@ where cbsuca.grievance_id is null and gim.grievance_no is null;
 select * from griev_ids_pnrd_p3;
 select * from cmo_bulk_status_update_closure_audit where grievance_id = 844618;
 
+
+--==================================================================================================
+--======================== CHECKING FOR BULK STATUS UPDATE INFORMATION =============================
+--==================================================================================================
+
+select * from griev_ids_mas where grievance_id in () ;
+select * from griev_ids_mast where grievance_id ;
+select * from griev_ids_pnrd_e_p2_road where grievance_id = 2742802;
+select * from griev_ids_pnrd_nte_p2 where grievance_id = 2742802;   --->>
+select * from griev_ids_pnrd_nte_p2_road where grievance_id = 2742802;
+select * from griev_ids_pnrd_nte_p3 where grievance_id = 2742802;
+select * from griev_ids_pnrd_p2 where grievance_id = 2742802; ---
+select * from griev_ids_pnrd_p3 where grievance_id = 2742802;
+select * from grievance where grievance_id = 2742802;
+
+select * from cmo_bulk_status_update_closure_audit where grievance_id = 2742802;
+select * from cmo_bulk_status_update_closure_audit_eligible_pnrd where grievance_id = 2742802; -- 
+select * from cmo_bulk_status_update_closure_audit_eligible_pnrd_road where grievance_id = 2742802;
+select * from cmo_bulk_status_update_closure_audit_noteligible where grievance_id = 2742802;
+select * from cmo_bulk_status_update_closure_audit_noteligible_pnrd where grievance_id in (3049654,3801718,881710,1010432,3505005,585099,2425857,2506057,3407242,143970,3433203,1048360,5134168,9752,5153147,3021150,5133278,74022,2689904,3652260,5236325,3036451,3639705,1507275,1178639,5054651,691150,5201231,2821492,5320163,5280164,5354765,3542422,5400495,5026871,5359648,5186747,2941959,3589392,487447,63386,876122,1249520,297314,5308719,1739355,4853690,119187,5323801,5281979,1627947,524359,1653644,5348065,5311187,5361187,2918978,4938725,1172681,5263190,4910322,547546,616341,5466838,3231574,643952,2607560,471971,3528621,3533838,1049008,1236301,3171667,3531930,2937286,2754958,1232990,2332976,1688338,2024692,2844915,1162557,358160,3019287,3451648,1977756,3673372,3059260,380043,3292229,3288694,1583541,4167174,2860971,2973418,1823422,2960175,3363979,1852230,1628604,1243171,255055,2883336,295082,3594903,981674,2879173,2720807,1920567,3593082,1130992,3287448,2647110,1959171,2797546,3049868,2681122,927045,2925412,2465297,3375542,3119802,3286565,352865,4776449,4445223,1216559,173818,1028203,2852755,912428,2651390,3131651,4637275,3125566,3383880,438455,2655722,5419014,1236947,2864652,2879689,3260137,2103,1907983,2199680,374330,2692908,1717266,5152620,5122453,5426110,453489,1380801,2263815,95341,5323803,5371240,5418275,992009,5373109,5062270,96965,1711916,5369525,2426620,998693,5285927,5266180,5190823,4797367,922206,3170805,3900505,5334171,5098029,4747762,5395498,3073060,5249171,1273904,3519282,4926313,5418255,1786397,5256096,5359422,5327549,3712310,821015,1919134,5381991,5286687,4810870,387746,5372745,201243,5355463,5271252,5222342,5238273,5172303,5286910,4418915,5257451,5275494,5178612,5189636,5364836,5252859,3913795,3794837,5173225,5329966,3917004,1121402,5299611,2084545,5195825,5381551,4005744,5280271,214682,138792,5186665,5339351,159457,5312958,3543179,163005,2644729,550834,523771,2158310,3011063,342720,1702812,4657966,3632354,518397,902291,3624511,5345757,2962980,5285817,4803618,4804811,3660028,2105762,376418,1580405,761107,5371348,4960136,5170635,5240952,2108600,1394511,5323839,3147054,5238850,3060741,632710,3821068,3139187,1880252,5065932,1066761,1805274,5231111,5243726,5267993,5340682,5455221,2648349,1877377,5503688,5263198,147954,5279490,3710098,138065,3220181,5157827,3710100,3579871,1642886,5285533,2565422,814216,5504927,4999610,5369391,147955,822506,3160452,1295143,3495337,1568623,3667611,2288301,1895728,1895711,5110502,822505,2452986,2209197,3968790,5356456,2919250,303602,804092,3845841,5417275,3798685,3287953,3670560,1957135,1957136,5330401,1010930,5348511,1235809,3774362,5318,2350760,5433387,4982878,10604,2913574,2009282,3709373,2836961,3107574,147211,11697,1767444,3427342,2761514,3527573,2884336,2891665,5425970,5426202,1140328,2279718,5390431,1525149,3686329,2866496,941432,2735590,1702022,2866495,2313793,389182,2374678,5196664,864171,4461819,3292291,2954933,5417155); --->>>
+select * from cmo_bulk_status_update_closure_audit_nte_pnrd_road where grievance_id ;
+
+select * from grievance where grievance_id in (2742802,3707047,1616009,3689009,3504635,2028069,2594754,5381132,3369488,956738,1374928,3488740,2655677,2225773,2866599,3958373,5470836,5221235,3623293,3135981,968514,3653954,3435200,3950379,978221,513732,1127487,2610105,3151591,1381393,1089823,129877,1910659,1068518,1973847,1628911,964098,3532458,3372836,1906581,351415,2864452,3331832,174249,3546366,3263753,2494666,2068902,3546940,1834274,857579,5284854,1663441,221107,1987602,2233963,1929433,1841744,1295514,1231137,216535,3236907,1422175,2062247,1375101,2203927,2124651,2340137,813331,526495,1452759,1958255,1109680,4085847,1316388,1290392,2165804,224620,5221236,3158929,2168098,5481251,1928799,743244,3238978,855574,2859896,1572775,666076,1398529,2629267,3588993,2904393,2852778,2354114,746907,3141709,1141144,3200247,384533,170859,3131230,1939521,5179875,2492275,401477,785330,1253958,3388082,3140470,2023700,3651937,2043545,3286978,1842241,1983412,1685013,5353579,5515258,2014324,1220685,2045086,5238502,3656155,2461343,3291041,1986477,3385556,1921040,3953432,2673315,3243815,3164242,2992927,858581,858580,2729816,1839701,1920476,1357217,5131829,5323129,5034869,5031235,535317,5410179,1684781,3278751,516256,3249198,514391,1920397,3681390,4883044,2010399,2615591,3120608,3103553,1593861,2450294,3653938,3162841,1384286,3468024,2769086,3642876,3694445,1401212,2755917,2210631,547754,543871,585702,2677563,2171218,1002243,2640142,2170463,3113614,3368256,3113524,2825603,3520317,1359444,1798383,1565628,2604204,3192536,265690,2092964,2062695,3126140,3654248,1932569,1578285,1657395,1960416,3539165,1973994,1476736,4670218,789814,3694013,2480661,2449618,3207603,3175360,3053254,3617949,3162681,3154200,3256755,1107248,315654,4204602,1434736,5539779,849168,3712727,2236326,5203121,4496444,1274050,5396961,5269991);
+
+
+
+select * from grievance_lifecycle gl where gl.grievance_id = 2834396 order by gl.assigned_on desc;
+select * from grievance_master gm where gm.grievance_id = 3031015;
+
+---===================================================================================================
+--====================================================================================================
+--====================================================================================================
+
+
+
 --update griev_ids_pnrd_p3
 --set grievance_id = (SELECT gm.grievance_id FROM grievance_master gm INNER JOIN griev_ids_pnrd_p3 gim ON gm.grievance_no = gim.grievance_no)
 --where grievance_id is null;
@@ -2399,178 +2435,6 @@ select
 
 
 -----------------------------------------------------------
-
-
--- public.forwarded_latest_5_bh_mat_2 source
-
--- public.forwarded_latest_5_bh_mat source
-
---CREATE MATERIALIZED VIEW public.atr_latest_13_bh_mat_2
---TABLESPACE pg_default
---AS WITH latest_5 AS (
---         SELECT a.grievance_id,
---            a.assigned_on
---           FROM ( SELECT row_number() OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on DESC) AS rnn,
---                    gl.grievance_id,
---                    gl.assigned_on,
---                    gl.grievance_status
---                   FROM grievance_lifecycle gl
---                  WHERE gl.grievance_status = ANY (ARRAY[3, 5])) a
---          WHERE a.rnn = 1 AND a.grievance_status = 5
---        ), latest_13 AS (
---         SELECT a.rnn,
---            a.lifecycle_id,
---            a.comment,
---            a.grievance_status,
---            a.assigned_on,
---            a.assigned_by_id,
---            a.assign_comment,
---            a.assigned_to_id,
---            a.assign_reply,
---            a.accepted_on,
---            a.atr_type,
---            a.atr_proposed_date,
---            a.official_code,
---            a.action_taken_note,
---            a.atn_id,
---            a.atn_reason_master_id,
---            a.action_proposed,
---            a.contact_date,
---            a.tentative_date,
---            a.prev_recv_date,
---            a.prev_atr_date,
---            a.closure_reason_id,
---            a.atr_submit_on,
---            a.created_by,
---            a.created_on,
---            a.grievance_id,
---            a.assigned_by_position,
---            a.assigned_to_position,
---            a.urgency_type,
---            a.addl_doc_id,
---            a.current_atr_date,
---            a.atr_doc_id,
---            a.assigned_by_office_id,
---            a.assigned_to_office_id,
---            a.assigned_by_office_cat,
---            a.assigned_to_office_cat,
---            a.migration_id,
---            a.migration_id_ac_tkn
---           FROM ( SELECT row_number() OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on DESC) AS rnn,
---                    gl.lifecycle_id,
---                    gl.comment,
---                    gl.grievance_status,
---                    gl.assigned_on,
---                    gl.assigned_by_id,
---                    gl.assign_comment,
---                    gl.assigned_to_id,
---                    gl.assign_reply,
---                    gl.accepted_on,
---                    gl.atr_type,
---                    gl.atr_proposed_date,
---                    gl.official_code,
---                    gl.action_taken_note,
---                    gl.atn_id,
---                    gl.atn_reason_master_id,
---                    gl.action_proposed,
---                    gl.contact_date,
---                    gl.tentative_date,
---                    gl.prev_recv_date,
---                    gl.prev_atr_date,
---                    gl.closure_reason_id,
---                    gl.atr_submit_on,
---                    gl.created_by,
---                    gl.created_on,
---                    gl.grievance_id,
---                    gl.assigned_by_position,
---                    gl.assigned_to_position,
---                    gl.urgency_type,
---                    gl.addl_doc_id,
---                    gl.current_atr_date,
---                    gl.atr_doc_id,
---                    gl.assigned_by_office_id,
---                    gl.assigned_to_office_id,
---                    gl.assigned_by_office_cat,
---                    gl.assigned_to_office_cat,
---                    gl.migration_id,
---                    gl.migration_id_ac_tkn
---                   FROM grievance_lifecycle gl
---                  WHERE gl.grievance_status = 13 OR gl.grievance_status = 6 AND gl.assigned_by_office_cat = 2) a
---             JOIN latest_5 ON latest_5.grievance_id = a.grievance_id
---          WHERE a.rnn = 1 AND a.grievance_status = 13 AND latest_5.assigned_on < a.assigned_on
---        )
--- SELECT cmo_police_station_master.sub_district_id,
---    grievance_master.district_id,
---    grievance_master.block_id,
---    grievance_master.municipality_id,
---    grievance_master.gp_id,
---    grievance_master.ward_id,
---    grievance_master.police_station_id,
---    grievance_master.assembly_const_id,
---    grievance_master.postoffice_id,
---    grievance_master.grievance_category,
---    grievance_master.sub_division_id,
---    grievance_master.status AS current_status,
---    grievance_master.grievance_source,
---    grievance_master.closure_reason_id AS grievance_master_closure_reason_id,
---    grievance_master.grievance_generate_date,
---    grievance_master.applicant_gender,
---    grievance_master.received_at,
---    grievance_master.receipt_mode,
---    grievance_master.applicant_caste,
---    grievance_master.applicant_reigion,
---    grievance_master.applicant_age,
---    grievance_master.atr_submit_by_lastest_office_id,
---    latest_13.rnn,
---    latest_13.lifecycle_id,
---    latest_13.comment,
---    latest_13.grievance_status,
---    latest_13.assigned_on,
---    latest_13.assigned_by_id,
---    latest_13.assign_comment,
---    latest_13.assigned_to_id,
---    latest_13.assign_reply,
---    latest_13.accepted_on,
---    latest_13.atr_type,
---    latest_13.atr_proposed_date,
---    latest_13.official_code,
---    latest_13.action_taken_note,
---    latest_13.atn_id,
---    latest_13.atn_reason_master_id,
---    latest_13.action_proposed,
---    latest_13.contact_date,
---    latest_13.tentative_date,
---    latest_13.prev_recv_date,
---    latest_13.prev_atr_date,
---    latest_13.closure_reason_id,
---    latest_13.atr_submit_on,
---    latest_13.created_by,
---    latest_13.created_on,
---    latest_13.grievance_id,
---    latest_13.assigned_by_position,
---    latest_13.assigned_to_position,
---    latest_13.urgency_type,
---    latest_13.addl_doc_id,
---    latest_13.current_atr_date,
---    latest_13.atr_doc_id,
---    latest_13.assigned_by_office_id,
---    latest_13.assigned_to_office_id,
---    latest_13.assigned_by_office_cat,
---    latest_13.assigned_to_office_cat,
---    latest_13.migration_id,
---    latest_13.migration_id_ac_tkn
---   FROM latest_13
---     JOIN grievance_master ON latest_13.grievance_id = grievance_master.grievance_id
---     LEFT JOIN cmo_police_station_master ON cmo_police_station_master.ps_id = grievance_master.police_station_id
---WITH DATA;
-
-
---DROP MATERIALIZED VIEW IF EXISTS public.atr_latest_13_bh_mat CASCADE;
---DROP MATERIALIZED VIEW IF EXISTS public.atr_latest_13_bh_mat_2 CASCADE;
-
-
-
-
 
 
 -----------------------------------------------------------------
@@ -3373,34 +3237,34 @@ WITH role_data AS (
             WHEN aurm.role_master_id = 7          THEN 'HOSO'
             WHEN aurm.role_master_id = 8          THEN 'SO'
         END AS role_group,
- 	COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 00:00:00' AND '2025-09-01 00:59:59' OR ut.expiry_time BETWEEN '2025-09-01 00:00:00' AND '2025-09-01 00:59:59') THEN 1 END) AS time_at_00,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 01:00:00' AND '2025-09-01 01:59:59' OR ut.expiry_time BETWEEN '2025-09-01 01:00:00' AND '2025-09-01 01:59:59') THEN 1 END) AS time_at_01,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 02:00:00' AND '2025-09-01 02:59:59' OR ut.expiry_time BETWEEN '2025-09-01 02:00:00' AND '2025-09-01 02:59:59') THEN 1 END) AS time_at_02,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 03:00:00' AND '2025-09-01 03:59:59' OR ut.expiry_time BETWEEN '2025-09-01 03:00:00' AND '2025-09-01 03:59:59') THEN 1 END) AS time_at_03,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 04:00:00' AND '2025-09-01 04:59:59' OR ut.expiry_time BETWEEN '2025-09-01 04:00:00' AND '2025-09-01 04:59:59') THEN 1 END) AS time_at_04,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 05:00:00' AND '2025-09-01 05:59:59' OR ut.expiry_time BETWEEN '2025-09-01 05:00:00' AND '2025-09-01 05:59:59') THEN 1 END) AS time_at_05,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 06:00:00' AND '2025-09-01 06:59:59' OR ut.expiry_time BETWEEN '2025-09-01 06:00:00' AND '2025-09-01 06:59:59') THEN 1 END) AS time_at_06,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 07:00:00' AND '2025-09-01 07:59:59' OR ut.expiry_time BETWEEN '2025-09-01 07:00:00' AND '2025-09-01 07:59:59') THEN 1 END) AS time_at_07,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 08:00:00' AND '2025-09-01 08:59:59' OR ut.expiry_time BETWEEN '2025-09-01 08:00:00' AND '2025-09-01 08:59:59') THEN 1 END) AS time_at_08,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 09:00:00' AND '2025-09-01 09:59:59' OR ut.expiry_time BETWEEN '2025-09-01 09:00:00' AND '2025-09-01 09:59:59') THEN 1 END) AS time_at_09,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 10:00:00' AND '2025-09-01 10:59:59' OR ut.expiry_time BETWEEN '2025-09-01 10:00:00' AND '2025-09-01 10:59:59') THEN 1 END) AS time_at_10,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 11:00:00' AND '2025-09-01 11:59:59' OR ut.expiry_time BETWEEN '2025-09-01 11:00:00' AND '2025-09-01 11:59:59') THEN 1 END) AS time_at_11,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 12:00:00' AND '2025-09-01 12:59:59' OR ut.expiry_time BETWEEN '2025-09-01 12:00:00' AND '2025-09-01 12:59:59') THEN 1 END) AS time_at_12,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 13:00:00' AND '2025-09-01 13:59:59' OR ut.expiry_time BETWEEN '2025-09-01 13:00:00' AND '2025-09-01 13:59:59') THEN 1 END) AS time_at_13,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 14:00:00' AND '2025-09-01 14:59:59' OR ut.expiry_time BETWEEN '2025-09-01 14:00:00' AND '2025-09-01 14:59:59') THEN 1 END) AS time_at_14,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 15:00:00' AND '2025-09-01 15:59:59' OR ut.expiry_time BETWEEN '2025-09-01 15:00:00' AND '2025-09-01 15:59:59') THEN 1 END) AS time_at_15,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 16:00:00' AND '2025-09-01 16:59:59' OR ut.expiry_time BETWEEN '2025-09-01 16:00:00' AND '2025-09-01 16:59:59') THEN 1 END) AS time_at_16,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 17:00:00' AND '2025-09-01 17:59:59' OR ut.expiry_time BETWEEN '2025-09-01 17:00:00' AND '2025-09-01 17:59:59') THEN 1 END) AS time_at_17,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 18:00:00' AND '2025-09-01 18:59:59' OR ut.expiry_time BETWEEN '2025-09-01 18:00:00' AND '2025-09-01 18:59:59') THEN 1 END) AS time_at_18,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 19:00:00' AND '2025-09-01 19:59:59' OR ut.expiry_time BETWEEN '2025-09-01 19:00:00' AND '2025-09-01 19:59:59') THEN 1 END) AS time_at_19,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 20:00:00' AND '2025-09-01 20:59:59' OR ut.expiry_time BETWEEN '2025-09-01 20:00:00' AND '2025-09-01 20:59:59') THEN 1 END) AS time_at_20,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 21:00:00' AND '2025-09-01 21:59:59' OR ut.expiry_time BETWEEN '2025-09-01 21:00:00' AND '2025-09-01 21:59:59') THEN 1 END) AS time_at_21,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 22:00:00' AND '2025-09-01 22:59:59' OR ut.expiry_time BETWEEN '2025-09-01 22:00:00' AND '2025-09-01 22:59:59') THEN 1 END) AS time_at_22,
-    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-01 23:00:00' AND '2025-09-01 23:59:59' OR ut.expiry_time BETWEEN '2025-09-01 23:00:00' AND '2025-09-01 23:59:59') THEN 1 END) AS time_at_23
+ 	COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 00:00:00' AND '2025-09-09 00:59:59' OR ut.expiry_time BETWEEN '2025-09-09 00:00:00' AND '2025-09-09 00:59:59') THEN 1 END) AS time_at_00,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 01:00:00' AND '2025-09-09 01:59:59' OR ut.expiry_time BETWEEN '2025-09-09 01:00:00' AND '2025-09-09 01:59:59') THEN 1 END) AS time_at_01,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 02:00:00' AND '2025-09-09 02:59:59' OR ut.expiry_time BETWEEN '2025-09-09 02:00:00' AND '2025-09-09 02:59:59') THEN 1 END) AS time_at_02,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 03:00:00' AND '2025-09-09 03:59:59' OR ut.expiry_time BETWEEN '2025-09-09 03:00:00' AND '2025-09-09 03:59:59') THEN 1 END) AS time_at_03,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 04:00:00' AND '2025-09-09 04:59:59' OR ut.expiry_time BETWEEN '2025-09-09 04:00:00' AND '2025-09-09 04:59:59') THEN 1 END) AS time_at_04,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 05:00:00' AND '2025-09-09 05:59:59' OR ut.expiry_time BETWEEN '2025-09-09 05:00:00' AND '2025-09-09 05:59:59') THEN 1 END) AS time_at_05,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 06:00:00' AND '2025-09-09 06:59:59' OR ut.expiry_time BETWEEN '2025-09-09 06:00:00' AND '2025-09-09 06:59:59') THEN 1 END) AS time_at_06,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 07:00:00' AND '2025-09-09 07:59:59' OR ut.expiry_time BETWEEN '2025-09-09 07:00:00' AND '2025-09-09 07:59:59') THEN 1 END) AS time_at_07,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 08:00:00' AND '2025-09-09 08:59:59' OR ut.expiry_time BETWEEN '2025-09-09 08:00:00' AND '2025-09-09 08:59:59') THEN 1 END) AS time_at_08,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 09:00:00' AND '2025-09-09 09:59:59' OR ut.expiry_time BETWEEN '2025-09-09 09:00:00' AND '2025-09-09 09:59:59') THEN 1 END) AS time_at_09,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 10:00:00' AND '2025-09-09 10:59:59' OR ut.expiry_time BETWEEN '2025-09-09 10:00:00' AND '2025-09-09 10:59:59') THEN 1 END) AS time_at_10,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 11:00:00' AND '2025-09-09 11:59:59' OR ut.expiry_time BETWEEN '2025-09-09 11:00:00' AND '2025-09-09 11:59:59') THEN 1 END) AS time_at_11,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 12:00:00' AND '2025-09-09 12:59:59' OR ut.expiry_time BETWEEN '2025-09-09 12:00:00' AND '2025-09-09 12:59:59') THEN 1 END) AS time_at_12,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 13:00:00' AND '2025-09-09 13:59:59' OR ut.expiry_time BETWEEN '2025-09-09 13:00:00' AND '2025-09-09 13:59:59') THEN 1 END) AS time_at_13,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 14:00:00' AND '2025-09-09 14:59:59' OR ut.expiry_time BETWEEN '2025-09-09 14:00:00' AND '2025-09-09 14:59:59') THEN 1 END) AS time_at_14,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 15:00:00' AND '2025-09-09 15:59:59' OR ut.expiry_time BETWEEN '2025-09-09 15:00:00' AND '2025-09-09 15:59:59') THEN 1 END) AS time_at_15,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 16:00:00' AND '2025-09-09 16:59:59' OR ut.expiry_time BETWEEN '2025-09-09 16:00:00' AND '2025-09-09 16:59:59') THEN 1 END) AS time_at_16,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 17:00:00' AND '2025-09-09 17:59:59' OR ut.expiry_time BETWEEN '2025-09-09 17:00:00' AND '2025-09-09 17:59:59') THEN 1 END) AS time_at_17,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 18:00:00' AND '2025-09-09 18:59:59' OR ut.expiry_time BETWEEN '2025-09-09 18:00:00' AND '2025-09-09 18:59:59') THEN 1 END) AS time_at_18,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 19:00:00' AND '2025-09-09 19:59:59' OR ut.expiry_time BETWEEN '2025-09-09 19:00:00' AND '2025-09-09 19:59:59') THEN 1 END) AS time_at_19,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 20:00:00' AND '2025-09-09 20:59:59' OR ut.expiry_time BETWEEN '2025-09-09 20:00:00' AND '2025-09-09 20:59:59') THEN 1 END) AS time_at_20,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 21:00:00' AND '2025-09-09 21:59:59' OR ut.expiry_time BETWEEN '2025-09-09 21:00:00' AND '2025-09-09 21:59:59') THEN 1 END) AS time_at_21,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 22:00:00' AND '2025-09-09 22:59:59' OR ut.expiry_time BETWEEN '2025-09-09 22:00:00' AND '2025-09-09 22:59:59') THEN 1 END) AS time_at_22,
+    COUNT(CASE WHEN (ut.updated_on BETWEEN '2025-09-09 23:00:00' AND '2025-09-09 23:59:59' OR ut.expiry_time BETWEEN '2025-09-09 23:00:00' AND '2025-09-09 23:59:59') THEN 1 END) AS time_at_23
     FROM user_token ut
     INNER JOIN admin_position_master apm ON ut.user_id = apm.position_id
     INNER JOIN admin_user_role_master aurm ON aurm.role_master_id = apm.role_master_id AND aurm.role_master_id IN (1,2,3,4,5,6,7,8,9)
-    WHERE ut.user_type = 1 AND ut.updated_on::date = '2025-09-01'
+    WHERE ut.user_type = 1 AND ut.updated_on::date = '2025-09-09'
     GROUP BY role_group
 )
 -- Add total row
@@ -3417,6 +3281,72 @@ SELECT
 FROM role_data
 ORDER BY role_group;
 
+
+
+----- PERFECT QUERY WITH TOTAL FOR DEPARTMENTAL ----
+WITH role_data AS (
+    SELECT 
+        CASE 
+            WHEN aurm.role_master_id IN (1,2,3,9) THEN 'CMO'
+            WHEN aurm.role_master_id IN (4,5,6)   THEN 'HOD'
+            WHEN aurm.role_master_id = 7          THEN 'HOSO'
+            WHEN aurm.role_master_id = 8          THEN 'SO'
+        END AS role_group,
+ 	COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 00:00:00' AND '2025-09-08 00:59:59' or aula.logout_time between '2025-09-08 00:00:00' AND '2025-09-08 00:59:59') THEN 1 END) AS time_at_00,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 01:00:00' AND '2025-09-08 01:59:59' or aula.logout_time between '2025-09-08 01:00:00' AND '2025-09-08 01:59:59') THEN 1 END) AS time_at_01,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 02:00:00' AND '2025-09-08 02:59:59' or aula.logout_time between '2025-09-08 02:00:00' AND '2025-09-08 02:59:59') THEN 1 END) AS time_at_02,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 03:00:00' AND '2025-09-08 03:59:59' or aula.logout_time between '2025-09-08 03:00:00' AND '2025-09-08 03:59:59') THEN 1 END) AS time_at_03,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 04:00:00' AND '2025-09-08 04:59:59' or aula.logout_time between '2025-09-08 04:00:00' AND '2025-09-08 04:59:59') THEN 1 END) AS time_at_04,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 05:00:00' AND '2025-09-08 05:59:59' or aula.logout_time between '2025-09-08 05:00:00' AND '2025-09-08 05:59:59') THEN 1 END) AS time_at_05,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 06:00:00' AND '2025-09-08 06:59:59' or aula.logout_time between '2025-09-08 06:00:00' AND '2025-09-08 06:59:59') THEN 1 END) AS time_at_06,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 07:00:00' AND '2025-09-08 07:59:59' or aula.logout_time between '2025-09-08 07:00:00' AND '2025-09-08 07:59:59') THEN 1 END) AS time_at_07,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 08:00:00' AND '2025-09-08 08:59:59' or aula.logout_time between '2025-09-08 08:00:00' AND '2025-09-08 08:59:59') THEN 1 END) AS time_at_08,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 09:00:00' AND '2025-09-08 09:59:59' or aula.logout_time between '2025-09-08 09:00:00' AND '2025-09-08 09:59:59') THEN 1 END) AS time_at_09,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 10:00:00' AND '2025-09-08 10:59:59' or aula.logout_time between '2025-09-08 10:00:00' AND '2025-09-08 10:59:59') THEN 1 END) AS time_at_10,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 11:00:00' AND '2025-09-08 11:59:59' or aula.logout_time between '2025-09-08 11:00:00' AND '2025-09-08 11:59:59') THEN 1 END) AS time_at_11,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 12:00:00' AND '2025-09-08 12:59:59' or aula.logout_time between '2025-09-08 12:00:00' AND '2025-09-08 12:59:59') THEN 1 END) AS time_at_12,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 13:00:00' AND '2025-09-08 13:59:59' or aula.logout_time between '2025-09-08 13:00:00' AND '2025-09-08 13:59:59') THEN 1 END) AS time_at_13,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 14:00:00' AND '2025-09-08 14:59:59' or aula.logout_time between '2025-09-08 14:00:00' AND '2025-09-08 14:59:59') THEN 1 END) AS time_at_14,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 15:00:00' AND '2025-09-08 15:59:59' or aula.logout_time between '2025-09-08 15:00:00' AND '2025-09-08 15:59:59') THEN 1 END) AS time_at_15,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 16:00:00' AND '2025-09-08 16:59:59' or aula.logout_time between '2025-09-08 16:00:00' AND '2025-09-08 16:59:59') THEN 1 END) AS time_at_16,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 17:00:00' AND '2025-09-08 17:59:59' or aula.logout_time between '2025-09-08 17:00:00' AND '2025-09-08 17:59:59') THEN 1 END) AS time_at_17,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 18:00:00' AND '2025-09-08 18:59:59' or aula.logout_time between '2025-09-08 18:00:00' AND '2025-09-08 18:59:59') THEN 1 END) AS time_at_18,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 19:00:00' AND '2025-09-08 19:59:59' or aula.logout_time between '2025-09-08 19:00:00' AND '2025-09-08 19:59:59') THEN 1 END) AS time_at_19,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 20:00:00' AND '2025-09-08 20:59:59' or aula.logout_time between '2025-09-08 20:00:00' AND '2025-09-08 20:59:59') THEN 1 END) AS time_at_20,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 21:00:00' AND '2025-09-08 21:59:59' or aula.logout_time between '2025-09-08 21:00:00' AND '2025-09-08 21:59:59') THEN 1 END) AS time_at_21,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 22:00:00' AND '2025-09-08 22:59:59' or aula.logout_time between '2025-09-08 22:00:00' AND '2025-09-08 22:59:59') THEN 1 END) AS time_at_22,
+    COUNT(CASE WHEN (aula.login_time BETWEEN '2025-09-08 23:00:00' AND '2025-09-08 23:59:59' or aula.logout_time between '2025-09-08 23:00:00' AND '2025-09-08 23:59:59') THEN 1 END) AS time_at_23
+    FROM admin_user_login_activity aula 
+    INNER JOIN admin_position_master apm ON aula.admin_user_id = apm.position_id
+    INNER JOIN admin_user_role_master aurm ON aurm.role_master_id = apm.role_master_id AND aurm.role_master_id IN (1,2,3,4,5,6,7,8,9)
+    WHERE aula.created_on::date = '2025-09-08'
+    GROUP BY role_group
+)
+-- Add total row
+SELECT * FROM role_data
+UNION ALL
+SELECT 
+    'TOTAL',
+    SUM(time_at_00), SUM(time_at_01), SUM(time_at_02), SUM(time_at_03),
+    SUM(time_at_04), SUM(time_at_05), SUM(time_at_06), SUM(time_at_07),
+    SUM(time_at_08), SUM(time_at_09), SUM(time_at_10), SUM(time_at_11),
+    SUM(time_at_12), SUM(time_at_13), SUM(time_at_14), SUM(time_at_15),
+    SUM(time_at_16), SUM(time_at_17), SUM(time_at_18), SUM(time_at_19),
+    SUM(time_at_20), SUM(time_at_21), SUM(time_at_22), SUM(time_at_23)
+FROM role_data
+ORDER BY role_group;
+
+
+
+SELECT *
+    FROM admin_user_login_activity aula 
+    WHERE aula.created_on::date = '2025-09-08' and (aula.login_time BETWEEN '2025-09-08 11:00:00' AND '2025-09-08 11:59:59' or aula.logout_time between '2025-09-08 11:00:00' AND '2025-09-08 11:59:59')
+
+
+
+
+select * from admin_user_login_activity aula limit 1;
+select * from admin_user_login_activity aula where aula.admin_user_id = 4315;
 
 ------ FOR CITIZEN -----
 SELECT 
@@ -3454,33 +3384,33 @@ SELECT
     ------ For Citizen Number of People Login-----
 SELECT 
     'Citizen' AS role_group,
-    '2025-09-08' as login_date,
- 	COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 00:00:00' AND '2025-09-08 01:00:00') THEN 1 END) AS time_at_00,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 01:00:00' AND '2025-09-08 02:00:00') THEN 1 END) AS time_at_01,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 02:00:00' AND '2025-09-08 03:00:00') THEN 1 END) AS time_at_02,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 03:00:00' AND '2025-09-08 04:00:00') THEN 1 END) AS time_at_03,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 04:00:00' AND '2025-09-08 05:00:00') THEN 1 END) AS time_at_04,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 05:00:00' AND '2025-09-08 06:00:00') THEN 1 END) AS time_at_05,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 06:00:00' AND '2025-09-08 07:00:00') THEN 1 END) AS time_at_06,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 07:00:00' AND '2025-09-08 08:00:00') THEN 1 END) AS time_at_07,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 08:00:00' AND '2025-09-08 09:00:00') THEN 1 END) AS time_at_08,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 09:00:00' AND '2025-09-08 10:00:00') THEN 1 END) AS time_at_09,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 10:00:00' AND '2025-09-08 11:00:00') THEN 1 END) AS time_at_10,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 11:00:00' AND '2025-09-08 12:00:00') THEN 1 END) AS time_at_11,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 12:00:00' AND '2025-09-08 13:00:00') THEN 1 END) AS time_at_12,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 13:00:00' AND '2025-09-08 14:00:00') THEN 1 END) AS time_at_13,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 14:00:00' AND '2025-09-08 15:00:00') THEN 1 END) AS time_at_14,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 15:00:00' AND '2025-09-08 16:00:00') THEN 1 END) AS time_at_15,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 16:00:00' AND '2025-09-08 17:00:00') THEN 1 END) AS time_at_16,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 17:00:00' AND '2025-09-08 18:00:00') THEN 1 END) AS time_at_17,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 18:00:00' AND '2025-09-08 19:00:00') THEN 1 END) AS time_at_18,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 19:00:00' AND '2025-09-08 20:00:00') THEN 1 END) AS time_at_19,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 20:00:00' AND '2025-09-08 21:00:00') THEN 1 END) AS time_at_20,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 21:00:00' AND '2025-09-08 22:00:00') THEN 1 END) AS time_at_21,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 22:00:00' AND '2025-09-08 23:00:00') THEN 1 END) AS time_at_22,
-    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-08 23:00:00' AND '2025-09-08 23:59:59') THEN 1 END) AS time_at_23
+    '2025-09-09' as login_date,
+ 	COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 00:00:00' AND '2025-09-09 01:00:00') THEN 1 END) AS time_at_00,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 01:00:00' AND '2025-09-09 02:00:00') THEN 1 END) AS time_at_01,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 02:00:00' AND '2025-09-09 03:00:00') THEN 1 END) AS time_at_02,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 03:00:00' AND '2025-09-09 04:00:00') THEN 1 END) AS time_at_03,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 04:00:00' AND '2025-09-09 05:00:00') THEN 1 END) AS time_at_04,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 05:00:00' AND '2025-09-09 06:00:00') THEN 1 END) AS time_at_05,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 06:00:00' AND '2025-09-09 07:00:00') THEN 1 END) AS time_at_06,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 07:00:00' AND '2025-09-09 08:00:00') THEN 1 END) AS time_at_07,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 08:00:00' AND '2025-09-09 09:00:00') THEN 1 END) AS time_at_08,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 09:00:00' AND '2025-09-09 10:00:00') THEN 1 END) AS time_at_09,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 10:00:00' AND '2025-09-09 11:00:00') THEN 1 END) AS time_at_10,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 11:00:00' AND '2025-09-09 12:00:00') THEN 1 END) AS time_at_11,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 12:00:00' AND '2025-09-09 13:00:00') THEN 1 END) AS time_at_12,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 13:00:00' AND '2025-09-09 14:00:00') THEN 1 END) AS time_at_13,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 14:00:00' AND '2025-09-09 15:00:00') THEN 1 END) AS time_at_14,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 15:00:00' AND '2025-09-09 16:00:00') THEN 1 END) AS time_at_15,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 16:00:00' AND '2025-09-09 17:00:00') THEN 1 END) AS time_at_16,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 17:00:00' AND '2025-09-09 18:00:00') THEN 1 END) AS time_at_17,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 18:00:00' AND '2025-09-09 19:00:00') THEN 1 END) AS time_at_18,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 19:00:00' AND '2025-09-09 20:00:00') THEN 1 END) AS time_at_19,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 20:00:00' AND '2025-09-09 21:00:00') THEN 1 END) AS time_at_20,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 21:00:00' AND '2025-09-09 22:00:00') THEN 1 END) AS time_at_21,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 22:00:00' AND '2025-09-09 23:00:00') THEN 1 END) AS time_at_22,
+    COUNT(CASE WHEN (cla.login_time BETWEEN '2025-09-09 23:00:00' AND '2025-09-09 23:59:59') THEN 1 END) AS time_at_23
     FROM citizen_login_activity cla 
-    WHERE cla.login_time::date = '2025-09-08'
+    WHERE cla.login_time::date = '2025-09-09'
     GROUP BY role_group;
     
     select * from citizen_login_activity cla limit 1
