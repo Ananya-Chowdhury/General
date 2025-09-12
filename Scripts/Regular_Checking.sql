@@ -250,10 +250,10 @@ select * from cmo_grievance_category_master cgcm ;
 ----------- Admin Position Fatch Query ----------
 select * from cmo_office_master com; --35 --53 --68
 select * from cmo_sub_office_master csom where csom.office_id = 53;
-select * from admin_user au where au.u_phone = '9147889068';
-select * from admin_user_details aud where aud.admin_user_id in (562, 14172);
+select * from admin_user au where au.u_phone = '9297929297';
+select * from admin_user_details aud where aud.admin_user_id in (10140);
 select * from admin_position_master apm where apm.sub_office_id = 3101;
-select * from admin_position_master apm where apm.position_id = 398;
+select * from admin_position_master apm where apm.position_id = 10140;
 select * from admin_position_master apm ;
 select * from admin_user_position_mapping aupm ;
 
@@ -421,7 +421,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9874263537'   --9147888180
+WHERE uo.u_phone = '8335877077'   --9147888180
 ORDER BY created_on desc limit 5;
 
 SELECT * 
@@ -1630,10 +1630,10 @@ select gim.grievance_id, gim.action_taken_note, gim.remarks, gim.action_taken_no
     where not exists ( select 1 from cmo_bulk_status_update_closure_audit cbsuca where cbsuca.grievance_id = gim.grievance_id) /*and gim.grievance_id in (637618, 2565573)*/
 order by gim.grievance_id asc 
 
---- Pair 1 For Eligible -- Using Currently
+-----<<<<<<<<<- Pair 1 For Eligible -- Using Currently------=======================>>>>>>>>
 griev_ids_pnrd_p3
 cmo_bulk_status_update_closure_audit
-
+------------------------------------------------
 
 --DELETE FROM griev_ids_pnrd_p3
 --WHERE grievance_no IS NOT NULL;
@@ -1656,9 +1656,10 @@ select gim.grievance_id, gim.grievance_category  , gim.action_taken_note, gim.re
     from grievance_master gm
     inner join griev_ids_pnrd_p3 gim on gm.grievance_id = gim.grievance_id
     where not exists ( select 1 from cmo_bulk_status_update_closure_audit as cbsuca where cbsuca.grievance_id = gim.grievance_id)
---    and gim.action_taken_note = 'Beyond State Govt. Purview'
-    and gim.grievance_category is not null 
---    and gm.status = 15
+    and gim.action_taken_note = 'Benefit/Service Provided'
+    and gim.grievance_no is not null 
+--    and gim.grievance_category is not null 
+    and gm.status = 15
 order by gim.grievance_id asc;
 --limit 2 offset 0;
 
@@ -1758,6 +1759,14 @@ WHERE g.grievance_no = gm.grievance_no
   AND g.grievance_id IS NULL;
 
 
+---- Delete Multiple Entry From the Table -----
+--DELETE FROM griev_ids_pnrd_p3 a
+--USING griev_ids_pnrd_p3 b
+--WHERE a.grievance_id = b.grievance_id
+--  AND a.ctid > b.ctid;
+
+
+
 ---------------------------------------------------------------------------------
 --- Check The Multiple Time Entry In Excel ---
 select
@@ -1783,8 +1792,7 @@ SELECT
 FROM grievance_master gm
 INNER JOIN (
     SELECT 
-        xx.grievance_no,
-	xx.grievance_id
+        xx.grievance_no, xx.grievance_id
 --	count(xx.grievance_no) as maximum_count
 --	xx.action_taken_note_reason_only_for_not_eligible  as not_eligible
     FROM griev_ids_pnrd_p3 xx
@@ -1807,9 +1815,7 @@ ORDER BY gim.grievance_id asc;       --30225
 
 ---- Perfect Query ----
 WITH filtered AS (
-    SELECT gim.grievance_id, gim.action_taken_note, gim.remarks,
-           gim.action_taken_note_reason_only_for_not_eligible, gim.grievance_no,
-           gm.status, gm.updated_on
+    SELECT gim.grievance_id, gim.action_taken_note, gim.remarks, gim.action_taken_note_reason_only_for_not_eligible, gim.grievance_no, gm.status, gm.updated_on
     FROM grievance_master gm
     INNER JOIN (
         SELECT xx.grievance_no, xx.grievance_id
@@ -1824,7 +1830,7 @@ WITH filtered AS (
     ) uniq 
         ON gm.grievance_id = uniq.grievance_id
     INNER JOIN griev_ids_pnrd_p3 gim ON gm.grievance_id = gim.grievance_id AND gm.grievance_no = gim.grievance_no
-    WHERE gim.action_taken_note_reason_only_for_not_eligible IS NOT null and*/ gm.status = 15
+    WHERE /*gim.action_taken_note_reason_only_for_not_eligible IS null and*/ gm.status != 15
 )
 SELECT *
 FROM filtered
@@ -3140,43 +3146,9 @@ and (user_token.updated_on between '2025-09-08 11:00:00' and '2025-09-08 12:59:0
 	  or user_token.expiry_time > '2025-09-08 11:00:00') ;
 
 -------------------------
-SELECT 
-    aurm.role_master_name AS role_name,
-
-    COUNT(CASE 
-            WHEN (ut.updated_on BETWEEN '2025-09-08 11:00:00' AND '2025-09-08 12:59:00' 
-                  OR ut.expiry_time > '2025-09-08 11:00:00') 
-            THEN 1 END
-    ) AS time_at_11,
-
-    COUNT(CASE 
-            WHEN (ut.updated_on BETWEEN '2025-09-08 13:00:00' AND '2025-09-08 14:59:00' 
-                  OR ut.expiry_time > '2025-09-08 13:00:00') 
-            THEN 1 END
-    ) AS time_at_01,
-
-    COUNT(CASE 
-            WHEN (ut.updated_on BETWEEN '2025-09-08 15:00:00' AND '2025-09-08 16:59:00' 
-                  OR ut.expiry_time > '2025-09-08 15:00:00') 
-            THEN 1 END
-    ) AS time_at_03,
-
-    COUNT(CASE 
-            WHEN (ut.updated_on > '2025-09-08 17:00:00' 
-                  OR ut.expiry_time > '2025-09-08 17:00:00') 
-            THEN 1 END
-    ) AS time_as_on_05
-
-FROM user_token ut
-INNER JOIN admin_position_master apm 
-    ON ut.user_id = apm.position_id
-INNER JOIN admin_user_role_master aurm 
-    ON aurm.role_master_id = apm.role_master_id
-   AND aurm.role_master_id IN (1,2,3,4,5,6,7,8)
-WHERE ut.user_type = 1
-  AND ut.updated_on::date = '2025-09-08'
-GROUP BY aurm.role_master_name, aurm.role_master_id
-ORDER BY aurm.role_master_id ASC;
+select * from user_token 
+where user_token.updated_on between '2025-09-08 11:00:00' and '2025-09-08 12:59:00'
+	  or user_token.expiry_time > '2025-09-08 11:00:00' ;
 
 
 ------------------------------------
@@ -3417,10 +3389,16 @@ SELECT
 ------------------------------------------
 
 -------- checking department-----------
-select * 
+select count(1) 
+--select *
 	from user_token 
-	where user_token.user_type = 1 and user_token.updated_on::date = '2025-09-08' 
-and (user_token.updated_on BETWEEN '2025-09-08 23:00:00' AND '2025-09-08 23:59:59' OR user_token.expiry_time BETWEEN '2025-09-08 23:00:00' AND '2025-09-08 23:59:59') ;
+	where user_token.user_type = 1 and user_token.updated_on::date = '2025-09-12' 
+and (user_token.updated_on BETWEEN '2025-09-12 20:30:00' AND '2025-09-12 21:00:00' OR user_token.expiry_time BETWEEN '2025-09-12 20:30:00' AND '2025-09-12 21:00:00') ;
+
+select *
+	from user_token 
+	where user_token.user_type = 1 and user_token.updated_on::date = '2025-09-12' 
+and user_token.updated_on BETWEEN '2025-09-12 20:30:00' AND '2025-09-12 21:00:00'; /*OR user_token.expiry_time BETWEEN '2025-09-12 20:30:00' AND '2025-09-12 21:00:00') ;*/
 ------------------------------------------------
 
 select * 
