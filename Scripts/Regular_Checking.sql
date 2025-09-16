@@ -2,7 +2,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-09-11' 
+WHERE batch_date::date = '2025-09-16' 
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -42,7 +42,7 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-order by cmo_ssm_push_details_id desc limit 100;
+order by cmo_ssm_push_details_id desc limit 1000;
 
 
 ----------------------- SSM APi PULL CHecK IF Any ID NOT Processed -------------------------------
@@ -299,6 +299,7 @@ select * from public.admin_user_details aud where aud.official_phone  in ('81018
 
 select * from admin_user_details aud where aud.official_name ='Subhendu Basu';
 select * from admin_user au where au.admin_user_id = 432;
+select * from user_token ut where ut.user_type = 2 limit 100;
 
 --- 9297929297 -- Dr.P Ulaganathan,IAS --- secy.prd-wb@bangla.gov.in --- 10140 -- P&RD
 --- 6292222444 -- Sri Sumit Gupta, IAS --- dm-ali@nic.in --- 76 ---- DM.South.24
@@ -530,7 +531,7 @@ inner join grievance_master_sdc_timestamp_issue_20250806_bkp gm on gm.grievance_
 SELECT count(distinct gl.lifecycle_id) FROM grievance_lifecycle gl 
 inner join grievance_master_sdc_timestamp_issue_20250806_bkp gm on gm.grievance_id = gl.grievance_id;  --122250
 
---create table grievance_lifecycle_sdc_timestamp_20250806_bkp;
+-- create table grievance_lifecycle_sdc_timestamp_20250806_bkp;
 
 select count(1) from grievance_lifecycle_sdc_timestamp_20250806_bkp;
 select count(1) from grievance_master_sdc_timestamp_issue_20250806_bkp;
@@ -1666,7 +1667,7 @@ select gim.grievance_id, gim.grievance_category, gim.action_taken_note, gim.rema
 order by gim.grievance_id asc;
 --limit 2 offset 0;
 
-
+select * from cmo_parameter_master cpm ;
 
 --DELETE FROM griev_ids_pnrd_p3 a
 --USING griev_ids_pnrd_p3 b
@@ -1718,7 +1719,7 @@ select * from cmo_bulk_status_update_closure_audit where grievance_id = 844618;
 --======================== CHECKING FOR BULK STATUS UPDATE INFORMATION =============================
 --==================================================================================================
 
-select * from griev_ids_mas where grievance_id in (1864,5223,5814,6544,8155,11450,14552,15998,18595,79937,81197,84539,87578,89077,96852,97311,97864,106730,108615,109244,113824,116007,124408,128414,130418,131178,131883,133897,144385,147327,152537,153326,162137,165701,171370,174008,177709,179084,179116,179245,182945,183110,184926,187142,190167,193830,196439,196875,197718,198784,212689,216191,217651,218316,219860,221293,225928,229257,229418,232377,234500,239158,242335,243496,245763,245854,245939,246686,248566,251195,253719,260331,269586,272898,274710,291702,294122,297877,301092,302362,303787,304081,305066,305340,311407,311898,314946,314960,316978,326295,326842,330349,346607,353586,356307,357720,361100,361907,366382,367804,368065,370422,378600,379007,381199,382114,383665,385739,388710,391136,391178,396010,396220,398136,398973,401607,403416,406995,411154,416255,416280,416515,425267,427007,427813,430296,430961,432969,436317,438145,443129,448240,450374,453865,459964,459994,466532,469004,471604,474188,474200,475754,482101,484295,490883,492107,494704,496350,496660,496698,498230,498556,502567,506466,507552,509975,511072,515446,516791,519343,520209,523110,525674,526920,532181,533296,533440,533532,534610,536161,537293,539993,541405,542390,542948,546080,547756,548297,551805,555940,558517,562920,564125,565300,567595,568093,570194,575998,577688,578454,580706,581743,583470,587077,587081,589006,591603,593005,599077);
+select * from griev_ids_mas where grievance_id in ();
 select * from griev_ids_mast where grievance_id in (2626049);
 select * from griev_ids_pnrd_e_p2_road where grievance_id in (2626049);
 select * from griev_ids_pnrd_nte_p2 where grievance_id in (2626049);   ----->>>>>
@@ -1738,11 +1739,22 @@ select * from cmo_bulk_status_update_closure_audit_nte_pnrd_road where grievance
 select * from grievance where grievance_id in (2626049);
 
 
-
-select * from grievance_lifecycle gl where gl.grievance_id = 3127435 order by gl.assigned_on desc;
-select * from grievance_master gm where gm.grievance_id = 5395609;
+select * from grievance_lifecycle gl where gl.grievance_id = 5114418 order by gl.assigned_on desc;
+select * from grievance_master gm where gm.grievance_id = 2614497;
 select * from cmo_action_taken_note_master catnm ;
 select * from cmo_action_taken_note_reason_master catnrm ;
+select * from cmo_grievance_category_master cgcm ;
+
+
+
+--TRUNCATE TABLE grievance;
+
+select * from grievance where exists ( select 1 from cmo_bulk_status_update_closure_audit as cbsuca where cbsuca.grievance_id = grievance.grievance_id);
+select * from grievance where exists ( select 1 from cmo_bulk_status_update_closure_audit_eligible_pnrd as cbsuca where cbsuca.grievance_id = grievance.grievance_id);
+select * from grievance where exists ( select 1 from cmo_bulk_status_update_closure_audit_eligible_pnrd_road as cbsuca where cbsuca.grievance_id = grievance.grievance_id);
+select * from grievance where exists ( select 1 from cmo_bulk_status_update_closure_audit_noteligible as cbsuca where cbsuca.grievance_id = grievance.grievance_id);
+select * from grievance where exists ( select 1 from cmo_bulk_status_update_closure_audit_noteligible_pnrd as cbsuca where cbsuca.grievance_id = grievance.grievance_id);   --->>>
+select * from grievance where exists ( select 1 from cmo_bulk_status_update_closure_audit_nte_pnrd_road as cbsuca where cbsuca.grievance_id = grievance.grievance_id);
 
 
 
