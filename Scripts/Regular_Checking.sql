@@ -1555,7 +1555,32 @@ WHERE lifecycle_id IN (
 );
 
 
-select * from grievance_lifecycle gl where gl.grievance_id = 5113038 order by gl.assigned_on desc;
+select * from grievance_lifecycle gl where gl.grievance_id = 5428112 order by gl.assigned_on desc;
+select * from grievance_lifecycle gl where gl.lifecycle_id = 65828034 order by gl.assigned_on desc;
+
+
+WITH ordered_duplicates AS (
+    SELECT lifecycle_id,
+           ROW_NUMBER() OVER (
+               PARTITION BY grievance_id, created_on::date, grievance_status
+               ORDER BY lifecycle_id
+           ) AS rn
+    FROM grievance_lifecycle
+--    WHERE grievance_id IN (4193915,5113038,5175868,5178912,5238197)
+      where created_on::date = '2025-07-26'
+      AND grievance_status IN (15, 2, 14, 4, 16)
+)
+SELECT lifecycle_id 
+FROM grievance_lifecycle
+WHERE lifecycle_id IN (
+    SELECT lifecycle_id FROM ordered_duplicates WHERE rn > 1
+);
+
+
+
+
+
+
 
 
 

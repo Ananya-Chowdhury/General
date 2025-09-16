@@ -107,6 +107,49 @@ WHERE grievance_status = 6
 ORDER BY assigned_on DESC;
 
 
-select * from grievance_lifecycle gl where gl.grievance_id = 1939899 order by gl.assigned_on desc;
+select * from grievance_lifecycle gl where gl.grievance_id = 11697 order by gl.assigned_on desc;
+select * from grievance_lifecycle gl where gl.grievance_status = 15 limit 1;
 select * from cmo_office_master com where com.office_id = 63;
 select * from grievance_master gm where gm.grievance_id in (2700557, 2409434, 1939899);
+
+
+------- Recalled Grievance Process Debbug Query -------
+WITH ordered AS (
+    SELECT
+        grievance_id,
+        grievance_status,
+        assigned_by_office_id,
+        ROW_NUMBER() OVER (PARTITION BY grievance_id ORDER BY assigned_on) AS rn
+    FROM grievance_lifecycle
+)
+--SELECT COUNT(DISTINCT g1.grievance_id) AS unique_grievances
+SELECT DISTINCT g1.grievance_id
+FROM ordered g1
+JOIN ordered g2
+  ON g1.grievance_id = g2.grievance_id
+ AND g2.rn = g1.rn + 1   -- immediate next status
+WHERE g1.grievance_status = 15
+  AND g2.grievance_status = 16
+  AND g1.assigned_by_office_id <> g2.assigned_by_office_id;
+ 
+ 
+ 
+ 
+ WITH ordered AS (
+    SELECT
+        grievance_id,
+        grievance_status,
+        assigned_by_office_id,
+        assigned_on,
+        ROW_NUMBER() OVER (PARTITION BY grievance_id ORDER BY assigned_on) AS rn
+    FROM grievance_lifecycle
+)
+SELECT DISTINCT g1.grievance_id
+FROM ordered g1
+JOIN ordered g2
+  ON g1.grievance_id = g2.grievance_id
+ AND g2.rn = g1.rn + 1   -- immediate next status
+WHERE g1.grievance_status = 15
+  AND g2.grievance_status = 16
+  AND g1.assigned_by_office_id <> g2.assigned_by_office_id
+  AND EXTRACT(YEAR FROM g1.assigned_on) = 2025;
