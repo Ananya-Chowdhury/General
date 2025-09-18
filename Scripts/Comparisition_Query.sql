@@ -3763,6 +3763,8 @@ group by com3.office_name order by com3.office_name;
 
 ------- ============================ OTHER HOD Comparisition QUERY ================================= -----
 
+--=IFERROR(INDEX(X:X, MATCH(H4,U:U, 0)), "")
+
 
 --- Grievance Receive Dashbord - Other Hod
 select com.office_name,count(1) from forwarded_latest_5_bh_mat as bh 

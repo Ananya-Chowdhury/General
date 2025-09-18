@@ -2,7 +2,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-09-16' 
+WHERE batch_date::date = '2025-09-18' 
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -250,15 +250,35 @@ select * from cmo_grievance_category_master cgcm ;
 ----------- Admin Position Fatch Query ----------
 select * from cmo_office_master com; --35 --53 --68
 select * from cmo_sub_office_master csom where csom.office_id = 53;
-select * from admin_user au where au.u_phone = '9297929297';
-select * from admin_user_details aud where aud.admin_user_id in (10140);
+select * from admin_user au where au.u_phone = '9732752528';
+select * from admin_user au where au.admin_user_id = 15001;
+select * from admin_user_details aud where aud.admin_user_id in (15001);
 select * from admin_position_master apm where apm.sub_office_id = 3101;
-select * from admin_position_master apm where apm.position_id = 10140;
+select * from admin_position_master apm where apm.position_id = 15405;
 select * from admin_position_master apm ;
 select * from admin_user_position_mapping aupm ;
 
 
 --------- Departmental Admin and Nodal User ------------
+ select 
+    admin_user_details.official_name, 
+    admin_user_details.official_phone, 
+    admin_position_master.office_id, 
+    com.office_name,
+    aurm.role_master_name, 
+    admin_position_master.position_id
+    from admin_user_details
+        inner join admin_user_position_mapping on admin_user_position_mapping.admin_user_id = admin_user_details.admin_user_id 
+        inner join admin_position_master on admin_position_master.position_id = admin_user_position_mapping.position_id
+        inner join admin_user_role_master aurm on aurm.role_master_id = admin_position_master.role_master_id
+        inner join cmo_office_master com on com.office_id = admin_position_master.office_id
+    where admin_position_master.office_id is not null and admin_position_master.role_master_id in (4,5) and 
+    admin_user_position_mapping.status = 1  and admin_position_master.record_status= 1
+    group by admin_user_details.official_name, admin_user_details.official_phone, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name
+order by admin_position_master.office_id asc;
+
+
+
 
 select admin_user_details.official_name, admin_user_details.official_phone, admin_user_details.official_email, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name 
 from admin_user_details
