@@ -2,7 +2,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-09-19' 
+WHERE batch_date::date = '2025-09-20' 
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -254,9 +254,9 @@ select * from admin_user au where au.u_phone = '8777729301';
 select * from admin_user au where au.admin_user_id = 15001;
 select * from admin_user_details aud where aud.admin_user_id in (15001);
 select * from admin_position_master apm where apm.sub_office_id = 3101;
-select * from admin_position_master apm where apm.position_id = 12658;
-select * from admin_position_master apm ;
+select * from admin_position_master apm where apm.position_id = 15405;
 select * from admin_user_position_mapping aupm where aupm.admin_user_id = 15001;
+select * from admin_user_position_mapping aupm where aupm.position_id = 15405;
 
 
 --------- Departmental Admin and Nodal User ------------
@@ -1114,7 +1114,7 @@ select * from cmo_parameter_master cpm ;
 select * from cmo_grievance_category_master cgcm ;
 select * from cmo_action_taken_note_master catnm ;
 select * from admin_position_master apm where apm.position_id = 3171;
-select * from grievance_lifecycle gl where gl.grievance_id = 4675 order by gl.assigned_on desc;
+select * from grievance_lifecycle gl where gl.grievance_id = 87856 order by gl.assigned_on desc;
 
 
 -------------------- Bulk Closure chcek --------------------------
@@ -1544,10 +1544,11 @@ WITH ordered_duplicates AS (
                ORDER BY lifecycle_id
            ) AS rn
     FROM grievance_lifecycle
-    WHERE grievance_id IN (75025, 157714, 299802, 347757, 458802, 544040, 639313, 1021208, 1094621, 1120527, 1147925, 1661965, 1689703, 1698324, 1747388, 1756274, 1830198, 1910240, 2021018, 2034237, 2044223, 2327571, 
-2486609, 2741316, 2823552, 3035119, 3131366, 3200822, 3231993, 3314679, 3338450, 3406928, 3421217, 4429379, 4829175, 4900916, 
-5103231, 5127211, 5163067, 5252572, 5259472, 5271277, 5271743, 5296275, 5331917, 5355401, 5390979, 5398756, 5410585, 5463718, 5488272, 5502972, 5508410, 5510314) 
-      AND created_on::date = '2025-08-01'
+    WHERE grievance_id IN (5119427,5119238,5119078,5117978,5122327,5120642,5120995,5114640,5114418,5114247,5117986,5116896,5118983,5113603,5113227,5113063,
+    5111565,5102011,5101423,5099887,5099813,5104703,5099635,5099640,5097600,5097065,5095901,5095633,5095932,5095102,5095018,5094834,5094819,5094812,5092114,
+    5091653,5095019,5095271,5093301,5094070,5091032,5088889,5088027,5087909,5085056,5084903,5087849,5087201,5077411,5082719,5075832,5099757,5087512,5087306,5084850,
+    5120168,5085100,5087439,5085055,5088614,5093520,5089725,5114421,5122141,5094591,5098796,5095068,5097611,5096439,5114420,5113723) 
+      AND created_on::date = '2025-07-26'
       AND grievance_status IN (15, 2, 14, 4, 16)
 )
 DELETE FROM grievance_lifecycle
@@ -1575,8 +1576,9 @@ WHERE lifecycle_id IN (
 );
 
 
-select * from grievance_lifecycle gl where gl.grievance_id = 5428112 order by gl.assigned_on desc;
+select * from grievance_lifecycle gl where gl.grievance_id = 5093301 order by gl.assigned_on desc;
 select * from grievance_lifecycle gl where gl.lifecycle_id = 65828034 order by gl.assigned_on desc;
+select * from grievance_master gm where gm.grievance_id = 5093301;
 
 
 WITH ordered_duplicates AS (
@@ -1984,165 +1986,8 @@ select gm.atn_reason_master_id from grievance_master gm where gm.grievance_id in
 --WHERE grievance_id IN (3647330,
 --2332941,
 --2807129,
---1913643,
---2053955,
---2862261,
---1764832,
---2976975,
---2116563,
---3054589,
---3701828,
---5153713,
---3483772,
---5247299,
---5288626,
---4166722,
---4211288,
---5361835,
---4434020,
---5500498,
---361511,
---912827,
---1091992,
---1113056,
---5468700,
---2588569,
---2444037,
---1992338,
---2006987,
---2971775,
---2829327,
---2026047,
---2792842,
---2849289,
---2835777,
---571145,
---2348200,
---2402219,
---2444677,
---2447689,
---2418191,
---1942638,
---3051744,
---2151056,
---2479222,
---3100660,
---3101418,
---2508952,
---3153553,
---2162730,
---2527851,
---2518896,
---2527211,
---3183980,
---3557614,
---3605522,
---3214606,
---3652443,
---3413475,
---76693,
---3296065,
---5126419,
---5146250,
---5151369,
---5171353,
---5270174,
---3320543,
---5233343,
---3206936,
---4085878,
---5301801,
---5305101,
---4211215,
---4211216,
---98957,
---3508532,
---3526696,
---4433981,
---4670245,
---4645711,
---1782051,
---1791072,
---1801512,
---1827801,
---1648705,
---5382400,
---73208,
---109144,
---126019,
---129874,
---196520,
---210778,
---271224,
---483948,
---487409,
---496333,
---499683,
---1457567,
---653240,
---697966,
---748953,
---748956,
---1066585,
---1205933,
---1261249,
---1271496,
---1553665,
---1440272,
---1521631,
---1571077,
---5392484,
---5441968,
---2649867,
---2232417,
---2239664,
---2826852,
---2857178,
---2869622,
---2862457,
---2377943,
---1931076,
---2406632,
---2517643,
---3033720,
---781986,
---2163186,
---3138520,
---3140222,
---2506180,
---3140886,
---3148839,
---2178515,
---4835542,
---3212164,
---4893554,
---3585667,
---3635113,
---3385119,
---3387638,
---808360,
---5054424,
---5075324,
---3530338,
---3533681,
---1747261,
---1693995,
---135858,
---141650,
---200519,
---308813,
---324935,
---352090,
 --381572,
---370735,
---423391,
---552125,
---793170,
---915974,
---906291,
---970956,
---975533,
---985559,
+--370735
 --1028073,
 --1089627,
 --1154916,

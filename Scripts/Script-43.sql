@@ -17,6 +17,13 @@ WHERE uo.u_phone = '9999999950'
 ORDER BY created_on desc;
 
 
+------------ Admin User Check Query ------------
+select * from admin_position_master apm where apm.record_status = 1;
+select * from admin_user_details aud where aud.official_phone = '9836072377';
+select * from admin_user_position_mapping aupm where aupm.admin_user_id = 955;
+select * from admin_position_master apm where apm.position_id = 1155;
+
+
 select * from grievance_master gm where gm.grievance_id in (22885,22886,22887,22888,22889);
 select * from grievance_master gm;
 
