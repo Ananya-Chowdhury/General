@@ -1094,11 +1094,11 @@ with fwd_union_data as (
             (
             select forwarded_latest_3_bh_mat.grievance_id, forwarded_latest_3_bh_mat.assigned_on
                 from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
-            where forwarded_latest_3_bh_mat.assigned_to_office_id in (35) /* SSM CALL CENTER */ 
+--            where forwarded_latest_3_bh_mat.assigned_to_office_id in (35) /* SSM CALL CENTER */ 
                 union
             select forwarded_latest_5_bh_mat.grievance_id, forwarded_latest_5_bh_mat.assigned_on
                 from forwarded_latest_5_bh_mat_2 as forwarded_latest_5_bh_mat
-            where forwarded_latest_5_bh_mat.assigned_to_office_id in (35) /* SSM CALL CENTER */ 
+--            where forwarded_latest_5_bh_mat.assigned_to_office_id in (35) /* SSM CALL CENTER */ 
             ) as recev_cmo_othod
         inner join forwarded_latest_5_bh_mat_2 as forwarded_latest_5_bh_mat on forwarded_latest_5_bh_mat.grievance_id = recev_cmo_othod.grievance_id
         --left join admin_position_master on forwarded_latest_5_bh_mat.assigned_to_position = admin_position_master.position_id

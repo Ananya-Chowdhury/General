@@ -2,7 +2,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-09-22' 
+WHERE batch_date::date = '2025-09-23' 
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -570,7 +570,7 @@ select * from pg_locks;
 select * from pg_stat_activity;
 
 
--- ===== Showing Maxiimum Connection ===== ---
+-- ===== Showing Maximum Connection ===== ---
 show max_connections;
 
 
@@ -683,6 +683,36 @@ FROM pg_locks
 JOIN pg_stat_activity ON pg_locks.pid = pg_stat_activity.pid
 LEFT JOIN pg_class ON pg_locks.relation = pg_class.oid
 WHERE pg_locks.relation IS NOT NULL;
+
+
+-------- Long Running Queries ------------
+SELECT pid, now() - query_start AS duration, state, query
+FROM pg_stat_activity
+WHERE state = 'active' AND now() - query_start > interval '120 seconds'
+ORDER BY duration DESC;
+
+
+
+--------- Active Blocking Relationships ----------
+SELECT
+  blocked.pid   AS blocked_pid,
+  blocked.query AS blocked_query,
+  blocking.pid  AS blocking_pid,
+  blocking.query AS blocking_query,
+  now() - blocked.query_start AS blocked_duration,
+  now() - blocking.query_start AS blocking_duration
+FROM pg_catalog.pg_locks blocked_lock
+JOIN pg_catalog.pg_stat_activity blocked ON blocked_lock.pid = blocked.pid
+JOIN pg_catalog.pg_locks blocking_lock ON (blocked_lock.locktype = blocking_lock.locktype
+  AND blocked_lock.database IS NOT DISTINCT FROM blocking_lock.database
+  AND blocked_lock.relation IS NOT DISTINCT FROM blocking_lock.relation
+  AND blocked_lock.page IS NOT DISTINCT FROM blocking_lock.page
+  AND blocked_lock.tuple IS NOT DISTINCT FROM blocking_lock.tuple
+  AND blocked_lock.virtualxid IS NOT DISTINCT FROM blocking_lock.virtualxid
+  AND blocked_lock.transactionid IS NOT DISTINCT FROM blocking_lock.transactionid
+)
+JOIN pg_catalog.pg_stat_activity blocking ON blocking_lock.pid = blocking.pid
+WHERE blocked_lock.granted = false AND blocking_lock.granted = true;	
 
 
 -------------------------------------------------------------------------------------------------------
