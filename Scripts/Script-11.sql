@@ -35,14 +35,11 @@ griev_data as (
         lastupdates.closure_reason_id as griev_lc_closure_id,
         lastupdates.atn_id
     from grievance_master
-    inner join lastupdates on lastupdates.rn = 1 and lastupdates.grievance_id = grievance_master.grievance_id
+    left join lastupdates on lastupdates.rn = 1 and lastupdates.grievance_id = grievance_master.grievance_id
     where grievance_master.status = 15 
         and grievance_master.closure_reason_id in (5,9)
 )
 select
     griev_data.*
 from griev_data
-order by griev_data.grievance_id asc limit 10;
-
-
-
+order by griev_data.grievance_id asc;

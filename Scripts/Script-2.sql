@@ -24,22 +24,28 @@ select * from grievance_master gm;
 
 
 select * from cmo_office_master com; -- 13
-select * from admin_position_master apm where apm.office_id = 13 and record_status = 1; -- 2266
-select * from admin_user_position_mapping aupm where aupm.position_id = 2266;
-select * from admin_user_details aud where admin_user_id = 2341;
+select * from admin_position_master apm where apm.office_id = 35 and record_status = 1 and apm.role_master_id = 5; -- 2266
+select * from admin_user_position_mapping aupm where aupm.position_id = 5;
+select * from admin_user_details aud where admin_user_id = 9856;
 
 
 select * from cmo_office_master com where office_id = 3;
 select * from cmo_sub_office_master csom where office_id = 3;
 select * from admin_position_master apm where office_id = 3  and sub_office_id = 479;
 select * from admin_user_position_mapping aupm  where position_id in (487,488);
-select * from admin_user_details aud where admin_user_id in (487,488);
-select * from admin_user au where admin_user_id in (11784,2000);
+select * from admin_user_details aud where admin_user_id in (1093);
+select * from admin_user au where admin_user_id in (614);
 select * from grievance_master gm where gm.assigned_to_office_id = 3;
 select * from admin_user_details aud where aud.official_phone ='8';
 select * from grievance_master gm where gm.pri_cont_no = '9163479418'; --8101859077
 
- 
+select * from admin_user au where au.u_phone = '9477399095' ;
+
+
+select * from admin_user_role_master aurm ;
+
+
+
 
 ["9999999900","9999999901","9999999902","9999999903","9999999904","9999999905","9999999906","9999999907","9999999908","9999999909","9999999910","9999999911","9999999912","9999999913","9999999914",
 "9999999915","9999999916","9999999917","9999999918","9999999919","9999999920","9999999999","9330027052","8170045634","8101859077","9836072377","9434172049","9477399095","9297929297","9874263537",
@@ -48,6 +54,9 @@ select * from grievance_master gm where gm.pri_cont_no = '9163479418'; --8101859
 ["9999999900","9999999901","9999999902","9999999903","9999999904","9999999905","9999999906","9999999907","9999999908","9999999909","9999999910","9999999911",
 "9999999912","9999999913","9999999914","9999999915","9999999916","9999999917","9999999918","9999999919","9999999920","9999999999","9330027052","8170045634","8101859077","9836072377"
 ,"9434172049","9477399095","9297929297","9874263537","6292222444","9434495405","9559000099","9434055201","7865925510","8101859077","9999999950"]
+
+
+
 
 
 select * from user_otp uo order by created_on desc;
