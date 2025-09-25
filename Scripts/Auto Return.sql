@@ -1,3 +1,4 @@
+
 with lastupdates as (
     select
         row_number() OVER (PARTITION BY grievance_lifecycle.grievance_id,grievance_lifecycle.assigned_to_office_id ORDER BY grievance_lifecycle.assigned_on DESC) as rn,
@@ -45,13 +46,9 @@ select
 from griev_data
 order by griev_data.tentative_date;
 
+-----------------------------------------------------------------------------------------------------------------------
 
-
-
-
-
-
-
+-----------------------------------------------------------------------------------------------------------------------
 with lastupdates as (
     select
         row_number() OVER (PARTITION BY grievance_lifecycle.grievance_id,grievance_lifecycle.assigned_to_office_id ORDER BY grievance_lifecycle.assigned_on DESC) as rn,
@@ -287,9 +284,158 @@ from master_district_block_grv_data mdbgd;
 
 
 
+------------------------------------------------------------------------------------------------------------------------------
+
+        
+ with lastupdates_17 AS (
+    select
+        grd.is_returned,
+        gl.grievance_id,
+        gl.grievance_status,
+        gl.assigned_on,
+        gl.assigned_to_office_id,
+        gl.assigned_by_position,
+        gl.assigned_to_position,
+        gl.assigned_by_office_id,
+        row_number() OVER (PARTITION BY gl.grievance_id,gl.assigned_to_office_id ORDER BY gl.assigned_on DESC) AS rn
+    from grievance_retruned_data grd 
+    inner join grievance_lifecycle gl on gl.grievance_id = grd.grievance_id
+    where grd.status = 1 and grd.is_returned = true
+        and gl.grievance_status in (17)   
+), lastupdates_14 AS (
+    select
+    	*
+		from lastupdates_17 
+),
+master_district_block_grv_data AS (
+    select
+        md.grievance_id,
+        md.status as griev_current_status,
+        lu.grievance_status as last_grievance_status,
+        lu.assigned_on as last_assigned_on,
+        lu.assigned_to_office_id as last_assigned_to_office_id,
+        lu.assigned_by_position as last_assigned_by_position,
+        lu.assigned_to_position as last_assigned_to_position
+    from master_district_block_grv md
+    inner join lastupdates lu on lu.rn = 1 and lu.grievance_id = md.grievance_id and lu.assigned_by_office_id <> md.assigned_to_office_id
+)
+select mdbgd.*
+from master_district_block_grv_data mdbgd;
+
+
+
+     
+     
+WITH latest_17 AS (
+     SELECT a.grievance_id,
+        a.assigned_on,
+        a.is_returned
+     FROM ( SELECT row_number() OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on DESC) AS rnn,
+            gl.grievance_id,
+            gl.assigned_on,
+            grd.is_returned 
+           FROM grievance_retruned_data grd
+           inner join grievance_lifecycle gl on gl.grievance_id = grd.grievance_id 
+          WHERE grd.status = 1 and grd.is_returned = true and gl.grievance_status = 17) a
+     WHERE a.rnn = 1
+), latest_14 AS (
+         SELECT 
+			a.grievance_id,
+         	a.assigned_on
+          FROM ( SELECT row_number() OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on DESC) AS rnn,
+                gl.grievance_id,
+                gl.assigned_on
+                FROM grievance_lifecycle gl
+              WHERE gl.grievance_status = 14) a
+          JOIN latest_17 ON latest_17.grievance_id = a.grievance_id
+          WHERE a.rnn = 1 AND latest_17.assigned_on < a.assigned_on
+  ), latest_3 AS (
+         SELECT 
+         	a.grievance_id,
+         	a.assigned_on
+           FROM ( SELECT row_number() OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on DESC) AS rnn,
+                    gl.grievance_id,
+                    gl.assigned_on
+                    FROM grievance_lifecycle gl
+                  WHERE gl.grievance_status = 3) a
+             JOIN latest_14 ON latest_14.grievance_id = a.grievance_id
+          WHERE a.rnn = 1 AND latest_14.assigned_on < a.assigned_on
+        )
+ SELECT 
+    grievance_master.status AS current_status,
+    latest_3.grievance_id,
+    latest_17.is_returned
+   FROM latest_3
+     JOIN grievance_master ON latest_3.grievance_id = grievance_master.grievance_id
+     
+     
+     
+---------------------------------------------------------------
+     
+WITH latest_14 AS (
+     SELECT a.grievance_id,
+        a.assigned_on,
+        a.is_returned,
+        a.assigned_by_office_id
+     FROM ( select
+        grd.is_returned,
+        gl.grievance_id,
+        gl.grievance_status,
+        gl.assigned_on,
+        gl.assigned_to_office_id,
+        gl.assigned_by_position,
+        gl.assigned_to_position,
+        gl.assigned_by_office_id,
+        row_number() OVER (PARTITION BY gl.grievance_id,gl.assigned_to_office_id ORDER BY gl.assigned_on DESC) AS rn
+    from grievance_retruned_data grd 
+    inner join grievance_lifecycle gl on gl.grievance_id = grd.grievance_id
+    where grd.status = 1 and grd.is_returned = true
+        and gl.grievance_status in (14)
+        and gl.assigned_on > grd.created_on ) a
+     WHERE a.rn = 1       
+), latest_3 AS (
+         SELECT 
+         	a.grievance_id,
+         	a.assigned_on,
+         	a.assigned_to_office_id,
+         	latest_14.is_returned
+           FROM ( SELECT row_number() OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on DESC) AS rnn,
+                    gl.grievance_id,
+                    gl.assigned_on,
+                    gl.assigned_to_office_id
+                    FROM grievance_lifecycle gl
+                  WHERE gl.grievance_status = 3) a
+             JOIN latest_14 ON latest_14.grievance_id = a.grievance_id AND a.assigned_on > latest_14.assigned_on and a.assigned_to_office_id != latest_14.assigned_by_office_id 
+          WHERE a.rnn = 1 
+ )
+ 	select 
+ 		l3.grievance_id,
+ 		l3.is_returned,
+ 		l3.assigned_on
+ 	from latest_3 l3
+ 	inner join latest_14 l14 on l14.grievance_id = l3.grievance_id;
+
+
+
+------ ==================== Perfect Query For Auto Return Update =========================== -------
+with main as (
+	select 
+		gl.grievance_id , 
+		gl.grievance_status as current_sts,
+		LEAD(gl.grievance_status, 1) OVER(partition by gl.grievance_id order by gl.assigned_on asc) as second_sts,
+		LEAD(gl.assigned_by_office_id, 1) OVER(partition by gl.grievance_id order by gl.assigned_on asc) as second_ofc_id,
+		LEAD(gl.grievance_status, 2) OVER(partition by gl.grievance_id order by gl.assigned_on asc ) as third_sts,
+		LEAD(gl.assigned_to_office_id, 2) OVER(partition by gl.grievance_id order by gl.assigned_on asc) as thir_ofc_to
+	from grievance_lifecycle gl 
+	inner join grievance_retruned_data grd on grd.grievance_id = gl.grievance_id 
+	where gl.grievance_status in (17, 14, 3)
+	order by assigned_on asc
+) 
+select * from main where current_sts = 17 and second_sts = 14 and third_sts = 3 and second_ofc_id  != thir_ofc_to;
 
 
 
 
-
-
+select * from grievance_lifecycle where grievance_id = 115180 order by assigned_on ;
+ 	
+ 	
