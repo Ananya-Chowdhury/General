@@ -1099,7 +1099,7 @@ with received_count as (
         	forwarded_latest_5_bh_mat.assigned_by_office_id, 
         	count(1) as atr_submitted,
         	avg(pending_at_other_hod_mat.days_to_resolve) as avg_days_to_resolved
-        from forwarded_latest_5_bh_mat_2 as forwarded_latest_5_bh_mat
+        from forwarded_latest_5_bh_mat_2 as forwarded_latest_5_bh_mat 
         inner join atr_latest_13_bh_mat_2 atr_latest_13_bh_mat on forwarded_latest_5_bh_mat.grievance_id = atr_latest_13_bh_mat.grievance_id
         left join pending_at_other_hod_mat_2 as pending_at_other_hod_mat on pending_at_other_hod_mat.grievance_id = forwarded_latest_5_bh_mat.grievance_id
         where 1=1  and atr_latest_13_bh_mat.assigned_by_office_id in (75)

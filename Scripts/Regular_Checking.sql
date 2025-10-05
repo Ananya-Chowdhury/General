@@ -2,13 +2,13 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-09-25' 
+WHERE batch_date::date = '2025-10-03'  -- 2025-09-26 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-09-24'
+WHERE batch_date::date = '2025-10-03'
 ORDER by data_count desc; 
 
 
@@ -252,12 +252,16 @@ select * from cmo_office_master com; --35 --53 --68
 select * from cmo_sub_office_master csom where csom.office_id = 53;
 select * from admin_user au where au.u_phone = '8777729301';
 select * from admin_user au where au.admin_user_id = 15001;
-select * from admin_user_details aud where aud.admin_user_id in (15001);
+select * from admin_user_details aud where aud.admin_user_id in (1227);
 select * from admin_position_master apm where apm.sub_office_id = 3101;
 select * from admin_position_master apm where apm.position_id = 15405;
 select * from admin_user_position_mapping aupm where aupm.admin_user_id = 15001;
-select * from admin_user_position_mapping aupm where aupm.position_id = 15405;
+select * from admin_user_position_mapping aupm where aupm.position_id = 1227;
+select * from admin_position_master apm where apm.office_id = 35 and role_master_id = 7 and record_status = 1;
 
+
+--select * from grievance_returned_data grd ;
+select * from grievance_retruned_data grd ;
 
 --------- Departmental Admin and Nodal User ------------
  select 
@@ -422,11 +426,12 @@ select * from public.grievance_lifecycle gl where gl.grievance_id = 3554042 orde
 select * from public.cmo_office_master com where office_name = 'Backward Classes Welfare Department'; --4
 select * from public.cmo_police_station_master cpsm where cpsm.ps_id in (165,183);
 select * from public.cmo_sub_districts_master csdm where csdm.sub_district_id in (21,60,26,35);
-select * from public.grievance_master gm where gm.grievance_id = 3554042;
+select * from public.grievance_master gm where gm.grievance_id = 12139;
 select * from public.grievance_lifecycle gl where gl.lifecycle_id = 8186648;  --2670392
 select * from grievance_master gm where gm.pri_cont_no = '9163479418';   --5809393
 select * from grievance_locking_history glh where glh.grievance_id = 5809393;
  
+
 
 select * from public.cmo_action_taken_note_master catnm;
 select * from public.atn_closure_reason_mapping acrm;
@@ -613,12 +618,22 @@ SELECT
     pg_stat_activity.query, 
     COUNT(1) AS query_count
 FROM pg_stat_activity
-INNER JOIN pg_locks ON pg_locks.pid = pg_stat_activity.pid
+left JOIN pg_locks ON pg_locks.pid = pg_stat_activity.pid
 GROUP BY pg_stat_activity.query
 HAVING 
     COUNT(1) >= 1;
    
 
+   SELECT 
+    pg_stat_activity.query, 
+    COUNT(1) AS query_count
+FROM pg_stat_activity
+inner JOIN pg_locks ON pg_locks.pid = pg_stat_activity.pid
+GROUP BY pg_stat_activity.query
+HAVING 
+    COUNT(1) >= 1;
+   
+   
 --- Postgres Locked Query ---
 SELECT
     pg_locks.locktype,
@@ -641,6 +656,19 @@ ORDER BY pg_stat_activity.query_start;
 --SELECT * FROM "get_dept"();
 --SELECT * FROM "hcm_mis"();
 --select * from public.category_all() --172.19.20.55
+--SHOW search_path
+--SELECT 1 AS "a" FROM "admin_user" WHERE ("admin_user"."u_phone" = '9547384111' OR "admin_user"."u_email" = '9547384111') LIMIT 1
+
+--SELECT c.relname,a.*,pg_catalog.pg_get_expr(ad.adbin, ad.adrelid, true) as def_value,dsc.description,dep.objid
+--FROM pg_catalog.pg_attribute a
+--INNER JOIN pg_catalog.pg_class c ON (a.attrelid=c.oid)
+--LEFT OUTER JOIN pg_catalog.pg_attrdef ad ON (a.attrelid=ad.adrelid AND a.attnum = ad.adnum)
+--LEFT OUTER JOIN pg_catalog.pg_description dsc ON (c.oid=dsc.objoid AND a.attnum = dsc.objsubid)
+--LEFT OUTER JOIN pg_depend dep on dep.refobjid = a.attrelid AND dep.deptype = 'i' and dep.refobjsubid = a.attnum and dep.classid = dep.refclassid
+--WHERE NOT a.attisdropped AND c.relkind not in ('i','I','c') AND c.oid=$1
+--ORDER BY a.attnum
+
+
 --
 ------- Find PID Number From Stuck Query ------
 select * from pg_stat_activity where query = 'SELECT * FROM "hod_all_weekly_modified_othins"()';
@@ -650,7 +678,7 @@ select * from pg_stat_activity where query = 'SELECT * FROM "hcm_mis"()';
 select * from pg_cancel_backend(2636372);
 
  -------- Cancel pid Locks ------
-select * from pg_catalog.pg_cancel_backend(2865443);
+select * from pg_catalog.pg_cancel_backend(3415343);
    
 ------  kill function query ----------
 SELECT * FROM manage_top_query(True);
@@ -3044,4 +3072,10 @@ where user_token.updated_on::date = '2025-09-08' and user_token.user_type = 1 an
 group by aurm.role_master_name, aurm.role_master_id 
 order by aurm.role_master_id asc;
 
+-------------------------------------------------
 
+
+--INSERT INTO cmo_ssm_push_details(push_date, status_code, request, from_row_no, to_row_no, actual_push_date) VALUES (current_date, 404,'{"token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNtb0B3Yi5nb3YuaW4iLCJwYXNzd29yZCI6IjdJZ3BMQlc5YzhANSJ9.uT8d-px2vEIw3n39X9GIBDq-8Kt_LSA0_VRbeBpmvf5z-b0E3ZmbXKHAYM-LCe6zA4UpLnHcK-eVNHE-tDKmUw",
+-- "No_of_Recs": 5000, "data":[{"Griev_ID": "SSM2933069", "Closure_Reason_Code": "002", "Action_Remarks": "Benefit/Service Provided", "Sender_Office_Name": "Chief Ministers Office", "Sender_Details": "Senior Software Developer", "Receiver_Office_Name": "NA", "Receiver_Details": "NA", "Status": "Disposed", "Action_DateTime": "2025-08-27 00:00:00", "Document_Link": "NA", 
+--"Action_taken_Date": "2025-08-27 00:34:04", "Action_taken": "NA", "Action_Desc": "Benefit/Service Provided", "Action_taken_by": "CMO Administrator, Senior Software Developer,
+-- Chief Ministers Office", "ATN_Reason_Desc": "NA", "griev_trans_no": 15, "Action_Proposed": "NA", "Contact_Date": null, "Tentative_Dat
