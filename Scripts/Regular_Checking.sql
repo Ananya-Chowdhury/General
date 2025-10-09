@@ -2,13 +2,13 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-03'  -- 2025-09-26 not fatched
+WHERE batch_date::date = '2025-10-09'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-03'
+WHERE batch_date::date = '2025-10-09'
 ORDER by data_count desc; 
 
 
@@ -107,8 +107,6 @@ FROM
 WHERE (a.batchs <= 96 or a.batchs > 96) ;
 ------------------------------------------------------------------------------
 
-
-
 ------------------------- Update New Query ------------------- 
 SELECT
     a.*,
@@ -169,8 +167,163 @@ FROM
     ) a
 WHERE a.batchs <= 96;
 
+--------------------- Total Pending SSM Count Query -------------
+-- select * from (
+SELECT
+    a.batch_date,
+    a.batchs AS successful_batches,
+    cardinality(
+        ARRAY(
+            SELECT g
+            FROM generate_series(1, 96) g
+            WHERE g <> ALL (string_to_array(a.batch_ids, ',')::int[])
+        )
+    ) AS pending_batches,
+    a.total_grievances_pulled
+    -- a.grievance_count
+FROM (
+    SELECT 
+        cbrd.batch_date::date,
+        COUNT(cbrd.batch_id) AS batchs,
+        array_to_string(
+            ARRAY_AGG(cbrd.batch_id ORDER BY cbrd.batch_id ASC),
+            ','
+        ) AS batch_ids,
+        sum(cbrd.data_count) as total_grievances_pulled
+        -- count(distinct cbgli.griev_id) as grievance_count
+    FROM cmo_batch_run_details cbrd
+    LEFT JOIN cmo_batch_time_master cbtm ON cbtm.batch_time_master_id = cbrd.batch_id
+--     inner join cmo_batch_grievance_line_item cbgli on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+    WHERE cbrd.status = 'S'
+    GROUP BY cbrd.batch_date::date --, cbgli.cmo_batch_run_details_id::int
+    ORDER BY cbrd.batch_date::date DESC
+) a
+-- ) z_q WHERE pending_batches <> 0;
+
+--------------------------
+
+
+-- Overall SSM Pull Status - Day Wise
+
+WITH batch_summary AS (
+    SELECT 
+        cbrd.batch_date::date,
+        COUNT(cbrd.batch_id) AS batchs,
+        array_to_string(
+            ARRAY_AGG(cbrd.batch_id ORDER BY cbrd.batch_id ASC),
+            ','
+        ) AS batch_ids,
+        SUM(cbrd.data_count) AS total_grievances_pulled
+    FROM cmo_batch_run_details cbrd
+    LEFT JOIN cmo_batch_time_master cbtm 
+        ON cbtm.batch_time_master_id = cbrd.batch_id
+    GROUP BY cbrd.batch_date::date
+),
+status_summary AS (
+    SELECT
+        cbrd.batch_date::date,
+        COUNT(*) FILTER (WHERE cbgli.status = 1) AS initiate_count,
+        COUNT(*) FILTER (WHERE cbgli.status = 2) AS success_count,
+        COUNT(*) FILTER (WHERE cbgli.status = 3) AS failed_count,
+        COUNT(*) FILTER (WHERE cbgli.status = 4) AS rectified_count,
+        COUNT(*) FILTER (WHERE cbgli.status = 5) AS duplicate_count,
+        COUNT(*) AS total_records
+    FROM cmo_batch_run_details cbrd
+    INNER JOIN cmo_batch_grievance_line_item cbgli 
+        ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+    GROUP BY cbrd.batch_date::date
+)
+SELECT 
+    a.batch_date,
+    a.batchs AS successful_batches,
+    cardinality(
+        ARRAY(
+            SELECT g
+            FROM generate_series(1, 96) g
+            WHERE g <> ALL (string_to_array(a.batch_ids, ',')::int[])
+        )
+    ) AS pending_batches,
+    COALESCE(a.total_grievances_pulled, 0) AS total_grievances_pulled,
+    COALESCE(s.initiate_count, 0) AS initiate_count,
+    COALESCE(s.success_count, 0) AS success_count,
+    COALESCE(s.failed_count, 0) AS failed_count,
+    COALESCE(s.rectified_count, 0) AS rectified_count,
+    COALESCE(s.duplicate_count, 0) AS duplicate_count,
+    COALESCE(s.total_records, 0) AS total_records
+FROM batch_summary a
+LEFT JOIN status_summary s 
+    ON a.batch_date = s.batch_date
+WHERE a.batchs <= 96 
+	-- and a.batch_date >= '2025-01-01'
+	and a.batch_date = '2025-10-08'
+ORDER BY a.batch_date ASC;
+
+-- Daywise Batch Wise Grievance Status
+SELECT
+    cbrd.batch_date,
+	cbgli.griev_id,
+    count(cbgli.griev_id) as total_count,
+    COUNT(*) FILTER (WHERE cbgli.status = 2) AS success_count,
+    COUNT(*) FILTER (WHERE cbgli.status = 3) AS failure_count,
+    case
+    	when cbgli.error is not null then cbgli.error
+    	else 'No Error'
+    end as failure_reason
+FROM cmo_batch_run_details cbrd
+INNER JOIN cmo_batch_grievance_line_item cbgli
+    ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+WHERE cbrd.batch_date
+	-- >= '2025-01-01' 
+	between '2025-01-01'::date and current_timestamp::date
+GROUP BY cbrd.batch_date,cbgli.griev_id, cbgli.error
+having count(cbgli.griev_id) > 0 and COUNT(*) FILTER (WHERE cbgli.status = 3) > 0
+ORDER BY cbrd.batch_date,cbgli.griev_id asc;
+
+
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM1011115';
+
+-- Failure Reason
+select
+	cbrd.batch_date,
+	cbrd.batch_id,
+	concat(cbrd.from_time,' - ',cbrd.to_time) as time_slot,
+	cbgli.griev_id,
+	cbgli.error
+from cmo_batch_grievance_line_item cbgli
+inner join cmo_batch_run_details cbrd on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+where cbrd.batch_date = '2025-10-08' and cbgli.status = 3;
+
 --------------------------------------------------------------------
 
+select * from (
+SELECT
+    a.batch_date,
+    a.batchs AS successful_batches,
+    cardinality(
+        ARRAY(
+            SELECT g
+            FROM generate_series(1, 96) g
+            WHERE g <> ALL (string_to_array(a.batch_ids, ',')::int[])
+        )
+    ) AS pending_batches
+FROM (
+    SELECT 
+        cbrd.batch_date::date,
+        COUNT(cbrd.batch_id) AS batchs,
+        array_to_string(
+            ARRAY_AGG(cbrd.batch_id ORDER BY cbrd.batch_id ASC),
+            ','
+        ) AS batch_ids
+    FROM cmo_batch_run_details cbrd
+    LEFT JOIN cmo_batch_time_master cbtm 
+        ON cbtm.batch_time_master_id = cbrd.batch_id
+    WHERE status = 'S'
+    GROUP BY cbrd.batch_date::date
+    ORDER BY cbrd.batch_date::date DESC
+) a
+) z_q WHERE pending_batches <> 0;
+
+---------------------------------------------------------------------
 
 select 
 	cbrd.cmo_batch_run_details_id,cbrd.batch_date,cbrd.batch_id,cbrd.from_time,
@@ -183,7 +336,7 @@ select
 	cbrd.cmo_batch_run_details_id,cbrd.batch_date,cbrd.batch_id,cbrd.from_time,
 	cbrd.to_time,cbrd.status,cbrd.data_count, cbrd.error, cbrd.processed
 from cmo_batch_run_details cbrd
-where cbrd.batch_date::date = '2025-08-07'::date
+where cbrd.batch_date::date = '2025-01-04'::date
 order by cbrd.batch_id desc;
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -207,6 +360,9 @@ select * from public.cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 
 select * from public.cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id = '6009';
 select * from public.grievance_master gm where grievance_no in ( select griev_id from cmo_batch_grievance_line_item where cmo_batch_run_details_id = 12549 );
 
+
+
+select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = ''
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -447,7 +603,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9332789001'   --9147888180
+WHERE uo.u_phone = '9999999999'   --9147888180
 ORDER BY created_on desc limit 5;
 
 SELECT * 
@@ -591,18 +747,6 @@ group by 1,2,3
 order by 2,4 desc;
 
 
-select 
-	pg_stat_activity.query, 
-	pg_stat_activity.client_addr,
-	pg_locks.mode,
-	count(1) AS query_count
-from pg_stat_activity
-inner join pg_locks on pg_locks.pid = pg_stat_activity.pid 
-group by 1,2,3
-order by 2,4 desc;
-
-
-
 -- Proccesed pid query identified more than 1000 -- 
 SELECT 
     pg_stat_activity.query, 
@@ -656,8 +800,14 @@ ORDER BY pg_stat_activity.query_start;
 --SELECT * FROM "get_dept"();
 --SELECT * FROM "hcm_mis"();
 --select * from public.category_all() --172.19.20.55
+
+
 --SHOW search_path
 --SELECT 1 AS "a" FROM "admin_user" WHERE ("admin_user"."u_phone" = '9547384111' OR "admin_user"."u_email" = '9547384111') LIMIT 1
+--SET search_path = public,public,"$user"
+--START_REPLICATION SLOT "replica_2" 2B0C/F2000000 TIMELINE 1
+
+
 
 --SELECT c.relname,a.*,pg_catalog.pg_get_expr(ad.adbin, ad.adrelid, true) as def_value,dsc.description,dep.objid
 --FROM pg_catalog.pg_attribute a
@@ -673,6 +823,7 @@ ORDER BY pg_stat_activity.query_start;
 ------- Find PID Number From Stuck Query ------
 select * from pg_stat_activity where query = 'SELECT * FROM "hod_all_weekly_modified_othins"()';
 select * from pg_stat_activity where query = 'SELECT * FROM "hcm_mis"()';
+select * from pg_stat_activity where query = 'SET search_path = public,public,"$user"';
 
 --------- Cancel PID Locks ---------
 select * from pg_cancel_backend(2636372);
@@ -758,6 +909,12 @@ select distinct gl.grievance_id, gl.lifecycle_id, gl.assigned_on
        order by gl.assigned_on desc ;
 --      limit 15 offset 0;
 
+---- Atr return for review to HOSO but not Assigned to That HOD ---
+select distinct gl.grievance_id, gl.lifecycle_id, gl.assigned_on
+       from grievance_lifecycle gl where gl.grievance_status = 12
+       and assigned_to_office_id != assigned_by_office_id
+       order by gl.assigned_on desc ;
+
       
 ---- Atr return for review to HOD but not Assigned to HOD ---
 select distinct gl.grievance_id, gl.lifecycle_id, gl.assigned_on
@@ -771,12 +928,12 @@ select distinct gl.grievance_id, gl.lifecycle_id, gl.assigned_on
 select distinct gl.grievance_id, gl.lifecycle_id, gl.assigned_on
        from grievance_lifecycle gl where gl.grievance_status = 10
        and assigned_to_office_cat != 3 and assigned_by_office_cat = 3
-       order by gl.assigned_on desc ;      
+       order by gl.assigned_on desc ;     
       
       
 
 
-select * from grievance_lifecycle gl where grievance_id = 989819 order by gl.assigned_on asc;
+select * from grievance_lifecycle gl where grievance_id = 5756371 order by gl.assigned_on desc;
 select gm.grievance_id, gm.grievance_no from grievance_master gm where grievance_id in (3416651);
 
 select distinct grievance_id from grievance_lifecycle gl   
@@ -898,6 +1055,9 @@ select * from grievance_master gm
 --inner join grievance_auto_assign_map gaam on gaam.grievance_cat_id = gm.grievance_category 
 inner join grievance_auto_assign_audit gaaa on gaaa.grievance_id = gm.grievance_id and gaaa.status  = 1
 where grievance_category = 131 order by gm.created_on desc;
+
+
+select * from pg_stat_activity where query = 'START_REPLICATION SLOT "replica_2" 2B0C/F2000000 TIMELINE 1';
 
 
 -------------- Total Count of Auto Assigned Grievances -------------
@@ -3079,3 +3239,4 @@ order by aurm.role_master_id asc;
 -- "No_of_Recs": 5000, "data":[{"Griev_ID": "SSM2933069", "Closure_Reason_Code": "002", "Action_Remarks": "Benefit/Service Provided", "Sender_Office_Name": "Chief Ministers Office", "Sender_Details": "Senior Software Developer", "Receiver_Office_Name": "NA", "Receiver_Details": "NA", "Status": "Disposed", "Action_DateTime": "2025-08-27 00:00:00", "Document_Link": "NA", 
 --"Action_taken_Date": "2025-08-27 00:34:04", "Action_taken": "NA", "Action_Desc": "Benefit/Service Provided", "Action_taken_by": "CMO Administrator, Senior Software Developer,
 -- Chief Ministers Office", "ATN_Reason_Desc": "NA", "griev_trans_no": 15, "Action_Proposed": "NA", "Contact_Date": null, "Tentative_Dat
+

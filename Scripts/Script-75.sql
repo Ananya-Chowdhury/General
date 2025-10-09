@@ -12,3 +12,5 @@ select * from actual_migration.cmro_master_user_1st_pull cmu where cmu.official_
 select * from actual_migration.cmro_master_user_1st_pull cmu where cmu.official_code = '2020/3769';
 
 
+
+

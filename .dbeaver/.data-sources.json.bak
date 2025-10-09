@@ -243,7 +243,7 @@
 		},
 		"prod": {
 			"name": "Production",
-			"color": "255,0,0",
+			"color": "org.jkiss.dbeaver.color.connectionType.prod.background",
 			"description": "Production database",
 			"auto-commit": false,
 			"confirm-execute": true,
