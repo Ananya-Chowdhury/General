@@ -220,7 +220,7 @@ left join cmo_police_station_master cpsm on cpsm.ps_id = griev_data.police_stati
 left join cmo_assembly_master cam on cam.assembly_id = griev_data.assembly_const_id  
 left join cmo_action_taken_note_master catnm on catnm.atn_id = griev_data.master_atn_id   
 left join cmo_closure_reason_master ccrm on ccrm.closure_reason_id = griev_data.master_closure_reason    
-where com.office_id = 1
+where com.office_id = 28
 group by com.office_id, com.office_name, griev_data.grievance_id, griev_data.grievance_no, cdlm.domain_value, griev_data.grievance_generate_date, griev_data.grievence_close_date,
 cgcm.grievance_category_desc, griev_data.grievance_description, griev_data.applicant_name, griev_data.pri_cont_no, griev_data.applicant_age, ccm.caste_name, crm.religion_name, 
 cdlm2.domain_value, cdm.district_name, griev_data.block_id, griev_data.municipality_id, griev_data.gp_id, griev_data.ward_id, cpsm.ps_name, griev_data.applicant_address, 

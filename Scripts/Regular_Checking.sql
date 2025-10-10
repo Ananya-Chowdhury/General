@@ -2,14 +2,14 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-09'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-10-10'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-09'
-ORDER by data_count desc; 
+WHERE batch_date::date = '2024-11-12'
+ORDER by batch_id asc; 
 
 
 select * from cmo_emp_batch_run_details cebrd;
@@ -168,7 +168,7 @@ FROM
 WHERE a.batchs <= 96;
 
 --------------------- Total Pending SSM Count Query -------------
--- select * from (
+ select * from (
 SELECT
     a.batch_date,
     a.batchs AS successful_batches,
@@ -198,17 +198,18 @@ FROM (
     GROUP BY cbrd.batch_date::date --, cbgli.cmo_batch_run_details_id::int
     ORDER BY cbrd.batch_date::date DESC
 ) a
--- ) z_q WHERE pending_batches <> 0;
+ ) z_q WHERE pending_batches <> 0;
 
 --------------------------
 
 
 -- Overall SSM Pull Status - Day Wise
-
 WITH batch_summary AS (
     SELECT 
         cbrd.batch_date::date,
         COUNT(cbrd.batch_id) AS batchs,
+        COUNT(*) FILTER (WHERE cbrd.status = 'S') AS success_pull_count,
+        COUNT(*) FILTER (WHERE cbrd.status = 'F') AS failed_pull_count,
         array_to_string(
             ARRAY_AGG(cbrd.batch_id ORDER BY cbrd.batch_id ASC),
             ','
@@ -235,7 +236,9 @@ status_summary AS (
 )
 SELECT 
     a.batch_date,
-    a.batchs AS successful_batches,
+    a.batchs AS total_batches_pulled,
+    coalesce(a.success_pull_count, 0) as success_pull_count,
+    coalesce(a.failed_pull_count, 0) as failed_pull_count,
     cardinality(
         ARRAY(
             SELECT g
@@ -253,11 +256,182 @@ SELECT
 FROM batch_summary a
 LEFT JOIN status_summary s 
     ON a.batch_date = s.batch_date
-WHERE a.batchs <= 96 
+WHERE (a.batchs <= 96 or a.batchs > 96)  
 	-- and a.batch_date >= '2025-01-01'
-	and a.batch_date = '2025-10-08'
-ORDER BY a.batch_date ASC;
+	and a.batch_date between '2024-11-12' and '2025-10-10'
+ORDER BY a.batch_date desc;
 
+
+select distinct
+	cbrd.status, 
+	count(cbrd.status) as status_count
+from cmo_batch_run_details cbrd
+group by cbrd.status ;
+--where cbrd.status = 'S';
+-------------------------------------------------------------------
+
+-- Overall SSM Pull Status - Day Wise Updated
+WITH batch_summary AS (
+    SELECT 
+        cbrd.batch_date::date,
+        COUNT(cbrd.batch_id) AS batchs,
+        COUNT(*) FILTER (WHERE cbrd.status = 'S') AS success_pull_count,
+        COUNT(*) FILTER (WHERE cbrd.status = 'F') AS failed_pull_count,
+        array_to_string(
+            ARRAY_AGG(cbrd.batch_id ORDER BY cbrd.batch_id ASC),
+            ','
+        ) AS batch_ids,
+        SUM(cbrd.data_count) AS total_grievances_pulled
+    FROM cmo_batch_run_details cbrd
+    LEFT JOIN cmo_batch_time_master cbtm 
+        ON cbtm.batch_time_master_id = cbrd.batch_id
+    GROUP BY cbrd.batch_date::date
+),
+status_summary AS (
+    SELECT
+        cbrd.batch_date::date,
+        COUNT(*) FILTER (WHERE cbgli.status = 1) AS initiate_count,
+        COUNT(*) FILTER (WHERE cbgli.status = 2) AS success_count,
+        COUNT(*) FILTER (WHERE cbgli.status = 3) AS failed_count,
+        COUNT(*) FILTER (WHERE cbgli.status = 4) AS rectified_count,
+        COUNT(*) FILTER (WHERE cbgli.status = 5) AS duplicate_count,
+        COUNT(*) AS total_records
+    FROM cmo_batch_run_details cbrd
+    INNER JOIN cmo_batch_grievance_line_item cbgli 
+        ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+    GROUP BY cbrd.batch_date::date
+),
+pending_batches_summary AS (
+    SELECT
+        a.batch_date,
+        cardinality(
+            ARRAY(
+                SELECT g
+                FROM generate_series(1, 96) g
+                WHERE g <> ALL (string_to_array(a.batch_ids, ',')::int[])
+            )
+        ) AS pending_batches
+    FROM (
+        SELECT 
+            cbrd.batch_date::date,
+            array_to_string(
+                ARRAY_AGG(cbrd.batch_id ORDER BY cbrd.batch_id ASC),
+                ','
+            ) AS batch_ids
+        FROM cmo_batch_run_details cbrd
+        WHERE cbrd.status = 'S'
+        GROUP BY cbrd.batch_date::date
+    ) a
+)
+SELECT 
+    a.batch_date,
+    a.batchs AS total_batches_pulled,
+    COALESCE(a.success_pull_count, 0) AS success_pull_count,
+    COALESCE(a.failed_pull_count, 0) AS failed_pull_count,
+    COALESCE(pb.pending_batches, 0) AS pending_batches,
+    COALESCE(a.total_grievances_pulled, 0) AS total_grievances_pulled,
+    COALESCE(s.success_count, 0) AS grievances_success_count,
+    COALESCE(s.failed_count, 0) AS grievances_failed_count,
+    COALESCE(s.duplicate_count, 0) AS grievances_duplicate_count,
+    COALESCE(s.initiate_count, 0) AS grievances_initiate_count,
+    COALESCE(s.rectified_count, 0) AS grievances_rectified_count,
+    COALESCE(s.total_records, 0) AS total_records
+FROM batch_summary a
+LEFT JOIN status_summary s 
+    ON a.batch_date = s.batch_date
+LEFT JOIN pending_batches_summary pb
+    ON a.batch_date = pb.batch_date
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-10'
+ORDER BY a.batch_date DESC;
+
+
+select * from cmo_batch_grievance_line_item cbgli where cbgli.status = 3;
+
+
+
+with 
+ssm_pull_data_failed as (
+	-- Failed Entry (Not validated) - 4215
+	select
+		cbrd.batch_date,
+		cbrd.from_time,
+		cbrd.to_time,
+		cbrd.created_no,
+		cbrd.processed,
+		cbgli.cmo_batch_run_details_id,
+		cbgli.griev_id,
+		cbgli.status,
+		cbgli.error,
+		cbgli.processed_on
+	from cmo_batch_grievance_line_item cbgli
+	inner join cmo_batch_run_details cbrd on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+	where cbgli.status = 3 and not exists (select 1 from grievance_master gm where gm.grievance_no = cbgli.griev_id)
+)
+--ssm_pull_data_success as (
+--	select
+--		cbrd.batch_date::date,
+--		cbrd.from_time,
+--		cbrd.to_time,
+--		cbrd.created_no,
+--		cbrd.processed,
+--		cbgli.cmo_batch_run_details_id,
+--		cbgli.griev_id,
+--		cbgli.status,
+--		cbgli.error,
+--		cbgli.processed_on
+--	from cmo_batch_grievance_line_item cbgli
+--	inner join cmo_batch_run_details cbrd on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+--	inner join ssm_pull_data_failed spdf on spdf.griev_id = cbgli.griev_id
+--	where cbgli.status = 2
+--)
+select distinct
+	spdf.batch_date::date,
+	spdf.from_time,
+	spdf.to_time,
+	spdf.error::varchar,
+	count(spdf.error)::integer
+from ssm_pull_data_failed spdf
+where spdf.batch_date between '2025-10-01'::date and (current_timestamp::date) --  - INTERVAL '1 day')::date
+group by spdf.batch_date,spdf.error,spdf.from_time,spdf.to_time;
+
+
+
+with ssm_pull_data_failed AS (
+    select
+        cbrd.batch_date,
+        cbrd.from_time,
+        cbrd.to_time,
+        cbrd.created_no,
+        cbrd.processed,
+        cbgli.cmo_batch_run_details_id,
+        cbgli.griev_id,
+        cbgli.status,
+        cbgli.error,
+        cbgli.processed_on
+    from cmo_batch_grievance_line_item cbgli
+    inner join cmo_batch_run_details cbrd 
+        on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+    where cbgli.status = 3
+      and not exists (
+          select 1 
+          from grievance_master gm 
+          where gm.grievance_no = cbgli.griev_id
+      )
+)
+select 
+  distinct spdf.griev_id, 
+    spdf.error
+from ssm_pull_data_failed spdf
+where spdf.error = 'false'
+order by spdf.griev_id, spdf.error;
+
+
+
+
+
+select * from grievance_master where grievance_no = 'SSM4296003';
+
+-------------------------------------------------------------------
 -- Daywise Batch Wise Grievance Status
 SELECT
     cbrd.batch_date,
@@ -350,8 +524,8 @@ order by cbrd.batch_id desc;
 ---------------------------------------------------------------------------------------------------------------------------
 
 --- Indivitual SSM Pull Data check ---
-select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id = 24874 /*and status = 5*/;
-select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id = 11606 and status not in (5,2);
+select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id = 37757 /*and status = 5*/;
+select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id = 37757 and status in (2);
 select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id = 4894 and status != 2;
 
 select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (select cbrd.cmo_batch_run_details_id
