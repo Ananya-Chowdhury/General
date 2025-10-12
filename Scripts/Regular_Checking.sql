@@ -2,7 +2,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-10'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-10-11'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -27,7 +27,7 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-09-05'
+where cspd.actual_push_date::date = '2025-10-11'
 order by cmo_ssm_push_details_id desc; -- limit 100;
 
 
@@ -43,6 +43,11 @@ select
 	cspd.created_no
 from cmo_ssm_push_details cspd 
 order by cmo_ssm_push_details_id desc limit 1000;
+
+
+--- Get The SSM API Push Count ----
+SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-11');
+
 
 
 ----------------------- SSM APi PULL CHecK IF Any ID NOT Processed -------------------------------
@@ -107,7 +112,7 @@ FROM
 WHERE (a.batchs <= 96 or a.batchs > 96) ;
 ------------------------------------------------------------------------------
 
-------------------------- Update New Query ------------------- 
+------------------------------- Update New Query -----------------------------
 SELECT
     a.*,
     '[' || array_to_string(
@@ -200,7 +205,7 @@ FROM (
 ) a
  ) z_q WHERE pending_batches <> 0;
 
---------------------------
+----------------------------------------------------------------------------------------------
 
 
 -- Overall SSM Pull Status - Day Wise
@@ -341,14 +346,15 @@ LEFT JOIN status_summary s
     ON a.batch_date = s.batch_date
 LEFT JOIN pending_batches_summary pb
     ON a.batch_date = pb.batch_date
-WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-10'
+--WHERE a.batch_date BETWEEN '2024-11-12' AND current_timestamp::date
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-12'
 ORDER BY a.batch_date DESC;
 
 
 select * from cmo_batch_grievance_line_item cbgli where cbgli.status = 3;
 
 
-
+-------- Total SSM PUSH FAILED ---->>> Unprocessed Grievance Count -----------
 with 
 ssm_pull_data_failed as (
 	-- Failed Entry (Not validated) - 4215
@@ -367,23 +373,6 @@ ssm_pull_data_failed as (
 	inner join cmo_batch_run_details cbrd on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
 	where cbgli.status = 3 and not exists (select 1 from grievance_master gm where gm.grievance_no = cbgli.griev_id)
 )
---ssm_pull_data_success as (
---	select
---		cbrd.batch_date::date,
---		cbrd.from_time,
---		cbrd.to_time,
---		cbrd.created_no,
---		cbrd.processed,
---		cbgli.cmo_batch_run_details_id,
---		cbgli.griev_id,
---		cbgli.status,
---		cbgli.error,
---		cbgli.processed_on
---	from cmo_batch_grievance_line_item cbgli
---	inner join cmo_batch_run_details cbrd on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
---	inner join ssm_pull_data_failed spdf on spdf.griev_id = cbgli.griev_id
---	where cbgli.status = 2
---)
 select distinct
 	spdf.batch_date::date,
 	spdf.from_time,
@@ -392,7 +381,8 @@ select distinct
 	count(spdf.error)::integer
 from ssm_pull_data_failed spdf
 where spdf.batch_date between '2025-10-01'::date and (current_timestamp::date) --  - INTERVAL '1 day')::date
-group by spdf.batch_date,spdf.error,spdf.from_time,spdf.to_time;
+group by spdf.batch_date,spdf.error,spdf.from_time,spdf.to_time
+order by spdf.batch_date desc;
 
 
 
@@ -426,10 +416,17 @@ where spdf.error = 'false'
 order by spdf.griev_id, spdf.error;
 
 
+----- Master Entry Check For SSM Pull Grievance ----
+select * from grievance_master where grievance_no = 'SSM5236014';
+
+
+---====================================================================================================================================================================================================
+---=====================================================================================================================================================================================================
+---=====================================================================================================================================================================================================
 
 
 
-select * from grievance_master where grievance_no = 'SSM4296003';
+
 
 -------------------------------------------------------------------
 -- Daywise Batch Wise Grievance Status

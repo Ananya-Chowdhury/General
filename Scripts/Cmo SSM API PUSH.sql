@@ -1,0 +1,1 @@
+SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-11');
