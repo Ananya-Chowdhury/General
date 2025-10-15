@@ -142,6 +142,13 @@ WHERE a.batchs <= 96;
 ----------------------------------------------------------------------
 
 
+--============================================================================================
+--============================================================================================
+--===================  P  E  N  D  I  N  G    B  A  T  C  H  E  S  ===========================
+--============================================================================================
+--============================================================================================
+
+
 --===================================================================
 ----------- Total Pending SSM PULL Batches Count Query --------------
 --===================================================================
@@ -178,6 +185,12 @@ FROM (
  ) z_q WHERE pending_batches <> 0;
 
 ----------------------------------------------------------------------------
+
+--============================================================================================
+--============================================================================================
+--=====================  R  E  G  U  L  A  R    R  E  P  O  R  T  ============================
+--============================================================================================
+--============================================================================================
 
 --=========================================================================
 --- Overall SSM Pull Status ---- Day Wise --->>>>>> [OLD Query Decrepted] --
@@ -325,30 +338,18 @@ SELECT
 FROM batch_summary a
 LEFT JOIN status_summary s ON a.batch_date = s.batch_date
 LEFT JOIN pending_batches_summary pb ON a.batch_date = pb.batch_date
-WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-13'
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-14'
 ORDER BY a.batch_date DESC;
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-select count(1) as total ,
---SUM(cbrd.data_count) AS total_grievances_pulled
-from cmo_batch_grievance_line_item cbgli 
-inner join cmo_batch_run_details cbrd ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
-where batch_date BETWEEN '2024-11-12'::date AND '2025-10-12'::date
---and cbgli.status = 5   ;
---and cbgli.status = 3 AND NOT EXISTS (SELECT 1 FROM grievance_master gm WHERE gm.grievance_no = cbgli.griev_id);
-
-
-
-select * from cmo_batch_grievance_line_item cbgli where cbgli.status = 3;
-select * from cmo_emp_batch_run_details order by cmo_emp_batch_run_details_id desc limit 1;
-
-
----------------------------------------------------------------------------------
----------------------------------------------------------------------------------
----------------------------------------------------------------------------------
+--============================================================================================
+--============================================================================================
+--=================================  F A I L E D  ============================================
+--============================================================================================
+--============================================================================================
 
 
 --===============================================================================
@@ -431,16 +432,23 @@ ORDER BY lf.batch_date DESC;
 
 
 
-
 select * from grievance_master gm where gm.grievance_no = 'SSM3994762';
+select * from cmo_batch_grievance_line_item cbgli where cbgli.status = 3;
+select * from cmo_emp_batch_run_details order by cmo_emp_batch_run_details_id desc limit 1;
 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
 
----------------------------  Data Checking -------------------------------
---========================================================================
+---------------------------  Data Checking --------------------------------------
+--===============================================================================
 
 ---- SSM Batches 
-select * from cmo_batch_grievance_line_item cbgli where /*cbgli.status = 3 and*/ cbgli.griev_id = 'SSM4314425';  -- FAILURE >> |Police Station not found in grievance number SSM4314425
+select * from cmo_batch_grievance_line_item cbgli where /*cbgli.status = 3 and*/ cbgli.griev_id = 'SSM4295850';  -- FAILURE >> |Police Station not found in grievance number SSM4295850
 select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id = 38204;
+select cbgli.ps_code, cbgli.griev_id, cbgli.error from cmo_batch_grievance_line_item cbgli where cbgli.griev_id in ('SSM4352563','SSM4352782','SSM4352712','SSM4352641','SSM4344439','SSM4344321','SSM4343619','SSM4343494','SSM4343116','SSM4342890','SSM4342859','SSM4342472','SSM4342260','SSM4341795','SSM4340729','SSM4340656','SSM4340161','SSM4342579','SSM4315952','SSM4325769','SSM4344501','SSM4340021','SSM4339528','SSM4339215','SSM4338903','SSM4338843','SSM4338645','SSM4338572','SSM4338401','SSM4338252','SSM4337807','SSM4337515','SSM4337106','SSM4344670','SSM4329122','SSM4322647','SSM4336832','SSM4336106','SSM4336074','SSM4336023','SSM4335547','SSM4335361','SSM4334701','SSM4334665','SSM4328494','SSM4327366','SSM4328368','SSM4334076','SSM4333100','SSM4332777','SSM4328087','SSM4332152','SSM4332070','SSM4330411','SSM4330329','SSM4329669','SSM4322199','SSM4321681','SSM4288634','SSM4303624','SSM4309799','SSM4312981','SSM4313705','SSM4315288','SSM4317856','SSM4317949','SSM4318429','SSM4319105','SSM4319226','SSM4319381','SSM4319567','SSM4319610','SSM4320709','SSM4320789','SSM4320834','SSM4320856','SSM4320890','SSM4320911','SSM4321385','SSM4321759','SSM4321783','SSM4321899','SSM4321910','SSM4321997','SSM4322383','SSM4322391','SSM4322425','SSM4322539','SSM4322565','SSM4322606','SSM4322627','SSM4323802','SSM4324719','SSM4324926','SSM4325647','SSM4326245','SSM4326254','SSM4326480','SSM4326536','SSM4326627','SSM4326964','SSM4307376','SSM4316630','SSM4316524','SSM4316217','SSM4315542','SSM4315365','SSM4315198','SSM4314477','SSM4314269','SSM4314185','SSM4314086','SSM4313914','SSM4313663','SSM4313600','SSM4313466','SSM4312342','SSM4311736','SSM4311544','SSM4310975','SSM4310818','SSM4310593','SSM4317017','SSM4310012','SSM4310007','SSM4309761','SSM4309260','SSM4296590','SSM4288373','SSM4307358','SSM4306857','SSM4306366','SSM4305039','SSM4304768','SSM4304730','SSM4304404','SSM4303970','SSM4303585','SSM4303448','SSM4302695','SSM4302527','SSM4288300','SSM4302172','SSM4300534','SSM4300435','SSM4300411','SSM4299906','SSM4299275','SSM4299159','SSM4298982','SSM4298853','SSM4298783','SSM4298162','SSM4297260','SSM4296761','SSM4295993','SSM4296003'
+);  -- FAILURE >> |Police Station not found in grievance number SSM4295850
+
 
 select * from cmo_batch_grievance_line_item limit 1;
 select * from cmo_batch_run_details cbrd order by cmo_batch_run_details_id desc limit 1;
@@ -462,7 +470,7 @@ select * from cmo_blocks_master cbm where cbm.block_code = '117';
 select * from cmo_blocks_master cbm ;
 
 ---- Police Station 
-select * from cmo_police_station_master cpsm where cpsm.ps_code = '1';
+select * from cmo_police_station_master cpsm where cpsm.ps_code = '527';
 select * from cmo_police_station_master cpsm ; -- ps_id = 1 for not known 
 
 ---- Gram Panchayet 
@@ -486,8 +494,6 @@ select * from cmo_professional_qualification_master cpqm;
 
 ---- Education Qualification
 select * from cmo_educational_qualification_master ceqm ;
-
-
 
 
 ---------------------------------------------------------------------------------------------------
@@ -558,177 +564,8 @@ where spdf.error = 'false'
 order by spdf.griev_id, spdf.error;
 
 
------ Master Entry Check For SSM Pull Grievance ----
-select * from grievance_master where grievance_no = 'SSM5232741';
+--==========================================================================
 
-
---------------------------------------------------------------------------------
-
-with ssm_pull_data_failed as (
-	-- Failed Entry (Not validated) - 4215
-	select
-		cbrd.batch_date,
-		cbrd.from_time,
-		cbrd.to_time,
-		cbrd.created_no,
-		cbrd.processed,
-		cbgli.cmo_batch_run_details_id,
-		cbgli.griev_id,
-		cbgli.status,
-		cbgli.error,
-		cbgli.processed_on
-	from cmo_batch_grievance_line_item cbgli
-	inner join cmo_batch_run_details cbrd on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
-	where cbgli.status = 5 and exists (select 1 from grievance_master gm where gm.grievance_no = cbgli.griev_id)
-)
-select distinct
-	spdf.batch_date::date,
-	spdf.from_time,
-	spdf.to_time,
-	spdf.error::varchar,
-	spdf.griev_id,
-	count(spdf.error)::integer
-from ssm_pull_data_failed spdf
---where spdf.batch_date between '2025-10-01'::date and (current_timestamp::date) --  - INTERVAL '1 day')::date
-where spdf.batch_date = '2025-10-11'::date --  - INTERVAL '1 day')::date
-group by spdf.batch_date,spdf.error,spdf.from_time,spdf.to_time, spdf.griev_id
-order by spdf.batch_date desc;
-
-
---===========================================================================================
------------------ Total Number of Duplicate Entry Count For SSM PULL Data -------------------
---===========================================================================================
-WITH ssm_pull_data_duplicate AS (
-	SELECT
-		cbrd.batch_date,
-		cbrd.from_time,
-		cbrd.to_time,
-		cbrd.created_no,
-		cbrd.processed,
-		cbgli.cmo_batch_run_details_id,
-		cbgli.griev_id,
-		cbgli.status,
-		cbgli.error,
-		cbgli.processed_on,
-		cbrd.batch_id
-	FROM cmo_batch_grievance_line_item cbgli
-	INNER JOIN cmo_batch_run_details cbrd ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
-	WHERE cbgli.status = 5
-)
-select
-	spd.batch_date,
-		spd.from_time,
-		spd.to_time,
-		case 
-			when spd.processed is true then 'True'
-			else 'N/A'
-		end as is_in_master,
-		case 
-			when spd.status = 5 then 'Duplicate'
-			else 'N/A'
-		end as status,
-		spd.batch_id,
-	spd.griev_id,
-	COUNT(*) AS total_count
-FROM ssm_pull_data_duplicate spd
-WHERE spd.batch_date BETWEEN '2025-10-01'::date AND '2025-10-12'::date
---WHERE spd.batch_date = '2025-10-01'::dat5
-GROUP BY spd.griev_id, spd.batch_date, spd.from_time, spd.to_time, spd.processed, spd.status, spd.batch_id
-ORDER BY spd.batch_date DESC;
-
-
-
-WITH ssm_pull_data_duplicate AS (
-	SELECT
-		cbrd.batch_date,
-		cbrd.from_time,
-		cbrd.to_time,
-		cbrd.created_no,
-		cbrd.processed,
-		cbgli.cmo_batch_run_details_id,
-		cbgli.griev_id,
-		cbgli.status,
-		cbgli.error,
-		cbgli.processed_on,
-		cbrd.batch_id
-	FROM cmo_batch_grievance_line_item cbgli
-	INNER JOIN cmo_batch_run_details cbrd 
-		ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
-	WHERE cbgli.status = 5
-)
-SELECT
-	spd.griev_id,
-	STRING_AGG(DISTINCT spd.batch_id::text, ', ') AS batch_ids,
-	STRING_AGG(DISTINCT to_char(spd.batch_date, 'YYYY-MM-DD'), ', ') AS batch_dates,
-	STRING_AGG(DISTINCT spd.from_time::text, ', ') AS from_times,
-	STRING_AGG(DISTINCT spd.to_time::text, ', ') AS to_times,
-	CASE 
-		WHEN bool_or(spd.processed IS TRUE) THEN 'True'
-		ELSE 'N/A'
-	END AS is_in_master,
-	'Duplicate' AS status,
-	COUNT(*) AS total_count
-FROM ssm_pull_data_duplicate spd
-WHERE spd.batch_date BETWEEN '2025-10-01'::date AND '2025-10-12'::date
-GROUP BY spd.griev_id
-ORDER BY total_count DESC;
-
-
-
-WITH ssm_pull_data_duplicate AS (
-	SELECT
-		cbrd.batch_date,
-		cbrd.from_time,
-		cbrd.to_time,
-		cbrd.created_no,
-		cbrd.processed,
-		cbgli.cmo_batch_run_details_id,
-		cbgli.griev_id,
-		cbgli.status,
-		cbgli.error,
-		cbgli.processed_on,
-		cbrd.batch_id
-	FROM cmo_batch_grievance_line_item cbgli
-	INNER JOIN cmo_batch_run_details cbrd ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
-	WHERE cbgli.status = 5
-)
-SELECT
-	spd.griev_id,
-	'[' || STRING_AGG(DISTINCT spd.batch_id::text, ', ') || ']' AS batch_ids,
-	'[' || STRING_AGG(DISTINCT to_char(spd.batch_date, 'YYYY-MM-DD'), ', ') || ']' AS batch_dates,
-	'[' || STRING_AGG(DISTINCT spd.from_time::text, ', ') || ']' AS from_times,
-	'[' || STRING_AGG(DISTINCT spd.to_time::text, ', ') || ']' AS to_times,
-	CASE 
-		WHEN bool_or(spd.processed IS TRUE) THEN 'True'
-		ELSE 'N/A'
-	END AS is_in_master,
-	'Duplicate' AS status,
-	COUNT(*) AS total_count
-FROM ssm_pull_data_duplicate spd
-WHERE spd.batch_date BETWEEN '2024-11-12'::date AND '2025-10-13'::date
-GROUP BY spd.griev_id
-ORDER BY total_count DESC;
-
-
-
-
-
-
-
-
-
-
---- Duplicate Grievnace Chceking Query -----
-select 
-	cbgli.* , cbrd.batch_id 
-	from cmo_batch_grievance_line_item cbgli 
-inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id 
-where /*cbgli.status = 5 and*/ cbgli.griev_id = 'SSM5247567';
-
-
-
--------------------------------------------------------------------
--- Daywise Batch Wise Grievance Status
 SELECT
     cbrd.batch_date,
 	cbgli.griev_id,
@@ -764,6 +601,297 @@ inner join cmo_batch_run_details cbrd on cbgli.cmo_batch_run_details_id = cbrd.c
 where cbrd.batch_date = '2025-10-08' and cbgli.status = 3;
 
 --------------------------------------------------------------------
+
+
+----- Master Entry Check For SSM Pull Grievance ----
+select * from grievance_master where grievance_no = 'SSM5232741';
+
+
+--------------------------------------------------------------------------------------------
+
+--============================================================================================
+--============================================================================================
+--============================  D  U  P  L  I  C  A  T  E  ===================================
+--============================================================================================
+--============================================================================================
+
+--===========================================================================================
+----------------- Total Number of Duplicate Entry Count For SSM PULL Data -------------------
+--===========================================================================================
+
+---- Date Wise Duplicate Count ----
+WITH ssm_pull_data_duplicate AS (
+	SELECT
+		cbrd.batch_date,
+		cbrd.from_time,
+		cbrd.to_time,
+		cbrd.created_no,
+		cbrd.processed,
+		cbgli.cmo_batch_run_details_id,
+		cbgli.griev_id,
+		cbgli.status,
+		cbgli.error,
+		cbgli.processed_on,
+		cbrd.batch_id
+	FROM cmo_batch_grievance_line_item cbgli
+	INNER JOIN cmo_batch_run_details cbrd ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+	WHERE cbgli.status = 5
+)
+select
+	spd.batch_date,
+		spd.from_time,
+		spd.to_time,
+		case 
+			when spd.processed is true then 'True'
+			else 'N/A'
+		end as is_in_master,
+		case 
+			when spd.status = 5 then 'Duplicate'
+			else 'N/A'
+		end as status,
+		spd.batch_id,
+	spd.griev_id,
+	COUNT(*) AS total_count
+FROM ssm_pull_data_duplicate spd
+--WHERE spd.batch_date BETWEEN '2025-10-01'::date AND '2025-10-12'::date
+WHERE spd.batch_date = '2025-10-14'::date
+GROUP BY spd.griev_id, spd.batch_date, spd.from_time, spd.to_time, spd.processed, spd.status, spd.batch_id
+ORDER BY spd.batch_date DESC;
+
+--===================================================================================
+---- Batch Wise Duplicate Count ----
+WITH ssm_pull_data_duplicate AS (
+	SELECT
+		cbrd.batch_date,
+		cbrd.from_time,
+		cbrd.to_time,
+		cbrd.created_no,
+		cbrd.processed,
+		cbgli.cmo_batch_run_details_id,
+		cbgli.griev_id,
+		cbgli.status,
+		cbgli.error,
+		cbgli.processed_on,
+		cbrd.batch_id
+	FROM cmo_batch_grievance_line_item cbgli
+	INNER JOIN cmo_batch_run_details cbrd 
+		ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+	WHERE cbgli.status = 5
+)
+SELECT
+	spd.griev_id,
+	STRING_AGG(DISTINCT spd.batch_id::text, ', ') AS batch_ids,
+	STRING_AGG(DISTINCT to_char(spd.batch_date, 'YYYY-MM-DD'), ', ') AS batch_dates,
+	STRING_AGG(DISTINCT spd.from_time::text, ', ') AS from_times,
+	STRING_AGG(DISTINCT spd.to_time::text, ', ') AS to_times,
+	CASE 
+		WHEN bool_or(spd.processed IS TRUE) THEN 'True'
+		ELSE 'N/A'
+	END AS is_in_master,
+	'Duplicate' AS status,
+	COUNT(*) AS total_count
+FROM ssm_pull_data_duplicate spd
+WHERE spd.batch_date BETWEEN '2025-10-01'::date AND '2025-10-12'::date
+GROUP BY spd.griev_id
+ORDER BY total_count DESC;
+
+--========================================================================================
+
+WITH ssm_pull_data_duplicate AS (
+	SELECT
+		cbrd.batch_date,
+		cbrd.from_time,
+		cbrd.to_time,
+		cbrd.created_no,
+		cbrd.processed,
+		cbgli.cmo_batch_run_details_id,
+		cbgli.griev_id,
+		cbgli.status,
+		cbgli.error,
+		cbgli.processed_on,
+		cbrd.batch_id
+	FROM cmo_batch_grievance_line_item cbgli
+	INNER JOIN cmo_batch_run_details cbrd ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+	WHERE cbgli.status = 5
+)
+SELECT
+	spd.griev_id,
+	'[' || STRING_AGG(DISTINCT spd.batch_id::text, ', ') || ']' AS batch_ids,
+	'[' || STRING_AGG(DISTINCT to_char(spd.batch_date, 'YYYY-MM-DD'), ', ') || ']' AS batch_dates,
+	'[' || STRING_AGG(DISTINCT spd.from_time::text, ', ') || ']' AS from_times,
+	'[' || STRING_AGG(DISTINCT spd.to_time::text, ', ') || ']' AS to_times,
+	CASE 
+		WHEN bool_or(spd.processed IS TRUE) THEN 'True'
+		ELSE 'N/A'
+	END AS is_in_master,
+	'Duplicate' AS status,
+	COUNT(*) AS total_count
+FROM ssm_pull_data_duplicate spd
+WHERE spd.batch_date BETWEEN '2024-11-12'::date AND '2025-10-13'::date
+GROUP BY spd.griev_id
+ORDER BY total_count DESC;
+
+--=====================================================================================
+--- ----------------- Query Version Update ------------------
+
+WITH ssm_pull_data_duplicate AS (
+    SELECT
+        cbrd.batch_date,
+        cbrd.from_time,
+        cbrd.to_time,
+        cbrd.created_no,
+        cbrd.processed,
+        cbgli.cmo_batch_run_details_id,
+        cbgli.griev_id,
+        cbgli.status,
+        cbgli.error,
+        cbgli.processed_on,
+        cbrd.batch_id
+    FROM cmo_batch_grievance_line_item cbgli
+    INNER JOIN cmo_batch_run_details cbrd ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+    WHERE cbgli.status = 5
+),
+success_data AS (
+    SELECT 
+        cbgli.griev_id,
+        cbrd.batch_id,
+        MAX(cbgli.processed_on) AS success_processed_on
+    FROM cmo_batch_grievance_line_item cbgli
+    INNER JOIN cmo_batch_run_details cbrd ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+    WHERE cbgli.status = 2
+    GROUP BY cbgli.griev_id,cbrd.batch_id
+)
+SELECT
+    spd.griev_id,
+    '[' || STRING_AGG(DISTINCT spd.batch_id::text, ', ') || ']' AS batch_ids,
+    '[' || STRING_AGG(DISTINCT s.batch_id::text, ', ') || ']' AS batch_ids_status_2,
+    '[' || STRING_AGG(DISTINCT to_char(spd.batch_date, 'YYYY-MM-DD'), ', ') || ']' AS batch_dates,
+    '[' || STRING_AGG(DISTINCT spd.from_time::text, ', ') || ']' AS from_times,
+    '[' || STRING_AGG(DISTINCT spd.to_time::text, ', ') || ']' AS to_times,
+    s.success_processed_on AS processed_on_status_2,
+    CASE 
+        WHEN bool_or(spd.processed IS TRUE) THEN 'True'
+        ELSE 'N/A'
+    END AS is_in_master,
+    case 
+		when spd.status = 5 then 'Duplicate'
+		else 'N/A'
+	end as status,
+    COUNT(*) AS total_count
+FROM ssm_pull_data_duplicate spd
+LEFT JOIN success_data s ON s.griev_id = spd.griev_id
+WHERE spd.batch_date BETWEEN '2024-11-12'::date AND '2025-10-13'::date
+GROUP BY spd.griev_id, s.success_processed_on, spd.status
+ORDER BY total_count DESC;
+
+
+--============================================================================================
+-- --------------------------- Grievance ID Wise Duplicate Count -----------------------------
+
+WITH ssm_pull_data_duplicate AS (
+    SELECT
+        cbrd.batch_date,
+        cbrd.from_time,
+        cbrd.to_time,
+        cbrd.created_no,
+        cbrd.processed,
+        cbgli.cmo_batch_run_details_id,
+        cbgli.griev_id,
+        cbgli.status,
+        cbgli.error,
+        cbgli.processed_on,
+        cbrd.batch_id
+    FROM cmo_batch_grievance_line_item cbgli
+    INNER JOIN cmo_batch_run_details cbrd 
+        ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+    WHERE cbgli.status = 5
+),
+success_data AS (
+    SELECT 
+        cbgli.griev_id,
+        cbrd.batch_id,
+        MAX(cbgli.processed_on) AS success_processed_on
+    FROM cmo_batch_grievance_line_item cbgli
+    INNER JOIN cmo_batch_run_details cbrd 
+        ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+    WHERE cbgli.status = 2
+    GROUP BY cbgli.griev_id, cbrd.batch_id
+)
+SELECT
+    spd.griev_id,
+    '[' || STRING_AGG(
+        DISTINCT '({batch:' || spd.batch_id || 
+        ', batch_date:' || to_char(spd.batch_date, 'YYYY-MM-DD') || 
+        ', from_time:' || COALESCE(spd.from_time::text, 'NULL') || 
+        ', to_time:' || COALESCE(spd.to_time::text, 'NULL') || '})', 
+        ', '
+    ) || ']' AS batch_details_status_5,
+    '[' || STRING_AGG(DISTINCT s.batch_id::text, ', ') || ']' AS batch_ids_status_2,
+    s.success_processed_on AS processed_on_status_2,
+    CASE 
+        WHEN bool_or(spd.processed IS TRUE) THEN 'True'
+        ELSE 'N/A'
+    END AS is_in_master,
+    CASE 
+        WHEN spd.status = 5 THEN 'Duplicate'
+        ELSE 'N/A'
+    END AS status,
+    COUNT(*) AS total_count
+FROM ssm_pull_data_duplicate spd
+LEFT JOIN success_data s 
+    ON s.griev_id = spd.griev_id
+WHERE spd.batch_date BETWEEN '2024-11-12'::date AND '2025-10-13'::date
+GROUP BY spd.griev_id, s.success_processed_on, spd.status
+ORDER BY total_count DESC;
+
+
+--=============================================================================
+with ssm_pull_data_failed as (
+	-- Failed Entry (Not validated) - 4215
+	select
+		cbrd.batch_date,
+		cbrd.from_time,
+		cbrd.to_time,
+		cbrd.created_no,
+		cbrd.processed,
+		cbgli.cmo_batch_run_details_id,
+		cbgli.griev_id,
+		cbgli.status,
+		cbgli.error,
+		cbgli.processed_on
+	from cmo_batch_grievance_line_item cbgli
+	inner join cmo_batch_run_details cbrd on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+	where cbgli.status = 5 and exists (select 1 from grievance_master gm where gm.grievance_no = cbgli.griev_id)
+)
+select distinct
+	spdf.batch_date::date,
+	spdf.from_time,
+	spdf.to_time,
+	spdf.error::varchar,
+	spdf.griev_id,
+	count(spdf.error)::integer
+from ssm_pull_data_failed spdf
+--where spdf.batch_date between '2025-10-01'::date and (current_timestamp::date) --  - INTERVAL '1 day')::date
+where spdf.batch_date = '2025-10-11'::date --  - INTERVAL '1 day')::date
+group by spdf.batch_date,spdf.error,spdf.from_time,spdf.to_time, spdf.griev_id
+order by spdf.batch_date desc;
+
+-----------------------------------------------
+--- Duplicate Grievnace Chceking Query -----
+-----------------------------------------------
+select 
+	cbgli.* , cbrd.batch_id 
+	from cmo_batch_grievance_line_item cbgli 
+inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id 
+where /*cbgli.status = 5 and*/ cbgli.griev_id = 'SSM5247567';
+
+
+--==========================================================================================================
+-----------------------------------------------------------------------------------------------------------
+-- ------------------------------- Daywise Batch Wise Grievance Status ------------------------------------
+-----------------------------------------------------------------------------------------------------------
+--===========================================================================================================
+
 
 select * from (
 SELECT
