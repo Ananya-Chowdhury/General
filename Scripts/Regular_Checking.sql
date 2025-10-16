@@ -28,7 +28,7 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-10-14'
+where cspd.actual_push_date::date = '2025-10-15'
 order by cmo_ssm_push_details_id desc; -- limit 100;
 
 
@@ -47,7 +47,7 @@ order by cmo_ssm_push_details_id desc limit 1000;
 
 
 --- Get The SSM API Push Count ----
-SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-14');
+SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-15');
 
 
 --========================== SSM API Regular Pulled Batches Check =============================
@@ -215,8 +215,8 @@ select * from grievance_retruned_data grd ;
         inner join admin_position_master on admin_position_master.position_id = admin_user_position_mapping.position_id
         inner join admin_user_role_master aurm on aurm.role_master_id = admin_position_master.role_master_id
         inner join cmo_office_master com on com.office_id = admin_position_master.office_id
-    where admin_position_master.office_id is not null and admin_position_master.role_master_id in (4,5) and 
-    admin_user_position_mapping.status = 1  and admin_position_master.record_status= 1
+    where admin_position_master.office_id is not null and admin_position_master.role_master_id in (4,5,6) and admin_user_position_mapping.status = 1  and admin_position_master.record_status= 1
+--    and com.office_id = 40
     group by admin_user_details.official_name, admin_user_details.official_phone, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name
 order by admin_position_master.office_id asc;
 
@@ -347,24 +347,24 @@ select * from  grievance_master gm where grievance_id in (69220, 126090, 136420,
 
 select * from public.cmo_domain_lookup_master cdlm where cdlm.domain_type = 'received_at_location';
 select * from public.cmo_grivence_receive_mode_master cgrmm;
-select * from public.admin_position_master apm where apm.position_id = 12745;
+select * from public.cmo_parameter_master cpm;
+select * from public.cmo_domain_lookup_master cdlm ;
 select * from public.cmo_office_master com; where com.office_id = 80;
-select * from public.admin_user_position_mapping aupm where aupm.position_id = 81; --3186
+select * from public.cmo_office_master com where office_name = 'Backward Classes Welfare Department'; --4
+select * from public.cmo_police_station_master cpsm where cpsm.ps_id in (165,183);
+select * from public.cmo_sub_districts_master csdm where csdm.sub_district_id in (21,60,26,35);
 select * from public.user_otp uo where uo.u_phone = '9163479418' order by created_on desc; --["9999999900","9999999999","8101859077","8918939197","8777729301","9775761810","7719357638","7001322965"]
 select * from public.user_otp uo limit 1;
+select * from public.admin_user_position_mapping aupm where aupm.position_id = 81; --3186
+select * from public.admin_position_master apm where apm.position_id = 12745;
 select * from public.admin_user au where admin_user_id = 3580;
 select * from public.admin_user_details aud where aud.admin_user_id = 3580;
 select * from public.admin_user_details aud where aud.official_name = 'Smt. Sima Halder';
 select * from public.admin_user au limit 1;
-select * from public.cmo_parameter_master cpm;
-select * from public.cmo_domain_lookup_master cdlm ;
 select * from public.admin_position_master apm where apm.record_status = 1 and apm.role_master_id = 9;
 select * from public.admin_user_position_mapping aupm where aupm.status = 1 and aupm.position_id = 1;
 select * from public.grievance_master gm where gm.status = 15;
 select * from public.grievance_lifecycle gl where gl.grievance_id = 3554042 order by gl.assigned_on asc;   --5740559
-select * from public.cmo_office_master com where office_name = 'Backward Classes Welfare Department'; --4
-select * from public.cmo_police_station_master cpsm where cpsm.ps_id in (165,183);
-select * from public.cmo_sub_districts_master csdm where csdm.sub_district_id in (21,60,26,35);
 select * from public.grievance_master gm where gm.grievance_id = 12139;
 select * from public.grievance_lifecycle gl where gl.lifecycle_id = 8186648;  --2670392
 select * from grievance_master gm where gm.pri_cont_no = '9163479418';   --5809393

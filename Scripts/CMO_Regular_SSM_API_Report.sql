@@ -338,7 +338,7 @@ SELECT
 FROM batch_summary a
 LEFT JOIN status_summary s ON a.batch_date = s.batch_date
 LEFT JOIN pending_batches_summary pb ON a.batch_date = pb.batch_date
-WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-14'
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-16'
 ORDER BY a.batch_date DESC;
 
 -------------------------------------------------------------------------------
@@ -970,3 +970,11 @@ left join cmo_emp_batch_run_details cebrd on cbrd.batch_date = cebrd.batch_date 
 where not exists (select 1 from grievance_master gm where gm.grievance_no = bl.griev_id)
 order by cbrd.batch_date asc;
 
+
+
+
+---================================================================================================================
+--==================================== Failed Batches Retrival Count Batch Date Wise ==============================
+
+select * 
+	from cmo_batch_run_details cbrd where cbrd.
