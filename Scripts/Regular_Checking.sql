@@ -1,8 +1,9 @@
 
+--===========================================================
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-15'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-10-16'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -15,7 +16,7 @@ ORDER by batch_id asc;
 
 select * from cmo_emp_batch_run_details cebrd;
 
-
+--===========================================================
 ------ SSM PUSH DATA CHECK ------
 select 
 	cspd.push_date,
@@ -28,7 +29,7 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-10-15'
+where cspd.actual_push_date::date = '2025-10-16'
 order by cmo_ssm_push_details_id desc; -- limit 100;
 
 
@@ -46,10 +47,49 @@ from cmo_ssm_push_details cspd
 order by cmo_ssm_push_details_id desc limit 1000;
 
 
+----- SSM PUSH FAILED ------
+select
+	cspd.cmo_ssm_push_details_id,
+	cspd.push_date,
+	cspd.status,
+	cspd.actual_push_date,
+	cspd.from_row_no,
+	cspd.to_row_no,
+	cspd.data_count,
+	cspd.status_code,
+	cspd.response,
+	cspd.created_no
+from cmo_ssm_push_details cspd 
+where status = 'F'
+order by push_date desc;
+
+
+---- SSM PUSH COUNT CHECK --->>> Correct ----
+select count(1) as ssm_push_count
+from grievance_lifecycle gl 
+inner join grievance_master gm on gm.grievance_id = gl.grievance_id 
+where gl.assigned_on::date = '2025-10-16'::DATE
+--where gl.assigned_on::date between '2024-11-12' and '2025-10-16'
+and gl.grievance_status != 1
+and (gm.grievance_source = 5 or gm.received_at = 6)
+--order by gl.grievance_status asc limit 100;
+
+
 --- Get The SSM API Push Count ----
-SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-15');
+SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-16');
 
 
+--- SSM PUSH DETAILS ------ 
+select * from cmo_ssm_push_details cspd;
+select cspd.cmo_ssm_push_details_id, cspd.status,cspd.data_count,response from cmo_ssm_push_details cspd where cspd.status = 'F';
+--select * from public.cmo_ssm_api_push_data_count();  --(OLD)
+select * from master_district_block_grv ;
+select * from cmo_ssm_api_push_data(50,0);
+select * from cmo_ssm_push_details cspd order by cmo_ssm_push_details_id desc limit 1;
+
+
+
+--==================================================================================================
 --========================== SSM API Regular Pulled Batches Check =============================
 ------------------------ Update Final Query ------------------------------   --06.09.2025 --07.09.2025
 SELECT
@@ -95,11 +135,17 @@ FROM
 ) a
 WHERE (a.batchs <= 96 or a.batchs > 96) ;
 
-------------------------------------------------------------------------------
---================================================================================
+--------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
+-- For CMO Batch Pull Data Count Check
+-- ARRAY_AGG(cbrd.batch_id) for list of batch detail ids
+-- distinct(cbrd.batch_date::date), for perticular distinct date where the process odne
+-- Total Number of Batch = 96 for With Success Status " status = 'S'
+-- count(cbrd.batch_id) as batchs, -------- >>>> total number of  batches enters
+---------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------
 
-
-
+------ SSM PULL DATA CHECK -----
 select 
 	cbrd.cmo_batch_run_details_id,cbrd.batch_date,cbrd.batch_id,cbrd.from_time,
 	cbrd.to_time,cbrd.status,cbrd.data_count, cbrd.error, cbrd.processed
@@ -119,15 +165,7 @@ from cmo_batch_run_details cbrd
 where cbrd.batch_date::date = '2025-01-04'::date
 order by cbrd.batch_id desc;
 
---------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------
--- For CMO Batch Pull Data Count Check
--- ARRAY_AGG(cbrd.batch_id) for list of batch detail ids
--- distinct(cbrd.batch_date::date), for perticular distinct date where the process odne
--- Total Number of Batch = 96 for With Success Status " status = 'S'
--- count(cbrd.batch_id) as batchs, -------- >>>> total number of  batches enters
----------------------------------------------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------------------------------------------
+
 
 --- Indivitual SSM Pull Data check ---
 select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id = 37757 /*and status = 5*/;
@@ -146,17 +184,8 @@ select * from grievance_lifecycle gl where gl.grievance_id = 272715 order by gl.
 
 
 select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = ''
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
---- SSM Push Details ------ 
-select * from cmo_ssm_push_details cspd;
-select cspd.cmo_ssm_push_details_id, cspd.status,cspd.data_count,response from cmo_ssm_push_details cspd where cspd.status = 'F';
-select * from public.cmo_ssm_api_push_data_count();
-select * from master_district_block_grv ;
-select * from cmo_ssm_api_push_data(50,0);
-select * from cmo_ssm_push_details cspd order by cmo_ssm_push_details_id desc limit 1;
-
+---- UPDATE / ALTER PART -----
 
 --UPDATE public.cmo_ssm_push_details SET response = replace(response, '''', '"');
 --UPDATE public.cmo_ssm_push_details SET response = replace(response, 'None,', '"NA",');
@@ -167,6 +196,9 @@ select * from cmo_ssm_push_details cspd order by cmo_ssm_push_details_id desc li
 --ALTER TABLE public.cmo_ssm_push_details ALTER COLUMN response TYPE JSONB USING response::JSONB;
 --ALTER TABLE public.cmo_ssm_push_details ADD column is_reprocessed TYPE boolean DEFAULT FALSE;
 
+------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--=========================================================================================================================================================================
 
 ---------------- Grievance Query ---------------
 select * from public.grievance_master gm where grievance_no in ('SSM4837610');
@@ -201,6 +233,7 @@ select * from admin_position_master apm where apm.office_id = 35 and role_master
 
 --select * from grievance_returned_data grd ;
 select * from grievance_retruned_data grd ;
+
 
 --------- Departmental Admin and Nodal User ------------
  select 
@@ -591,6 +624,9 @@ ORDER BY pg_stat_activity.query_start;
 --START_REPLICATION SLOT "replica_2" 2B0C/F2000000 TIMELINE 1
 
 
+--  select * from home_page_grievance_counts 
+
+
 
 --SELECT c.relname,a.*,pg_catalog.pg_get_expr(ad.adbin, ad.adrelid, true) as def_value,dsc.description,dep.objid
 --FROM pg_catalog.pg_attribute a
@@ -767,22 +803,6 @@ from grievance_lifecycle gl where gl.grievance_id = 3818109;
 
 select * from admin_position_master apm where apm.position_id = 195;
 select * from admin_user_role_master aurm;
-
------ SSM Push ------
-select
-	cspd.cmo_ssm_push_details_id,
-	cspd.push_date,
-	cspd.status,
-	cspd.actual_push_date,
-	cspd.from_row_no,
-	cspd.to_row_no,
-	cspd.data_count,
-	cspd.status_code,
-	cspd.response,
-	cspd.created_no
-from cmo_ssm_push_details cspd 
-where status = 'F'
-order by push_date desc;
 
 
 select emergency_flag from grievance_master gm where gm.grievance_no = '745098210812092023040309';

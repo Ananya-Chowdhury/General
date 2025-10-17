@@ -26,7 +26,8 @@ with
             gl.assign_comment
 		from grievance_lifecycle gl
 		where gl.grievance_status != 1 
-			and gl.assigned_on::DATE = '2025-10-15'::DATE
+--			and gl.assigned_on::DATE = '2025-10-15'::DATE
+			and gl.assigned_on::DATE between '2024-11-12'::DATE and '2025-10-16'::DATE
 			/*and gl.assigned_on::DATE = (current_date - interval '1 day')::DATE*/
 			/* and gl.assigned_on::DATE = '2025-04-20'::DATE */
 	),

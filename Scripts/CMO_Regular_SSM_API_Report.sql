@@ -653,8 +653,8 @@ select
 	spd.griev_id,
 	COUNT(*) AS total_count
 FROM ssm_pull_data_duplicate spd
---WHERE spd.batch_date BETWEEN '2025-10-01'::date AND '2025-10-12'::date
-WHERE spd.batch_date = '2025-10-14'::date
+WHERE spd.batch_date BETWEEN '2024-11-12'::date AND '2025-10-16'::date
+--WHERE spd.batch_date = '2025-10-16'::date
 GROUP BY spd.griev_id, spd.batch_date, spd.from_time, spd.to_time, spd.processed, spd.status, spd.batch_id
 ORDER BY spd.batch_date DESC;
 
@@ -978,3 +978,47 @@ order by cbrd.batch_date asc;
 
 select * 
 	from cmo_batch_run_details cbrd where cbrd.
+
+	
+	
+	
+	
+---================================================================
+	select count(1) as total_count
+	from grievance_master gm 
+--	where gm.created_on::date = '2025-10-17';
+	where gm.grievance_generate_date::date between '2023-06-08' and '2025-10-16';
+	
+
+	select count(*) as total from grievance_lifecycle gl ;
+	
+	select * from grievance_master gm limit 1;
+	
+	
+--========================================================
+	
+	select 
+        count(distinct com.office_id) 
+    from cmo_office_master com 
+    where com.status = 1 and com.district_id != 999
+    union
+    select 
+    	count(distinct csom.office_id) 
+    from cmo_sub_office_master csom
+    where csom.status = 1 and csom.mapping_district_id != 999
+    
+    
+---====================== HOME PAGE COUNT ===================
+     select * from home_page_grievance_counts;   --- mat view 
+     
+     
+     select count(*) as cou from grievance_master gm where gm.status = 15;
+     
+     
+     SELECT count(1) AS total_grievance_count,
+    sum(
+        CASE
+            WHEN gm.status = 15 THEN 1
+            ELSE 0
+        END) AS grievance_redressed_count
+   FROM grievance_master gm
