@@ -1,4 +1,4 @@
-SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-15');
+SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-20');
 
 
 with
@@ -27,7 +27,7 @@ with
 		from grievance_lifecycle gl
 		where gl.grievance_status != 1 
 --			and gl.assigned_on::DATE = '2025-10-15'::DATE
-			and gl.assigned_on::DATE between '2024-11-12'::DATE and '2025-10-16'::DATE
+			and gl.assigned_on::DATE between '2024-11-12'::DATE and '2025-10-20'::DATE
 			/*and gl.assigned_on::DATE = (current_date - interval '1 day')::DATE*/
 			/* and gl.assigned_on::DATE = '2025-04-20'::DATE */
 	),
@@ -195,7 +195,7 @@ with
 	)
 select
 	count(1) as total_count,
-	'2025-10-15'::DATE AS push_date
+	'2025-10-20'::DATE AS push_date
 	/*(current_date - interval '1 day')::DATE as push_date*/
 	/*'2025-04-20'::DATE as push_date */ /* Backdated -> 2024-11-12 to 2025-01-01 | 2025-04-11 - 2025-04-22 */ 
 from grievance_master_data M;
@@ -215,6 +215,31 @@ where gl.assigned_on::date = '2025-10-15'::DATE;
 select count(1) as ssm_push_count 
 from grievance_lifecycle gl 
 inner join grievance_master gm on gm.grievance_id = gl.grievance_id 
-where gl.assigned_on::date = '2025-10-15'::DATE
+where gl.assigned_on::date = '2025-10-17'::DATE
+--where gl.assigned_on::date between '2024-11-12' and '2025-10-20'
 and gl.grievance_status != 1
 and (gm.grievance_source = 5 or gm.received_at = 6);
+
+
+----- Daily SSM PUSH With Unique Grievance Count Check --->>> Correct ----
+select count(1) as ssm_push_count, count(distinct gl.grievance_id) as uniq_grie
+from grievance_lifecycle gl 
+inner join grievance_master gm on gm.grievance_id = gl.grievance_id 
+where gl.assigned_on::date = '2025-10-17'::DATE
+--where gl.assigned_on::date between '2024-11-12' and '2025-10-20'
+and gl.grievance_status != 1
+and (gm.grievance_source = 5 or gm.received_at = 6);
+
+
+SELECT 
+    COUNT(1) AS ssm_push_count,
+    COUNT(DISTINCT gl.grievance_id) AS uniq_grie
+FROM grievance_lifecycle gl
+INNER JOIN grievance_master gm 
+    ON gm.grievance_id = gl.grievance_id
+WHERE gl.assigned_on::date = '2025-10-17'::DATE
+  -- OR use this for a date range:
+  -- gl.assigned_on::date BETWEEN '2024-11-12' AND '2025-10-20'
+  AND gl.grievance_status != 1
+  AND (gm.grievance_source = 5 OR gm.received_at = 6)
+  group by gl.grievance_id ;

@@ -1274,9 +1274,46 @@ select forwarded_latest_5_bh_mat.assigned_by_office_id, forwarded_latest_5_bh_ma
 
 
 	 
--- ======================================================================================================================================================================
+-- ============================================================================================================================================================================
 -- --------------------------------------- HOD Dashboard ------------>>>>>> Grievances And ATRs Status At My Office --------- Final ------>>>> -------------------------------
--- ======================================================================================================================================================================
+-- ============================================================================================================================================================================
+	
+-- ===================== Unassigned Grievance =================== --	
+with in_status_3 as ( 
+	select 
+		count(*) as assigned_to_admin 
+from forwarded_latest_3_bh_mat_2 flbm 
+where flbm.assigned_to_office_id in (75) 
+) 
+select count(*) as unassigned_grievance from in_status_3
+where not exists (select 1 from grievance_master_bh_mat_2 gmbm where in_status_3.assigned_to_office_id = gmbm.assigned_to_office_id and gmbm.status != 4)	
+	
+
+	
+	
+WITH in_status_3 AS (
+    SELECT 
+        flbm.grievance_id,
+        flbm.assigned_to_office_id
+    FROM forwarded_latest_3_bh_mat_2 flbm
+    WHERE flbm.assigned_to_office_id IN (75)
+)
+SELECT 
+--    COUNT(*) AS unassigned_grievance
+    ins.grievance_id
+FROM in_status_3 ins
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM forwarded_latest_4_bh_mat_2 gmbm
+    WHERE gmbm.grievance_id = ins.grievance_id
+      AND gmbm.assigned_to_office_id = ins.assigned_to_office_id
+--      AND gmbm.grievance_status = 4 
+);
+
+	
+select * from grievance_lifecycle gl where gl.grievance_id = 77289 order by assigned_on desc;
+	
+-- ========================= Grievance At My Office ===================
 with griev_forwarded as (
 		select 
 			forwarded_latest_3_bh_mat.assigned_to_position,
