@@ -3,13 +3,13 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-21'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-10-24'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-09-26'
+WHERE batch_date::date = '2025-10-23'
 and status = 'S'
 ORDER by batch_id asc; 
 
@@ -30,7 +30,7 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-10-17'
+where cspd.actual_push_date::date = '2025-10-23'
 order by cmo_ssm_push_details_id desc; -- limit 100;
 
 
@@ -69,15 +69,15 @@ order by push_date desc;
 select count(1) as ssm_push_count
 from grievance_lifecycle gl 
 inner join grievance_master gm on gm.grievance_id = gl.grievance_id 
-where gl.assigned_on::date = '2025-10-20'::DATE
---where gl.assigned_on::date between '2024-11-12' and '2025-10-20'
+--where gl.assigned_on::date = '2025-10-21'::DATE
+where gl.assigned_on::date between '2024-11-12' and '2025-10-21'
 and gl.grievance_status != 1
 and (gm.grievance_source = 5 or gm.received_at = 6)
 --order by gl.grievance_status asc limit 100;
 
 
 --- Get The SSM API Push Count ----
-SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-18');
+SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-23');
 
 
 --- SSM PUSH DETAILS ------ 
@@ -205,8 +205,8 @@ select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = ''
 ---------------- Grievance Query ---------------
 select * from public.grievance_master gm where grievance_no in ('SSM4837610');
 select * from public.grievance_master gm where gm.grievance_id = 5235053;
-select * from public.grievance_lifecycle gl where gl.grievance_id = 3049654 order by gl.assigned_on desc;
-select * from public.grievance_master gm where gm.grievance_no = 'CMO18754331';
+select * from public.grievance_lifecycle gl where gl.grievance_id = 5894923 order by gl.assigned_on desc;
+select * from public.grievance_master gm where gm.grievance_no = 'CMO41972931';
 select * from public.admin_position_master apm where apm.position_id = 10140;               -- assigned_to_postion = position_id      admin_postion_master
 select * from public.admin_user_position_mapping aupm where aupm.position_id = 11360;       --12745 (6) --10140 --12708 (7) --
 select * from public.admin_user au where au.admin_user_id = 10920;
@@ -391,10 +391,11 @@ select * from public.cmo_sub_districts_master csdm where csdm.sub_district_id in
 select * from public.user_otp uo where uo.u_phone = '9163479418' order by created_on desc; --["9999999900","9999999999","8101859077","8918939197","8777729301","9775761810","7719357638","7001322965"]
 select * from public.user_otp uo limit 1;
 select * from public.admin_user_position_mapping aupm where aupm.position_id = 81; --3186
+select * from public.admin_user_position_mapping aupm where aupm.admin_user_id = 11119; --3186
 select * from public.admin_position_master apm where apm.position_id = 12745;
 select * from public.admin_user au where admin_user_id = 3580;
 select * from public.admin_user_details aud where aud.admin_user_id = 3580;
-select * from public.admin_user_details aud where aud.official_name = 'Smt. Sima Halder';
+select * from public.admin_user_details aud where aud.official_name = 'Ananya Majumder';
 select * from public.admin_user au limit 1;
 select * from public.admin_position_master apm where apm.record_status = 1 and apm.role_master_id = 9;
 select * from public.admin_user_position_mapping aupm where aupm.status = 1 and aupm.position_id = 1;
@@ -717,8 +718,21 @@ WHERE blocked_lock.granted = false AND blocking_lock.granted = true;
 
 -------------------------------------------------------------------------------------------------------
 
+--============================================================
+------------------------ DATA CHECK --------------------------
+--============================================================
+---------- Grievance Status Pattern Check --------
+select 
+--	count(*)
+	flbm.grievance_id 
+from forwarded_latest_3_4_bh_mat_2 flbm 
+where flbm.previous_status = 3
+--AND (flbm.next_status IS DISTINCT FROM 2)
+and next_status IN (11)  
+--limit 10;
 
---------------- DATA CHECK -----------------
+
+--------
 select max(gl.assigned_on) from grievance_lifecycle gl  
 where gl.grievance_status = 4 and gl.assigned_by_office_id != gl.assigned_to_office_id;    -- 2025.02.10   --2025-07-23  14:28:00.229 +0530
 

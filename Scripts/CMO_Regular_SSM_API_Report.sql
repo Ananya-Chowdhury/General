@@ -12,7 +12,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-19'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-10-23'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -351,13 +351,13 @@ SELECT
     COALESCE(s.grievances_success_count, 0) AS grievances_success_count,
     COALESCE(s.grievances_failed_count, 0) AS grievances_failed_count,
     COALESCE(s.duplicate_count, 0) AS grievances_duplicate_count,
-    COALESCE(s.initiate_count, 0) AS grievances_initiate_count,
+--    COALESCE(s.initiate_count, 0) AS grievances_initiate_count,
     COALESCE(s.rectified_count, 0) AS grievances_rectified_count,
     COALESCE(s.total_records, 0) AS total_records
 FROM batch_summary a
 LEFT JOIN status_summary s ON a.batch_date = s.batch_date
 LEFT JOIN pending_batches_summary pb ON a.batch_date = pb.batch_date
-WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-20'
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-23'
 ORDER BY a.batch_date DESC;
 
 -------------------------------------------------------------------------------
@@ -996,7 +996,7 @@ order by cbrd.batch_date asc;
 --==================================== Failed Batches Retrival Count Batch Date Wise ==============================
 
 select * 
-	from cmo_batch_run_details cbrd where cbrd.
+	from cmo_batch_run_details cbrd where cbrd.;
 
 	
 	
@@ -1006,7 +1006,7 @@ select *
 	select count(1) as total_count
 	from grievance_master gm 
 --	where gm.created_on::date = '2025-10-17';
-	where gm.grievance_generate_date::date between '2023-06-08' and '2025-10-20';
+	where gm.grievance_generate_date::date between '2023-06-08' and '2025-10-22';
 	
 
 	select count(*) as total from grievance_lifecycle gl ;
