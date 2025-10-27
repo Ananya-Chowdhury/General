@@ -1,4 +1,4 @@
-SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-23');
+SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-26');
 
 
 with
@@ -27,7 +27,7 @@ with
 		from grievance_lifecycle gl   --24039151
 		where gl.grievance_status != 1 
 --			and gl.assigned_on::DATE = '2025-10-15'::DATE
-			and gl.assigned_on::DATE between '2024-11-12'::DATE and '2025-10-23'::DATE
+			and gl.assigned_on::DATE between '2024-11-12'::DATE and '2025-10-26'::DATE
 			/*and gl.assigned_on::DATE = (current_date - interval '1 day')::DATE*/
 			/* and gl.assigned_on::DATE = '2025-04-20'::DATE */
 	),
@@ -197,13 +197,15 @@ with
 select
 	count(1) as total_count,
 --	assigned_on::date
-	'2025-10-23'::DATE AS push_date
+	'2025-10-26'::DATE AS push_date
 	/*(current_date - interval '1 day')::DATE as push_date*/
 	/*'2025-04-20'::DATE as push_date */ /* Backdated -> 2024-11-12 to 2025-01-01 | 2025-04-11 - 2025-04-22 */ 
 from grievance_master_data M
 --group by assigned_on;
 
 
+
+select * from control_json;
 
 select 
 	cspd.push_date,
@@ -215,6 +217,7 @@ select
 	cspd.data_count,
 	cspd.request,
 	cspd.response,
+	cspd.is_reprocessed,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
 --where cspd.actual_push_date::date = '2025-10-16' 
@@ -265,8 +268,8 @@ where gl.assigned_on::date = '2025-10-15'::DATE;
 select count(1) as ssm_push_count 
 from grievance_lifecycle gl 
 inner join grievance_master gm on gm.grievance_id = gl.grievance_id 
-where gl.assigned_on::date = '2025-10-23'::DATE
---where gl.assigned_on::date between '2024-11-12' and '2025-10-23'
+--where gl.assigned_on::date = '2025-10-26'::DATE
+where gl.assigned_on::date between '2024-11-12' and '2025-10-26'
 and gl.grievance_status != 1
 and (gm.grievance_source = 5 or gm.received_at = 6);
 

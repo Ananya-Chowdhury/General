@@ -1265,7 +1265,7 @@ select forwarded_latest_5_bh_mat.assigned_by_office_id, forwarded_latest_5_bh_ma
 		 gl.assigned_to_position,
 		 gl.assigned_by_office_cat,
 		 gl.assigned_to_office_cat
-	 from grievance_lifecycle gl where gl.grievance_id = 3669328 order by gl.assigned_on desc;
+	 from grievance_lifecycle gl where gl.grievance_id = 3293586 order by gl.assigned_on desc;
 -- ==============================================================================================================================================================================================================================
 -- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- ====================================================================================================== FINAL =================================================================================================================
@@ -1386,7 +1386,7 @@ select
 	gl.assigned_to_office_id,
 	gl.assigned_to_position,
 	gl.assigned_by_position 
-from grievance_lifecycle gl where gl.grievance_id = 302 order by assigned_on desc;
+from grievance_lifecycle gl where gl.grievance_id = 107591 order by assigned_on desc;
 
 select * from cmo_office_master com where com.office_id = 75;
 	
@@ -1640,6 +1640,43 @@ group by md.grievance_id
 --group by md.assigned_to_position, md.assigned_to_id
 
 
+select max(atr_latest_14_bh_mat.assigned_on)
+	from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
+inner join atr_latest_14_bh_mat_2 as atr_latest_14_bh_mat on atr_latest_14_bh_mat.grievance_id = forwarded_latest_3_bh_mat.grievance_id and atr_latest_14_bh_mat.current_status in (14,15)
+
+
+--			
+--			
+--		select 
+----			'Restricted' as role,
+--			md.assigned_to_position as assigned_to_position,
+--			md.assigned_to_id as assigned_to_id,
+--			md.assigned_to_office_id,
+--    		count(1) as atr_submitted
+--	    from master_district_block_grv md
+--	    left join admin_position_master apm on apm.position_id = md.assigned_to_position
+--	    left join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id
+--	    where md.status in (11) and md.assigned_to_office_id = 75 and aurm.role_master_id in (4,5)
+--	    group by md.assigned_to_position, md.assigned_to_id, md.assigned_to_office_id
+
+
+--		select
+--			bh.assigned_to_position as assigned_to_position,
+--			bh.assigned_to_id as assigned_to_id,
+--			count(distinct forwarded_latest_3_bh_mat.grievance_id) as atr_submitted
+--		from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat 
+--		inner join forwarded_latest_3_4_bh_mat_2 as bh on forwarded_latest_3_bh_mat.grievance_id = bh.grievance_id 
+--		left join admin_position_master apm on apm.position_id = bh.assigned_to_position
+--	    left join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id
+--		where bh.assigned_to_office_id in (75) /*and aurm.role_master_id in (4,5)*/
+--		and bh.previous_status = 4
+--		and next_status IN (11) 
+--		and bh.assigned_to_office_id  = bh.next_status_assigned_to_office
+--		group by bh.assigned_to_position, bh.assigned_to_id
+
+
+
+
 
 
 
@@ -1687,68 +1724,48 @@ with griev_forwarded as (
 			count(1) as atr_submitted
 		from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
 		inner join atr_latest_14_bh_mat_2 as atr_latest_14_bh_mat on atr_latest_14_bh_mat.grievance_id = forwarded_latest_3_bh_mat.grievance_id and atr_latest_14_bh_mat.current_status in (14,15)
-		left join admin_position_master apm on apm.position_id = forwarded_latest_3_bh_mat.assigned_to_id
+		left join admin_position_master apm on apm.position_id = forwarded_latest_3_bh_mat.assigned_to_position
+		-- left join admin_user_role_master on apm.role_master_id = admin_user_role_master.role_master_id and admin_user_role_master.role_master_id in (4,5)
 		where atr_latest_14_bh_mat.assigned_by_office_id in (75) /* SSM CALL CENTER */ 
 		group by forwarded_latest_3_bh_mat.assigned_to_position, forwarded_latest_3_bh_mat.assigned_to_id, forwarded_latest_3_bh_mat.assigned_to_office_id
-		
---			union all
-		
+			union all
 		select 
---			'Nodal' as role,
---			forwarded_latest_4_bh_mat.assigned_to_position as assigned_to_position,
---			forwarded_latest_4_bh_mat.assigned_to_id as assigned_to_id,
---			forwarded_latest_4_bh_mat.assigned_to_office_id,
+--			'Restricted' as role,
+			forwarded_latest_4_bh_mat.assigned_to_position as assigned_to_position,
+			forwarded_latest_4_bh_mat.assigned_to_id as assigned_to_id,
+			forwarded_latest_4_bh_mat.assigned_to_office_id,
 --			atr_latest_4_11_bh_mat.assigned_by_position,
 --			atr_latest_4_11_bh_mat.assigned_by_id,
 --			atr_latest_4_11_bh_mat.assigned_by_office_id,
---			count(1) as atr_submitted
-			forwarded_latest_4_bh_mat.grievance_id 
+			count(1) as atr_submitted
+--			forwarded_latest_4_bh_mat.grievance_id 
 		from forwarded_latest_4_bh_mat_2 as forwarded_latest_4_bh_mat
-		inner join atr_latest_4_11_bh_mat_2 as atr_latest_4_11_bh_mat on atr_latest_4_11_bh_mat.grievance_id = forwarded_latest_4_bh_mat.grievance_id /*and atr_latest_4_11_bh_mat.current_status in (14,15)*/
-		left join admin_position_master apm on apm.position_id = forwarded_latest_4_bh_mat.assigned_to_id
-		left join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id 
-		where forwarded_latest_4_bh_mat.assigned_to_office_id in (75) and aurm.role_master_id in (6)  /* SSM CALL CENTER */ 
-		and forwarded_latest_4_bh_mat.assigned_to_id != atr_latest_4_11_bh_mat.assigned_by_id 
---		group by forwarded_latest_4_bh_mat.assigned_to_position, forwarded_latest_4_bh_mat.assigned_to_id, forwarded_latest_4_bh_mat.assigned_to_office_id
---		,atr_latest_4_11_bh_mat.assigned_by_position, atr_latest_4_11_bh_mat.assigned_by_id, atr_latest_4_11_bh_mat.assigned_by_office_id
---			
---			
+		inner join atr_latest_4_11_bh_mat_2 as atr_latest_4_11_bh_mat on atr_latest_4_11_bh_mat.grievance_id = forwarded_latest_4_bh_mat.grievance_id 
+		left join admin_position_master apm on apm.position_id = forwarded_latest_4_bh_mat.assigned_to_position
+		left join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id and aurm.role_master_id in (6)
+		where forwarded_latest_4_bh_mat.assigned_to_office_id in (75)   /* SSM CALL CENTER */ 
+		and forwarded_latest_4_bh_mat.assigned_by_id = atr_latest_4_11_bh_mat.assigned_to_id 
+		group by forwarded_latest_4_bh_mat.assigned_to_position, forwarded_latest_4_bh_mat.assigned_to_id, forwarded_latest_4_bh_mat.assigned_to_office_id
+		/*,atr_latest_4_11_bh_mat.assigned_by_position, atr_latest_4_11_bh_mat.assigned_by_id, atr_latest_4_11_bh_mat.assigned_by_office_id*/
+), atr_yet_to_sent as (
 --		select 
-----			'Restricted' as role,
---			md.assigned_to_position as assigned_to_position,
---			md.assigned_to_id as assigned_to_id,
---			md.assigned_to_office_id,
---    		count(1) as atr_submitted
---	    from master_district_block_grv md
---	    left join admin_position_master apm on apm.position_id = md.assigned_to_position
---	    left join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id
---	    where md.status in (11) and md.assigned_to_office_id = 75 and aurm.role_master_id in (4,5)
---	    group by md.assigned_to_position, md.assigned_to_id, md.assigned_to_office_id
-
-
---		select
---			bh.assigned_to_position as assigned_to_position,
---			bh.assigned_to_id as assigned_to_id,
---			count(distinct forwarded_latest_3_bh_mat.grievance_id) as atr_submitted
---		from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat 
---		inner join forwarded_latest_3_4_bh_mat_2 as bh on forwarded_latest_3_bh_mat.grievance_id = bh.grievance_id 
---		left join admin_position_master apm on apm.position_id = bh.assigned_to_position
---	    left join admin_user_role_master aurm on aurm.role_master_id = apm.role_master_id
---		where bh.assigned_to_office_id in (75) /*and aurm.role_master_id in (4,5)*/
---		and bh.previous_status = 4
---		and next_status IN (11) 
---		and bh.assigned_to_office_id  = bh.next_status_assigned_to_office
---		group by bh.assigned_to_position, bh.assigned_to_id
-)/*, atr_yet_to_sent as (
-		select 
-			forwarded_latest_3_bh_mat.assigned_to_position,
-			forwarded_latest_3_bh_mat.assigned_to_id,
-			 count(1) as yet_atr_not_submitted
-		from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
-		where forwarded_latest_3_bh_mat.assigned_to_office_id in (75)
-        and not exists ( select 1 from atr_latest_14_bh_mat_2 as atr_latest_14_bh_mat where atr_latest_14_bh_mat.grievance_id = forwarded_latest_3_bh_mat.grievance_id and atr_latest_14_bh_mat.current_status in (14,15)) /* SSM CALL CENTER */ 
-		group by forwarded_latest_3_bh_mat.assigned_to_position, forwarded_latest_3_bh_mat.assigned_to_id
-)	*/
+--			forwarded_latest_3_bh_mat.assigned_to_position,
+--			forwarded_latest_3_bh_mat.assigned_to_id,
+--			 count(1) as yet_atr_not_submitted
+--		from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
+--		where forwarded_latest_3_bh_mat.assigned_to_office_id in (75)
+--        and not exists ( select 1 from atr_latest_14_bh_mat_2 as atr_latest_14_bh_mat where atr_latest_14_bh_mat.grievance_id = forwarded_latest_3_bh_mat.grievance_id and atr_latest_14_bh_mat.current_status in (14,15)) /* SSM CALL CENTER */ 
+--		group by forwarded_latest_3_bh_mat.assigned_to_position, forwarded_latest_3_bh_mat.assigned_to_id
+		select count(1) as yet_atr_not_submitted,
+			md.assigned_to_position,
+			md.assigned_to_id
+			from master_district_block_grv md
+		left join admin_position_master apm on apm.position_id = md.updated_by_position
+		left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
+		where md.status in (6,11,13)
+		and md.assigned_to_office_id = 75
+		group by md.assigned_to_position, md.assigned_to_id
+)	
 	select 
 --		coalesce(atr_sent.role, 'N/A') as roleee,
 --		case 
@@ -1772,13 +1789,13 @@ with griev_forwarded as (
         coalesce(griev_forwarded.assigned, 0) as grievance_asssigned,
         coalesce(griev_yet_to_assigned.yet_to_assigned, 0) as grievance_yet_to_assigned,
         sum(coalesce(griev_forwarded.assigned, 0) + coalesce(griev_yet_to_assigned.yet_to_assigned, 0)) as grievance_total,
-        coalesce(atr_sent.atr_submitted, 0) as atr_sent
---        atr_yet_to_sent.yet_atr_not_submitted as atr_not_submitted,
---        sum(atr_sent.atr_submitted + atr_yet_to_sent.yet_atr_not_submitted) as atr_total
+        coalesce(atr_sent.atr_submitted, 0) as atr_sent,
+        atr_yet_to_sent.yet_atr_not_submitted as atr_not_submitted,
+        sum(atr_sent.atr_submitted + atr_yet_to_sent.yet_atr_not_submitted) as atr_total
 	from griev_forwarded
 	left join griev_yet_to_assigned on griev_yet_to_assigned.assigned_to_id = griev_forwarded.assigned_to_id
 	left join atr_sent on atr_sent.assigned_to_id = griev_forwarded.assigned_to_id
---	left join atr_yet_to_sent on atr_yet_to_sent.assigned_to_id = griev_forwarded.assigned_to_id
+	left join atr_yet_to_sent on atr_yet_to_sent.assigned_to_id = griev_forwarded.assigned_to_id
     left join admin_position_master on griev_forwarded.assigned_to_position = admin_position_master.position_id
 	left join admin_user_details on griev_forwarded.assigned_to_id = admin_user_details.admin_user_id
     left join cmo_office_master on admin_position_master.office_id = cmo_office_master.office_id
@@ -1786,8 +1803,8 @@ with griev_forwarded as (
     left join cmo_designation_master on cmo_designation_master.designation_id = admin_position_master.designation_id
     left join cmo_sub_office_master on cmo_sub_office_master.suboffice_id = admin_position_master.sub_office_id
 	group by admin_user_details.official_name, cmo_designation_master.designation_name,admin_position_master.office_id, admin_user_role_master.role_master_name, 
-	cmo_sub_office_master.suboffice_name, cmo_office_master.office_name, griev_forwarded.assigned, griev_yet_to_assigned.yet_to_assigned,atr_sent.atr_submitted/*, 
-	atr_yet_to_sent.yet_atr_not_submitted*/,admin_position_master.record_status,admin_position_master.role_master_id
+	cmo_sub_office_master.suboffice_name, cmo_office_master.office_name, griev_forwarded.assigned, griev_yet_to_assigned.yet_to_assigned,atr_sent.atr_submitted, 
+	atr_yet_to_sent.yet_atr_not_submitted,admin_position_master.record_status,admin_position_master.role_master_id
 	 
 	
 	
@@ -2104,10 +2121,51 @@ left join returned_fo_review on fwd_Count.assigned_by_id = returned_fo_review.as
 	--------------------------------------------------------------------------------------
 	
 	
+ /*All TOTAL USER WISE COUNT Currently*/
+------ ADMIN ACT ON ATR LISTING ALL TAB
+/* TAB_ID: 2B6 | TBL: All >> Role: 4 Ofc: 75 | G_Codes: ('GM011', 'GM013', 'GM006') */
+select count(1)
+from master_district_block_grv md
+left join admin_position_master apm on apm.position_id = md.updated_by_position
+left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
+where md.status in (6,11,13)
+and md.assigned_to_office_id = 75
+
+
+----- Nodal ACT ON ATR LISTINNG ALL TAB
+/* TAB_ID: 2B6 | TBL: All >> Role: 5 Ofc: 75 | G_Codes: ('GM011', 'GM013', 'GM006') */
+select count(1)
+from master_district_block_grv md
+left join admin_position_master apm on apm.position_id = md.updated_by_position
+left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
+where md.status in (6,11,13)
+and md.assigned_to_office_id = 75
+    and md.assigned_to_position = 14954
+
+
+
+ ------- Restricted USer 
+ /* TAB_ID: 2B6 | TBL: All >> Role: 6 Ofc: 75 | G_Codes: ('GM011', 'GM013', 'GM006') */
+select count(1)
+from master_district_block_grv md
+left join admin_position_master apm on apm.position_id = md.updated_by_position
+left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
+where md.status in (6,11,13)
+and md.assigned_to_office_id = 75
+    and md.assigned_to_position = 12897
+
 	
-	
-	
-	
+    
+ -----  Correct for User wise query ----
+select count(1),
+	md.assigned_to_position,
+	md.assigned_to_id
+	from master_district_block_grv md
+left join admin_position_master apm on apm.position_id = md.updated_by_position
+left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
+where md.status in (6,11,13)
+and md.assigned_to_office_id = 75
+group by md.assigned_to_position, md.assigned_to_id
 	
 	
 	
@@ -2415,3 +2473,99 @@ from union_part
 	 
 	 
 	 
+
+
+
+
+
+
+with latest_4 as (
+	select * from (
+		select 
+			row_number() over(partition by gl.grievance_id order by gl.assigned_on desc) as rnn,
+			gl.assigned_on, gl.lifecycle_id, gl.grievance_id,gl.grievance_status
+		from grievance_lifecycle gl 
+		inner join admin_position_master apm on apm.position_id = gl.assigned_by_position 
+		inner join admin_position_master apm2 on apm2.position_id = gl.assigned_to_position 
+		where apm.role_master_id in (4,5) and apm2.role_master_id = 6
+	)XX where XX.rnn = 1
+), latest_11 as (
+	select * from (
+		select 
+			row_number() over(partition by gl.grievance_id order by gl.assigned_on desc) as rnn,
+			gl.assigned_on, gl.lifecycle_id, gl.grievance_id,gl.grievance_status
+		from grievance_lifecycle gl 
+		inner join admin_position_master apm on apm.position_id = gl.assigned_by_position 
+		inner join admin_position_master apm2 on apm2.position_id = gl.assigned_to_position 
+		where apm.role_master_id = 6 and apm2.role_master_id in (4,5)
+	)XX where XX.rnn = 1
+)
+select 
+	* 
+from latest_4
+inner join latest_11 on latest_4.grievance_id = latest_11.grievance_id and latest_11.assigned_on > latest_4.assigned_on ;
+
+
+select 
+	row_number() over(partition by gl.grievance_id order by gl.assigned_on desc) as rnn,
+	gl.*
+from grievance_lifecycle gl 
+inner join admin_position_master apm on apm.position_id = gl.assigned_by_position 
+inner join admin_position_master apm2 on apm2.position_id = gl.assigned_to_position 
+where apm.role_master_id = 6 and apm2.role_master_id in (4,5)
+
+
+
+
+
+
+select 
+	row_number() over(partition by gl.grievance_id order by gl.assigned_on desc) as rnn,
+	gl.*
+from grievance_lifecycle gl 
+inner join admin_position_master apm on apm.position_id = gl.assigned_by_position 
+inner join admin_position_master apm2 on apm2.position_id = gl.assigned_to_position 
+where apm.role_master_id in (4,5) and apm2.role_master_id = 6 and
+	  gl.grievance_id = 398670;
+
+
+select * from grievance_lifecycle gl where  gl.grievance_id = 1 order by assigned_on ;
+
+select  
+	apm.role_master_id , apm2.role_master_id, gl.lifecycle_id
+from grievance_lifecycle gl 
+inner join admin_position_master apm on apm.position_id = gl.assigned_by_position 
+inner join admin_position_master apm2 on apm2.position_id = gl.assigned_to_position 
+where gl.grievance_id = 236
+order by gl.assigned_on ;
+
+
+
+
+
+
+select 
+--			'Admin & Nodal' as role,
+--			forwarded_latest_3_bh_mat.assigned_to_position as assigned_to_position,
+--			forwarded_latest_3_bh_mat.assigned_to_id as assigned_to_id,
+--			forwarded_latest_3_bh_mat.assigned_to_office_id,
+			apm.role_master_id, count(1) as atr_submitted
+		from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
+		inner join atr_latest_14_bh_mat_2 as atr_latest_14_bh_mat on atr_latest_14_bh_mat.grievance_id = forwarded_latest_3_bh_mat.grievance_id --and atr_latest_14_bh_mat.current_status in (14,15)
+		inner join admin_position_master apm on apm.position_id = forwarded_latest_3_bh_mat.assigned_to_position
+		group by apm.role_master_id
+		-- left join admin_user_role_master on apm.role_master_id = admin_user_role_master.role_master_id and admin_user_role_master.role_master_id in (4,5)
+--		where atr_latest_14_bh_mat.assigned_by_office_id in (75) /* SSM CALL CENTER */ 
+--		group by forwarded_latest_3_bh_mat.assigned_to_position, forwarded_latest_3_bh_mat.assigned_to_id, forwarded_latest_3_bh_mat.assigned_to_office_id;
+
+
+
+
+
+
+select apm.role_master_id, count(1)
+from forwarded_latest_3_bh_mat flbm 
+inner join atr_latest_14_bh_mat albm on flbm.grievance_id = albm.grievance_id 
+inner join admin_position_master apm on apm.position_id = albm.assigned_by_position 
+where apm.role_master_id in (4,5)
+group by apm.role_master_id;
