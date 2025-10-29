@@ -1281,13 +1281,26 @@ select forwarded_latest_5_bh_mat.assigned_by_office_id, forwarded_latest_5_bh_ma
 -- ===================== Unassigned Grievance =================== --	
 with in_status_3 as ( 
 	select 
-		count(*) as assigned_to_admin 
+		count(*) as assigned_to_admin ,
+		flbm.
 from forwarded_latest_3_bh_mat_2 flbm 
 where flbm.assigned_to_office_id in (75) 
 ) 
 select count(*) as unassigned_grievance from in_status_3
-where not exists (select 1 from grievance_master_bh_mat_2 gmbm where in_status_3.assigned_to_office_id = gmbm.assigned_to_office_id and gmbm.status != 4)	
-	
+where not exists (select 1 from grievance_master_bh_mat_2 gmbm 
+where in_status_3.assigned_to_office_id = gmbm.assigned_to_office_id and gmbm.status != 4)	
+--==========================================================================================================================
+
+
+
+select 
+    count(*) as unassigned_grievances
+from forwarded_latest_3_4_bh_mat_2 as bh
+where bh.current_status = 3 and bh.
+assigned_to_office_id in (75) /* SSM CALL CENTER */ 
+--  and (next_status is distinct from 4) 
+and (bh.next_status is NULL or bh.next_status not in (4, 5, 11, 14, 7))
+
 
 	
 	
@@ -1359,7 +1372,7 @@ AND next_status IN (4, 5, 11, 14, 7)
 ---- Correct for Unassigned Grievance -----
 select count(*) as unassigned_grievances
 from forwarded_latest_3_4_bh_mat_2 bh
-WHERE grievance_status = 3 and assigned_to_office_id in (75) /*and grievance_source = 5*/ /*and assigned_to_office_id = next_status_assigned_to_office*/
+WHERE bh.current_status = 3 and bh.assigned_to_office_id in (75) /*and grievance_source = 5*/ /*and assigned_to_office_id = next_status_assigned_to_office*/
 --  AND (next_status IS DISTINCT FROM 4) ; 
   AND (next_status IS NULL OR next_status NOT IN (4, 5, 11, 14, 7))
 

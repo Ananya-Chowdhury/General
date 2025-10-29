@@ -3,7 +3,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-28'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-10-29'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -30,7 +30,7 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-10-27'
+where cspd.actual_push_date::date = '2025-10-28'
 order by cmo_ssm_push_details_id desc; -- limit 100;
 
 
@@ -77,7 +77,7 @@ and (gm.grievance_source = 5 or gm.received_at = 6)
 
 
 --- Get The SSM API Push Count ----
-SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-23');
+SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-28');
 
 
 --- SSM PUSH DETAILS ------ 
