@@ -620,4 +620,10 @@ ORDER by batch_id desc;
                 from master_district_block_grv_data mdbgd;
 
                             
-                            
+ ------------------------------------------------------------------------------------------------------------------------
+ 
+select * from cmo_batch_grievance_line_item where griev_id ='SSM4295122'
+
+select * from grievance_master gm where gm.grievance_no ='SSM5308026';
+select * from cmo_police_station_master cpsm where cpsm.ps_id = 627;
+select * from cmo_police_station_master cpsm where cpsm.ps_code = '0023';

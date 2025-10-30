@@ -22,6 +22,7 @@ WHERE batch_date::date = '2025-09-26'
 and status = 'S'
 ORDER by batch_id asc; 
 
+select 
 
 select * from cmo_emp_batch_run_details cebrd;
 
@@ -357,7 +358,7 @@ SELECT
 FROM batch_summary a
 LEFT JOIN status_summary s ON a.batch_date = s.batch_date
 LEFT JOIN pending_batches_summary pb ON a.batch_date = pb.batch_date
-WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-28'
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-29'
 ORDER BY a.batch_date DESC;
 
 -------------------------------------------------------------------------------
@@ -463,9 +464,22 @@ select * from cmo_emp_batch_run_details order by cmo_emp_batch_run_details_id de
 --===============================================================================
 
 ---- SSM Batches 
-select * from cmo_batch_grievance_line_item cbgli where /*cbgli.status = 3 and*/ cbgli.griev_id = 'SSM4295850';  -- FAILURE >> |Police Station not found in grievance number SSM4295850
+select * from cmo_batch_grievance_line_item cbgli where /*cbgli.status = 3 and*/ cbgli.griev_id = 'SSM5301334';  -- FAILURE >> |Police Station not found in grievance number SSM4295850
 select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id = 38204;
-select cbgli.ps_code, cbgli.griev_id, cbgli.error from cmo_batch_grievance_line_item cbgli where cbgli.griev_id in ('SSM4352563','SSM4352782','SSM4352712','SSM4352641','SSM4344439','SSM4344321','SSM4343619','SSM4343494','SSM4343116','SSM4342890','SSM4342859','SSM4342472','SSM4342260','SSM4341795','SSM4340729','SSM4340656','SSM4340161','SSM4342579','SSM4315952','SSM4325769','SSM4344501','SSM4340021','SSM4339528','SSM4339215','SSM4338903','SSM4338843','SSM4338645','SSM4338572','SSM4338401','SSM4338252','SSM4337807','SSM4337515','SSM4337106','SSM4344670','SSM4329122','SSM4322647','SSM4336832','SSM4336106','SSM4336074','SSM4336023','SSM4335547','SSM4335361','SSM4334701','SSM4334665','SSM4328494','SSM4327366','SSM4328368','SSM4334076','SSM4333100','SSM4332777','SSM4328087','SSM4332152','SSM4332070','SSM4330411','SSM4330329','SSM4329669','SSM4322199','SSM4321681','SSM4288634','SSM4303624','SSM4309799','SSM4312981','SSM4313705','SSM4315288','SSM4317856','SSM4317949','SSM4318429','SSM4319105','SSM4319226','SSM4319381','SSM4319567','SSM4319610','SSM4320709','SSM4320789','SSM4320834','SSM4320856','SSM4320890','SSM4320911','SSM4321385','SSM4321759','SSM4321783','SSM4321899','SSM4321910','SSM4321997','SSM4322383','SSM4322391','SSM4322425','SSM4322539','SSM4322565','SSM4322606','SSM4322627','SSM4323802','SSM4324719','SSM4324926','SSM4325647','SSM4326245','SSM4326254','SSM4326480','SSM4326536','SSM4326627','SSM4326964','SSM4307376','SSM4316630','SSM4316524','SSM4316217','SSM4315542','SSM4315365','SSM4315198','SSM4314477','SSM4314269','SSM4314185','SSM4314086','SSM4313914','SSM4313663','SSM4313600','SSM4313466','SSM4312342','SSM4311736','SSM4311544','SSM4310975','SSM4310818','SSM4310593','SSM4317017','SSM4310012','SSM4310007','SSM4309761','SSM4309260','SSM4296590','SSM4288373','SSM4307358','SSM4306857','SSM4306366','SSM4305039','SSM4304768','SSM4304730','SSM4304404','SSM4303970','SSM4303585','SSM4303448','SSM4302695','SSM4302527','SSM4288300','SSM4302172','SSM4300534','SSM4300435','SSM4300411','SSM4299906','SSM4299275','SSM4299159','SSM4298982','SSM4298853','SSM4298783','SSM4298162','SSM4297260','SSM4296761','SSM4295993','SSM4296003'
+select cbgli.ps_code, cbgli.griev_id, cbgli.error from cmo_batch_grievance_line_item cbgli 
+where cbgli.griev_id in ('SSM4352563','SSM4352782','SSM4352712','SSM4352641','SSM4344439','SSM4344321','SSM4343619','SSM4343494','SSM4343116','SSM4342890','SSM4342859',
+'SSM4342472','SSM4342260','SSM4341795','SSM4340729','SSM4340656','SSM4340161','SSM4342579','SSM4315952','SSM4325769','SSM4344501','SSM4340021','SSM4339528','SSM4339215',
+'SSM4338903','SSM4338843','SSM4338645','SSM4338572','SSM4338401','SSM4338252','SSM4337807','SSM4337515','SSM4337106','SSM4344670','SSM4329122','SSM4322647','SSM4336832',
+'SSM4336106','SSM4336074','SSM4336023','SSM4335547','SSM4335361','SSM4334701','SSM4334665','SSM4328494','SSM4327366','SSM4328368','SSM4334076','SSM4333100','SSM4332777',
+'SSM4328087','SSM4332152','SSM4332070','SSM4330411','SSM4330329','SSM4329669','SSM4322199','SSM4321681','SSM4288634','SSM4303624','SSM4309799','SSM4312981','SSM4313705',
+'SSM4315288','SSM4317856','SSM4317949','SSM4318429','SSM4319105','SSM4319226','SSM4319381','SSM4319567','SSM4319610','SSM4320709','SSM4320789','SSM4320834','SSM4320856',
+'SSM4320890','SSM4320911','SSM4321385','SSM4321759','SSM4321783','SSM4321899','SSM4321910','SSM4321997','SSM4322383','SSM4322391','SSM4322425','SSM4322539','SSM4322565',
+'SSM4322606','SSM4322627','SSM4323802','SSM4324719','SSM4324926','SSM4325647','SSM4326245','SSM4326254','SSM4326480','SSM4326536','SSM4326627','SSM4326964','SSM4307376',
+'SSM4316630','SSM4316524','SSM4316217','SSM4315542','SSM4315365','SSM4315198','SSM4314477','SSM4314269','SSM4314185','SSM4314086','SSM4313914','SSM4313663','SSM4313600',
+'SSM4313466','SSM4312342','SSM4311736','SSM4311544','SSM4310975','SSM4310818','SSM4310593','SSM4317017','SSM4310012','SSM4310007','SSM4309761','SSM4309260','SSM4296590',
+'SSM4288373','SSM4307358','SSM4306857','SSM4306366','SSM4305039','SSM4304768','SSM4304730','SSM4304404','SSM4303970','SSM4303585','SSM4303448','SSM4302695','SSM4302527',
+'SSM4288300','SSM4302172','SSM4300534','SSM4300435','SSM4300411','SSM4299906','SSM4299275','SSM4299159','SSM4298982','SSM4298853','SSM4298783','SSM4298162','SSM4297260',
+'SSM4296761','SSM4295993','SSM4296003'
 );  -- FAILURE >> |Police Station not found in grievance number SSM4295850
 
 
@@ -481,19 +495,19 @@ select * from cmo_districts_master cdm where cdm.district_code = '11';
 select * from cmo_districts_master cdm;
 
 ---- Grievance Category 
-select * from cmo_grievance_category_master cgcm where cgcm.grievance_category_code = '18';
+select * from cmo_grievance_category_master cgcm where cgcm.grievance_category_code = 'J4';
 select * from cmo_grievance_category_master cgcm ;
 
 ---- Block Master 
-select * from cmo_blocks_master cbm where cbm.block_code = '117';
+select * from cmo_blocks_master cbm where cbm.block_code = '325';
 select * from cmo_blocks_master cbm ;
 
 ---- Police Station 
-select * from cmo_police_station_master cpsm where cpsm.ps_code = '527';
+select * from cmo_police_station_master cpsm where cpsm.ps_code = '804';
 select * from cmo_police_station_master cpsm ; -- ps_id = 1 for not known 
 
 ---- Gram Panchayet 
-select * from cmo_gram_panchayat_master cgpm where cgpm.gp_code = '001143';
+select * from cmo_gram_panchayat_master cgpm where cgpm.gp_code = '003187';
 select * from cmo_gram_panchayat_master cgpm ;
 
 ---- Ward Master 
@@ -501,7 +515,7 @@ select * from cmo_wards_master cwm ;
 
 
 ---- Post Office
-select * from cmo_post_office_master cpom where cpom.po_code = '0286';
+select * from cmo_post_office_master cpom where cpom.po_code = '0448';
 
 ---- Skills Master 
 select * from cmo_skill_master csm ;
@@ -514,6 +528,9 @@ select * from cmo_professional_qualification_master cpqm;
 ---- Education Qualification
 select * from cmo_educational_qualification_master ceqm ;
 
+
+----- Assembly Constitution -----
+select * from cmo_assembly_master cam where cam.assembly_code = '279;'
 
 ---------------------------------------------------------------------------------------------------
 
@@ -1006,7 +1023,7 @@ select *
 	select count(1) as total_count
 	from grievance_master gm 
 --	where gm.created_on::date = '2025-10-17';
-	where gm.grievance_generate_date::date between '2023-06-08' and '2025-10-28'
+	where gm.grievance_generate_date::date between '2023-06-08' and '2025-10-29'
 	and gm.grievance_source = 5;
 	
 

@@ -3,7 +3,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-29'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-10-30'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -30,7 +30,7 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-10-28'
+where cspd.actual_push_date::date = '2025-10-29'
 order by cmo_ssm_push_details_id desc; -- limit 100;
 
 
@@ -3063,3 +3063,9 @@ order by aurm.role_master_id asc;
 --"Action_taken_Date": "2025-08-27 00:34:04", "Action_taken": "NA", "Action_Desc": "Benefit/Service Provided", "Action_taken_by": "CMO Administrator, Senior Software Developer,
 -- Chief Ministers Office", "ATN_Reason_Desc": "NA", "griev_trans_no": 15, "Action_Proposed": "NA", "Contact_Date": null, "Tentative_Dat
 
+
+
+
+----====================== SMS BULK STATUS UPDATE QUERY =========================
+select * from bulk_griev_status_mesg_assign where request_mobile_no::bigint = 9903733214; ---6295603699
+select * from bulk_griev_status_mesg_assign bgsa order by bgsa.id desc limit 1;
