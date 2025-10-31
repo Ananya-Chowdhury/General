@@ -222,6 +222,22 @@
 				},
 				"auth-model": "native"
 			}
+		},
+		"mysql8-19a38bd2bce-45379252e6753057": {
+			"provider": "mysql",
+			"driver": "mysql8",
+			"name": "sdc_snltr_dev",
+			"save-password": true,
+			"configuration": {
+				"host": "10.0.0.1",
+				"port": "3336",
+				"database": "sdc_snltr_dev",
+				"url": "jdbc:mysql://10.0.0.1:3336/sdc_snltr_dev",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"auth-model": "native"
+			}
 		}
 	},
 	"virtual-models": {"postgres-jdbc-198738c5c23-3a4863b3e2f006b6":{"cmo_grievance_portal_prod":{"public":{":griev_ids_pnrd_p3":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}},":griev_ids_pnrd_e_p2_road":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}},":cmo_ssm_push_details":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}}}}}},

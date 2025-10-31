@@ -12,7 +12,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-28'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-10-31'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -358,7 +358,7 @@ SELECT
 FROM batch_summary a
 LEFT JOIN status_summary s ON a.batch_date = s.batch_date
 LEFT JOIN pending_batches_summary pb ON a.batch_date = pb.batch_date
-WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-29'
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-30'
 ORDER BY a.batch_date DESC;
 
 -------------------------------------------------------------------------------
@@ -963,10 +963,32 @@ FROM (
 ---=====================================================================================================================================================================================================
 ---=====================================================================================================================================================================================================
 
-
+---- ========================= SSM DATA CHECKING QUERY SET ======================
 
 select count(*) from cmo_batch_grievance_line_item 
 where cmo_batch_run_details_id = 37890 and griev_id = 'SSM5236014' and status = 3;
+
+
+select 
+	griev_id,
+	griev_date,
+	griev_received_date,
+	processed_on,
+	status
+from cmo_batch_grievance_line_item 
+where griev_id in ('SSM1011144', 'SSM1011146', 'SSM1011147', 'SSM1011154', 'SSM1011158', 'SSM1011173', 'SSM1011174', 'SSM1011178', 'SSM1011179', 'SSM1011193', 'SSM1011198', 'SSM1011200', 'SSM1011206', 'SSM1011208', 'SSM1011210', 'SSM1011215', 'SSM1011216', 'SSM1011221', 'SSM1011223', 'SSM1011236', 'SSM1011239', 'SSM1011241', 'SSM1011246', 'SSM1011249', 'SSM1011251', 'SSM1011252', 'SSM1011253', 'SSM1011254', 'SSM1011258', 'SSM1011277', 'SSM1011282', 'SSM1011289', 'SSM1011293', 'SSM1011294', 'SSM1011297', 'SSM1011298', 'SSM1011302', 'SSM1011314', 'SSM1011320', 'SSM1011322', 'SSM1011327', 'SSM1011332', 'SSM1011334', 'SSM1011337', 'SSM1011338', 'SSM1011339', 'SSM1011344', 'SSM1011354', 'SSM1011360', 'SSM1011367', 'SSM1011369', 'SSM1011371', 'SSM1011372', 'SSM1011374', 'SSM1011376', 'SSM1011377', 'SSM1011394') ;
+
+
+
+select 
+	gm.grievance_id,
+	gm.grievance_no,
+	gm.grievance_generate_date,
+	gm.created_on 
+from grievance_master gm 
+where gm.grievance_no in ('SSM1011144', 'SSM1011146', 'SSM1011147', 'SSM1011154', 'SSM1011158', 'SSM1011173', 'SSM1011174', 'SSM1011178', 'SSM1011179', 'SSM1011193', 'SSM1011198', 'SSM1011200', 'SSM1011206', 'SSM1011208', 'SSM1011210', 'SSM1011215', 'SSM1011216', 'SSM1011221', 'SSM1011223', 'SSM1011236', 'SSM1011239', 'SSM1011241', 'SSM1011246', 'SSM1011249', 'SSM1011251', 'SSM1011252', 'SSM1011253', 'SSM1011254', 'SSM1011258', 'SSM1011277', 'SSM1011282', 'SSM1011289', 'SSM1011293', 'SSM1011294', 'SSM1011297', 'SSM1011298', 'SSM1011302', 'SSM1011314', 'SSM1011320', 'SSM1011322', 'SSM1011327', 'SSM1011332', 'SSM1011334', 'SSM1011337', 'SSM1011338', 'SSM1011339', 'SSM1011344', 'SSM1011354', 'SSM1011360', 'SSM1011367', 'SSM1011369', 'SSM1011371', 'SSM1011372', 'SSM1011374', 'SSM1011376', 'SSM1011377', 'SSM1011394') ;
+
+
 
 select cmo_batch_run_details_id from cmo_batch_run_details where data_count > 0 and processed = false;
 
@@ -1059,3 +1081,116 @@ select *
             ELSE 0
         END) AS grievance_redressed_count
    FROM grievance_master gm
+   
+   --=======================================================================
+   
+   	select count(1) as total_count
+	from grievance_master gm 
+--	where gm.created_on::date = '2025-10-17';
+	where gm.grievance_generate_date::date between '2023-06-08' and '2025-10-30'
+	and gm.grievance_source = 5;
+   
+   	
+   	select 
+   		grievance_no,
+   		grievance_id,
+   		grievance_generate_date,
+   		created_on,
+   		usb_unique_id
+--	count(*) as ssm_data 
+	from grievance_master gm 
+--	where gm.grievance_generate_date::date = '2023-06-08'
+	where gm.grievance_generate_date::date between '2023-06-08' and '2025-10-30'
+	and gm.grievance_source = 5
+	   order by grievance_generate_date asc
+   
+	  
+--------- Updated Query For CMO Department SSM TEAM ----------
+select 
+	case 
+		when grievance_no like 'SSM%' then grievance_no
+		else usb_unique_id
+	end as unique_grievance_no,
+--  grievance_no,
+	grievance_id,
+	grievance_generate_date,
+	created_on
+--  usb_unique_id
+--	count(*)
+from grievance_master gm 
+where gm.grievance_generate_date::date between '2023-06-08' and '2025-10-30'
+	and gm.grievance_source = 5
+order by grievance_generate_date asc
+	   
+	   
+	   
+   	select count(*) as total_number
+	from grievance_master gm 
+--	where gm.created_on::date = '2025-10-17';
+	where gm.grievance_generate_date::date ='2023-06-08'
+--	where gm.grievance_generate_date::date between '2023-06-08' and '2025-10-30'
+	and gm.grievance_source = 5
+--	   order by grievance_generate_date
+   
+   
+   ------ SOHINI DI --
+	select 
+count(*) 
+--		grievance_no,usb_unique_id,grievance_generate_date,direct_close 
+	from grievance_master gm 
+	where /*gm.usb_unique_id like '%SSM%' and */grievance_generate_date::date between '2023-06-08' and '2024-11-12 12:00:00' and grievance_source =5 
+--	order by grievance_generate_date 
+	
+	
+	select 
+--		count(*) as previous_ssm_data
+	grievance_no,
+   		grievance_id,
+   		grievance_generate_date,
+   		created_on,
+   		usb_unique_id 
+	from grievance_master gm 
+	where /*gm.usb_unique_id like '%SSM%' and*/ grievance_generate_date::date ='2023-06-08'and grievance_source =5 
+	order by grievance_generate_date 
+	
+   union all
+   select 
+	count(*) as new_ssm_data 
+--   	grievance_no,grievance_id,grievance_generate_date,usb_unique_id 
+   		from grievance_master gm 
+   	where gm.grievance_generate_date::date between '2024-11-12 12:00:01' and '2025-10-30' and grievance_no like '%SSM%' and grievance_source =5 
+--   order by grievance_generate_date
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+   select 
+   	grievance_no,
+   	usb_unique_id,
+   	grievance_generate_date,
+   	direct_close 
+   from grievance_master gm 
+   where gm.usb_unique_id like '%SSM%' and grievance_generate_date::date between '2023-06-08' and '2024-11-12' and grievance_source =5 
+   order by grievance_generate_date 
+   
+   select 
+   	count(*)
+   from grievance_master gm 
+   where gm.usb_unique_id like '%SSM%' and grievance_generate_date::date between '2023-06-08' and '2024-11-12' and grievance_source =5 
+--   order by grievance_generate_date 
+   
+   
+   
+   
+   select 
+   	grievance_no,grievance_id,grievance_generate_date,usb_unique_id 
+   from grievance_master gm 
+   where gm.grievance_generate_date::date between '2024-11-12' and '2025-10-30' and grievance_no like '%SSM%' and grievance_source =5 
+   order by grievance_generate_date
