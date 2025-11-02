@@ -3084,8 +3084,8 @@ where bgsa.request_mobile_no is NULL
 order by bgsa.id limit 500;
 
 -- update bulk_griev_status_mesg_assign
--- set failed_mobile_no = request_mobile_no 
--- where processed = FALSE
+-- set processed_mobile_no = request_mobile_no 
+-- where processed = TRUE
 
 
 select bgsa.*, gm.grievance_id, gm.pri_cont_no 
