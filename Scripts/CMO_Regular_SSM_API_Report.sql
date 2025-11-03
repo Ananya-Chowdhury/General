@@ -12,7 +12,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-31'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-01'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -206,6 +206,64 @@ FROM (
 
 ----------------------------------------------------------------------------
 
+--================================ Batch Wise Timeslots ===========================================
+SELECT *
+FROM (
+    SELECT
+        a.batch_date,
+        a.batchs AS successful_batches,
+        cardinality(
+            ARRAY(
+                SELECT g
+                FROM generate_series(1, 96) g
+                WHERE g <> ALL (string_to_array(a.batch_ids, ',')::int[])
+            )
+        ) AS pending_batches,
+        '[' || array_to_string(
+            ARRAY(
+                SELECT g
+                FROM generate_series(1, 96) g
+                WHERE g <> ALL (string_to_array(a.batch_ids, ',')::int[])
+                ORDER BY g
+            ),
+            ', '
+        ) || ']' AS missing_batch_ids,
+        CASE
+            WHEN a.batchs >= 96 THEN 'Synced'
+            ELSE array_to_string(
+                ARRAY(
+                    SELECT CONCAT(cbtm.from_time, ' - ', cbtm.to_time)
+                    FROM generate_series(1, 96) g
+                    INNER JOIN cmo_batch_time_master cbtm 
+                        ON cbtm.batch_time_master_id = g
+                    WHERE g <> ALL (string_to_array(a.batch_ids, ',')::int[])
+                    ORDER BY g
+                ),
+                ', '
+            )
+        END AS missing_batch_timeslots,
+        a.total_grievances_pulled
+    FROM (
+        SELECT 
+            cbrd.batch_date::date,
+            COUNT(cbrd.batch_id) AS batchs,
+            array_to_string(
+                ARRAY_AGG(cbrd.batch_id ORDER BY cbrd.batch_id ASC),
+                ','
+            ) AS batch_ids,
+            SUM(cbrd.data_count) AS total_grievances_pulled
+        FROM cmo_batch_run_details cbrd
+        LEFT JOIN cmo_batch_time_master cbtm 
+            ON cbtm.batch_time_master_id = cbrd.batch_id
+        WHERE cbrd.status = 'S'
+        GROUP BY cbrd.batch_date::date
+        ORDER BY cbrd.batch_date::date DESC
+    ) a
+) z_q
+WHERE pending_batches <> 0;
+
+---------------------------------------------------------------------------------
+
 --============================================================================================
 --============================================================================================
 --=====================  R  E  G  U  L  A  R    R  E  P  O  R  T  ============================
@@ -358,7 +416,7 @@ SELECT
 FROM batch_summary a
 LEFT JOIN status_summary s ON a.batch_date = s.batch_date
 LEFT JOIN pending_batches_summary pb ON a.batch_date = pb.batch_date
-WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-10-30'
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-11-02'
 ORDER BY a.batch_date DESC;
 
 -------------------------------------------------------------------------------
@@ -1087,7 +1145,7 @@ select *
    	select count(1) as total_count
 	from grievance_master gm 
 --	where gm.created_on::date = '2025-10-17';
-	where gm.grievance_generate_date::date between '2023-06-08' and '2025-10-30'
+	where gm.grievance_generate_date::date between '2023-06-08' and '2025-11-02'
 	and gm.grievance_source = 5;
    
    	

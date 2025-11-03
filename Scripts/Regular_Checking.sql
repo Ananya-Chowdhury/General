@@ -3,7 +3,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-10-31'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-01'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -30,7 +30,7 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-10-30'
+where cspd.actual_push_date::date = '2025-11-03'
 order by cmo_ssm_push_details_id desc; -- limit 100;
 
 
@@ -3103,3 +3103,45 @@ order by bgsa.id limit 500;
 
 
 select count(*) from bulk_griev_status_mesg_assign;
+
+
+--===========================================================================================
+--================================= HOME PAGE DATA COUNT =============================
+
+select count(*) as total_office_count 
+    from cmo_office_master com  
+where status = 1 and com.district_id != 999
+union all
+select count(*) as total_sub_office_count 
+    from cmo_sub_office_master csom  
+where status = 1 and csom.mapping_district_id != 999
+
+
+
+------- Total Office Count  ---------
+with office as(
+	select count(*) as total_office_count 
+	    from cmo_office_master com  
+	where status = 1 and com.district_id != 999
+), suboffice as (
+	select count(*) as total_sub_office_count 
+	    from cmo_sub_office_master csom  
+	where status = 1 and csom.mapping_district_id != 999
+) select 
+	sum(total_office_count + total_sub_office_count) as total_count
+FROM office, suboffice;
+
+
+-------- Total Grievance Lodge Count ----------
+select 
+	count(distinct gm.grievance_id) as total_grievance_count
+from grievance_master gm ;
+
+
+select 
+	count(distinct mdbg.grievance_id) as total_grievance_count
+from master_district_block_grv mdbg;
+
+select 
+	count(distinct mdbg.grievance_id) as total_grievance_count
+from grievance_master_bh_mat_2 mdbg;
