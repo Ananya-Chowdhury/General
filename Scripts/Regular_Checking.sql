@@ -3145,3 +3145,10 @@ from master_district_block_grv mdbg;
 select 
 	count(distinct mdbg.grievance_id) as total_grievance_count
 from grievance_master_bh_mat_2 mdbg;
+
+
+----------- Total Closed Count -------------
+select 
+	COUNT(1) as disposed_cnt 
+FROM grievance_master_bh_mat_2 as gm
+WHERE gm.status = 15
