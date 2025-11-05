@@ -12,7 +12,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-01'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-03'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -416,7 +416,7 @@ SELECT
 FROM batch_summary a
 LEFT JOIN status_summary s ON a.batch_date = s.batch_date
 LEFT JOIN pending_batches_summary pb ON a.batch_date = pb.batch_date
-WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-11-02'
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-11-04'
 ORDER BY a.batch_date DESC;
 
 -------------------------------------------------------------------------------
@@ -1145,7 +1145,7 @@ select *
    	select count(1) as total_count
 	from grievance_master gm 
 --	where gm.created_on::date = '2025-10-17';
-	where gm.grievance_generate_date::date between '2023-06-08' and '2025-11-02'
+	where gm.grievance_generate_date::date between '2023-06-08' and '2025-11-03'
 	and gm.grievance_source = 5;
    
    	
@@ -1252,3 +1252,60 @@ count(*)
    from grievance_master gm 
    where gm.grievance_generate_date::date between '2024-11-12' and '2025-10-30' and grievance_no like '%SSM%' and grievance_source =5 
    order by grievance_generate_date
+   
+   
+   
+  --======================================================================================================================
+  --============================== SSM FEEDBACK API QUERY --- as on 04.11.2025 ====================================
+  --======================================================================================================================
+
+ ------ P U L L -----
+   select
+ 	distinct cbgli.griev_id,
+-- 	(CURRENT_DATE - INTERVAL '1 day')::date AS batch_pull_date,
+ 	'2025-11-01'::date AS batch_pull_date,
+ 	cbgli.griev_received_date as grievnace_lodge_date,
+ 	case 
+ 		when cbgli.status = 2 AND EXISTS (SELECT 1 FROM grievance_master gm WHERE gm.grievance_no = cbgli.griev_id) then true
+ 		else false
+ 	end as grievance_successed,
+ 	case 
+ 		when cbgli.status = 3 AND NOT EXISTS (SELECT 1 FROM grievance_master gm WHERE gm.grievance_no = cbgli.griev_id) then true
+ 		else false
+ 	end as grievance_falied,
+	cbgli.error as error_status
+FROM cmo_batch_run_details cbrd
+INNER JOIN cmo_batch_grievance_line_item cbgli ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
+--WHERE batch_date::date = CURRENT_DATE - INTERVAL '1 day'
+WHERE batch_date::date = '2025-11-01'
+and cbrd.status = 'S'
+    
+
+----- P U S H -----
+select 
+	count(1) as ssm_push_count 
+from grievance_lifecycle gl 
+inner join grievance_master gm on gm.grievance_id = gl.grievance_id 
+where gl.assigned_on::date = '2025-11-03'::DATE
+and gl.grievance_status != 1
+and (gm.grievance_source = 5 or gm.received_at = 6);
+
+
+select 
+	gl.lifecycle_id as transaction_id
+--	gl.grievance_id as grievance_id,
+--	gm.grievance_no as grievance_no,
+--	cspd.response as ssm_response,
+--	cspd.actual_push_date as actual_push_date,
+--	cspd.status as push_data_status,
+--	cspd.push_date as data_push_date
+from grievance_lifecycle gl 
+inner join grievance_master gm on gm.grievance_id = gl.grievance_id 
+--inner join cmo_ssm_push_details cspd on cspd.actual_push_date::date = gl.assigned_on::date
+where gl.assigned_on::date = '2025-11-03'::DATE
+and gl.grievance_status != 1
+and (gm.grievance_source = 5 or gm.received_at = 6);
+   
+
+
+select * from cmo_ssm_push_details cspd where cspd.actual_push_date::date = '2025-11-03' limit 1;

@@ -627,3 +627,153 @@ select * from cmo_batch_grievance_line_item where griev_id ='SSM4295122'
 select * from grievance_master gm where gm.grievance_no ='SSM5308026';
 select * from cmo_police_station_master cpsm where cpsm.ps_id = 627;
 select * from cmo_police_station_master cpsm where cpsm.ps_code = '0023';
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+with raw_data as (
+                select grievance_master_bh_mat.*
+                from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
+                inner join grievance_master_bh_mat_2 as grievance_master_bh_mat on grievance_master_bh_mat.grievance_id = forwarded_latest_3_bh_mat.grievance_id
+                where forwarded_latest_3_bh_mat.assigned_to_office_id in (18)
+                    and not exists (
+                        select 1 from atr_latest_14_bh_mat_2 as atr_latest_14_bh_mat
+                            where atr_latest_14_bh_mat.grievance_id = forwarded_latest_3_bh_mat.grievance_id
+                                and atr_latest_14_bh_mat.current_status in (14,15)
+                            )
+                ), unassigned_cmo as (
+                    select
+                        'Unassigned (CMO)' as status,
+                        'N/A' as name_and_esignation_of_the_user,
+                        'N/A' as office,
+                        'N/A' as user_role,
+                        'N/A' as user_status,
+                        'N/A' as status_id,
+                        count(1) as pending_grievances,
+                        null::int as pending_atrs,
+                        null::int as atr_returned_for_review,
+                        null::int as atr_auto_returned_from_cmo,
+--                        count(1) as total_count
+                        grievance_id
+                    from raw_data
+                    where raw_data.status = 3
+                    group by grievance_id
+--                ), unassigned_other_hod as (
+--                    select
+--                        'Unassigned (Other HoD)' as status,
+--                        'N/A' as name_and_esignation_of_the_user,
+--                        'N/A' as office,
+--                        'N/A' as user_role,
+--                        'N/A' as user_status,
+--                        'N/A' as status_id,
+--                        0 as pending_grievances,
+--                        null::int as pending_atrs,
+--                        null::int as atr_returned_for_review,
+--                        null::int as atr_auto_returned_from_cmo,
+----                        0 as total_count
+--                        grievance_id
+                ), recalled as (
+                    select
+                        'Recalled' as status,
+                        'N/A' as name_and_esignation_of_the_user,
+                        'N/A' as office,
+                        'N/A' as user_role,
+                        'N/A' as user_status,
+                        'N/A' as status_id,
+                        count(1) as pending_grievances,
+                        null::int as pending_atrs,
+                        null::int as atr_returned_for_review,
+                        null::int as atr_auto_returned_from_cmo,
+--                        count(1) as total_count
+                        grievance_id 
+                    from raw_data
+                    where raw_data.status = 16
+                    group by grievance_id
+                ), user_wise_pndcy as (
+                    select xx.status,  xx.name_and_esignation_of_the_user, xx.office, xx.user_role, xx.user_status, xx.status_id::text, xx.pending_grievances, xx.pending_atrs, xx.atr_returned_for_review,
+                        xx.atr_auto_returned_from_cmo/*, xx.total_count*/ , xx.grievance_id
+                    from (
+                        select 'User wise ATR Pendency' as status,
+                            -- admin_user_details.official_name as name_and_esignation_of_the_user,
+                            case when admin_user_details.official_name is not null then concat(admin_user_details.official_name, ' - (', cmo_designation_master.designation_name ,' )')
+                                else null
+                            end as name_and_esignation_of_the_user,
+                            -- cmo_office_master.office_name as office,
+                            case
+                                when cmo_sub_office_master.suboffice_name is not null then concat(cmo_office_master.office_name, ' - ( ', cmo_sub_office_master.suboffice_name, ' )')
+                                else cmo_office_master.office_name
+                            end as office,
+                            case when admin_position_master.office_id in (18) /*REPLACE*/
+                                    then admin_user_role_master.role_master_name
+                                else concat(admin_user_role_master.role_master_name, ' (Other HOD)')
+                            end as user_role,
+                            admin_position_master.record_status as status_id,
+                            case
+                                when admin_position_master.record_status = 1 then 'Active'
+                                when admin_position_master.record_status = 2 then 'Inactive'
+                                else null
+                            end as user_status,
+                            case when admin_position_master.office_id in (18) /*REPLACE*/ then 1 else 2 end as "type",
+                            sum(case when raw_data.status in (4,5,7,8,8888) then 1 else 0 end) as "pending_grievances",
+                            sum(case when raw_data.status in (9,11,13) then 1 else 0 end) as "pending_atrs",
+                            sum(case when raw_data.status in (6,10,12) then 1 else 0 end) as "atr_returned_for_review",
+                            case when admin_position_master.office_id in (18) /*REPLACE*/ then sum(case when raw_data.status in (16,17) then 1 else 0 end)
+                                    else null::int
+                            end as "atr_auto_returned_from_cmo",
+--                            count(1) as total_count
+                            raw_data.grievance_id
+                        from raw_data
+                        left join admin_user_details on raw_data.assigned_to_id = admin_user_details.admin_user_id
+                        left join admin_position_master on raw_data.assigned_to_position = admin_position_master.position_id
+                        left join cmo_office_master on admin_position_master.office_id = cmo_office_master.office_id
+                        left join admin_user_role_master on admin_position_master.role_master_id = admin_user_role_master.role_master_id
+                        left join cmo_designation_master on cmo_designation_master.designation_id = admin_position_master.designation_id
+                        left join cmo_sub_office_master on cmo_sub_office_master.suboffice_id = admin_position_master.sub_office_id
+                        where raw_data.status not in (3,16)
+                        group by admin_user_details.official_name, admin_position_master.office_id, cmo_office_master.office_name, admin_user_role_master.role_master_id,
+                        admin_user_role_master.role_master_name, cmo_designation_master.designation_name, cmo_sub_office_master.suboffice_name, admin_position_master.record_status, raw_data.grievance_id
+                        order by type, admin_user_role_master.role_master_id
+                    )xx
+                ), union_part as (
+                    select * from unassigned_cmo
+                        union all
+--                    select * from unassigned_other_hod
+--                        union all
+                    select * from recalled
+                        union all
+                    select * from user_wise_pndcy
+                )
+                select
+                    row_number() over() as sl_no,
+                    '2025-11-03 16:30:01.176202+00:00'::timestamp as refresh_time_utc,
+                    '2025-11-03 16:30:01.176202+00:00'::timestamp + interval '5 hour 30 minutes' as refresh_time_ist,
+                    *
+                from union_part
+
+
+                
+                
+                
+select 
+	gl.grievance_id,
+	gl.grievance_status,
+	gl.assigned_on,
+	gl.assigned_by_id,
+	gl.assigned_to_id,
+	gl.assigned_by_office_cat,
+	gl.assigned_to_office_cat,
+	gl.assigned_by_office_id,
+	gl.assigned_to_office_id,
+	gl.assigned_by_position, 
+	gl.assigned_to_position
+from grievance_lifecycle gl where gl.grievance_id = 3184193 order by assigned_on desc;
+
+select * from cmo_office_master com where com.office_id = 117
+
+--=================================================================================================================
+
+
+
+

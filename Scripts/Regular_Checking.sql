@@ -3,7 +3,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-01'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-05'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -30,7 +30,7 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-11-03'
+where cspd.actual_push_date::date = '2025-11-04'
 order by cmo_ssm_push_details_id desc; -- limit 100;
 
 
@@ -253,8 +253,8 @@ select * from grievance_retruned_data grd ;
         inner join admin_position_master on admin_position_master.position_id = admin_user_position_mapping.position_id
         inner join admin_user_role_master aurm on aurm.role_master_id = admin_position_master.role_master_id
         inner join cmo_office_master com on com.office_id = admin_position_master.office_id
-    where admin_position_master.office_id is not null and admin_position_master.role_master_id in (4,5,6) and admin_user_position_mapping.status = 1  and admin_position_master.record_status= 1
-    and admin_position_master.position_id = 3437
+    where admin_position_master.office_id is not null /*and admin_position_master.role_master_id in (4,5,6)*/ and admin_user_position_mapping.status = 1  and admin_position_master.record_status= 1
+    and admin_position_master.position_id = 851
     group by admin_user_details.official_name, admin_user_details.official_phone, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name, 
     admin_user_details.admin_user_id, admin_user_position_mapping.status, admin_position_master.record_status
 order by admin_position_master.office_id asc;
