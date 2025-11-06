@@ -166,8 +166,8 @@ inner join pending_at_hoso_mat_2 as ba on forwarded_latest_7_bh_mat.grievance_id
 --inner join atr_latest_11_bh_mat_2 as bm on forwarded_latest_7_bh_mat.grievance_id = bm.grievance_id /*and bm.assigned_by_office_cat = forwarded_latest_7_bh_mat.assigned_to_office_cat*/ 
 left join admin_position_master on forwarded_latest_7_bh_mat.assigned_to_position = admin_position_master.position_id
 where 1=1 /*and bm.grievance_id is null*/ and forwarded_latest_7_bh_mat.assigned_by_office_id in (75) /*and admin_position_master.role_master_id in (7,8)*/
---	and not exists ( SELECT 1 FROM atr_latest_11_bh_mat_2 as atr_latest_11_bh_mat where forwarded_latest_7_bh_mat.grievance_id = atr_latest_11_bh_mat.grievance_id and atr_latest_11_bh_mat.assigned_to_office_id in (75) 
-	and not exists ( SELECT 1 FROM atr_latest_11_mat as atr_latest_11_bh_mat where forwarded_latest_7_bh_mat.grievance_id = atr_latest_11_bh_mat.grievance_id and atr_latest_11_bh_mat.assigned_to_office_id in (75) 
+	and not exists ( SELECT 1 FROM atr_latest_11_bh_mat_2 as atr_latest_11_bh_mat where forwarded_latest_7_bh_mat.grievance_id = atr_latest_11_bh_mat.grievance_id and atr_latest_11_bh_mat.assigned_to_office_id in (75) 
+--	and not exists ( SELECT 1 FROM atr_latest_11_mat as atr_latest_11_bh_mat where forwarded_latest_7_bh_mat.grievance_id = atr_latest_11_bh_mat.grievance_id and atr_latest_11_bh_mat.assigned_to_office_id in (75) 
 		/*and atr_latest_11_bh_mat.assigned_by_office_cat = forwarded_latest_7_bh_mat.assigned_to_office_cat*/)
 ) as XXXXXXXXX
 left join (
@@ -209,8 +209,9 @@ select
 	gl.assigned_by_office_id,
 	gl.assigned_to_office_id,
 	gl.assigned_by_position, 
-	gl.assigned_to_position
-from grievance_lifecycle gl where gl.grievance_id = 5710829 order by assigned_on desc;
+	gl.assigned_to_position,
+	gl.assign_comment 
+from grievance_lifecycle gl where gl.grievance_id = 4342932 order by assigned_on desc;
 
 
 

@@ -3,7 +3,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-05'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-06'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -30,7 +30,7 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-11-04'
+where cspd.actual_push_date::date = '2025-11-05'
 order by cmo_ssm_push_details_id desc; -- limit 100;
 
 
@@ -891,9 +891,9 @@ inner join grievance_auto_assign_audit gaaa on gaaa.grievance_id = gm.grievance_
 ------------------------------------------------------------------------------------------------------------------------
 
 
-
+---------------------------------------------------------------------------------------------------
 --------------- ( Bhandari Da -->>> Bulk Forwarding ---->>> bulk_griev_sts_cng ) ------------------
-------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 
 select * from bulk_griev_status_assign bgsa where created_on::date between '2025-01-29' and '2025-01-30' order by created_on desc; 
 select * from bulk_griev_status_assign bgsa where created_on::date = '2025-01-29' order by created_on desc;                         --id = 46588, 58348, 58349, 46588

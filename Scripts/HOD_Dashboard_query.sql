@@ -2719,3 +2719,77 @@ select * ,
     cross join atr_pending_other_hod
     cross join close_other_hod;
 
+	
+	
+	
+	
+	
+--==================================================================================================================================
+--========================================= PULLED BACK METERIALISED VIEW ==========================================================
+--==================================================================================================================================
+	
+SELECT 
+	t.grievance_id,
+    t.middle_status,
+    t.next_status,
+    t.current_status,
+    t.previous_status,
+    t.previous_assigned_to_office,
+    t.previous_assigned_to_position,
+    t.previous_assigned_to_id,
+    t.middle_status_assigned_to_office,
+    t.next_status_assigned_to_office,
+    t.next_status_assigned_to_position,
+    t.next_status_assigned_by_position,
+    t.next_status_assigned_to_id,
+    t.grievance_source
+   FROM ( SELECT gl.grievance_id,
+            gl.grievance_status      as previous_status,
+            gl.assigned_to_office_id as previous_assigned_to_office,
+            gl.assigned_to_position  as previous_assigned_to_position,
+            gl.assigned_to_id  		 as previous_assigned_to_id,
+            gm.grievance_source,
+            gm.status AS current_status,
+            lead(gl.grievance_status) OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on) AS middle_status,
+            lead(gl.grievance_status) OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on) AS next_status,
+            lead(gl.assigned_to_office_id) OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on) AS middle_status_assigned_to_office,
+            lead(gl.assigned_to_office_id) OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on) AS next_status_assigned_to_office,
+            lead(gl.assigned_to_position) OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on) AS next_status_assigned_to_position,
+            lead(gl.assigned_by_position) OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on) AS next_status_assigned_by_position,
+            lead(gl.assigned_to_id) OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on) AS next_status_assigned_to_id,
+            lead(gl.assigned_by_id) OVER (PARTITION BY gl.grievance_id ORDER BY gl.assigned_on) AS next_status_assigned_by_id
+           FROM grievance_lifecycle gl
+             JOIN grievance_master gm ON gm.grievance_id = gl.grievance_id) t
+           where previous_status = next_status
+  				and previous_assigned_to_office = next_status_assigned_to_office
+  				and previous_assigned_to_id = next_status_assigned_to_id
+  				and next_status_assigned_by_position = next_status_assigned_to_position
+  				and next_status_assigned_by_id = next_status_assigned_to_id
+  				and middle_status = 7 and middle_status_assigned_to_office = 75
+            
+             
+             
+             
+ select * from grievance_lifecycle gl where gl."assign_comment" like '%PULL BACK%' limit 10
+ 
+ 
+ select 
+	gl.grievance_id,
+	gl.grievance_status,
+	gl.assigned_on,
+	gl.assigned_by_id,
+	gl.assigned_to_id,
+	gl.assigned_by_office_cat,
+	gl.assigned_to_office_cat,
+	gl.assigned_by_office_id,
+	gl.assigned_to_office_id,
+	gl.assigned_by_position, 
+	gl.assigned_to_position,
+	gl.assign_comment 
+from grievance_lifecycle gl where gl.grievance_id = 4342932 order by assigned_on desc;
+
+
+
+select * from cmo_designation_master cdm ;
+select * from office_category_type_mapping octm ;
+select * from cmo_domain_lookup_master cdlm ;

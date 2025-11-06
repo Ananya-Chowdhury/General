@@ -416,7 +416,7 @@ SELECT
 FROM batch_summary a
 LEFT JOIN status_summary s ON a.batch_date = s.batch_date
 LEFT JOIN pending_batches_summary pb ON a.batch_date = pb.batch_date
-WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-11-04'
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-11-05'
 ORDER BY a.batch_date DESC;
 
 -------------------------------------------------------------------------------
@@ -1103,7 +1103,7 @@ select *
 	select count(1) as total_count
 	from grievance_master gm 
 --	where gm.created_on::date = '2025-10-17';
-	where gm.grievance_generate_date::date between '2023-06-08' and '2025-10-29'
+	where gm.grievance_generate_date::date between '2023-06-08' and '2025-11-06'
 	and gm.grievance_source = 5;
 	
 
@@ -1145,7 +1145,7 @@ select *
    	select count(1) as total_count
 	from grievance_master gm 
 --	where gm.created_on::date = '2025-10-17';
-	where gm.grievance_generate_date::date between '2023-06-08' and '2025-11-03'
+	where gm.grievance_generate_date::date between '2023-06-08' and '2025-11-05'
 	and gm.grievance_source = 5;
    
    	

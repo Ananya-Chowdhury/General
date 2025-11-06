@@ -44,11 +44,21 @@ select * from admin_user au where au.u_phone = '9477399095' ;
 
 select * from admin_user_role_master aurm ;
 
+--=====================================================
+--=================== DEV LOGINs ======================
 
+-- CMO Super Admin = 9330027052
+-- HOSO = 7865925510, 9434495405
+-- HOD Admin = 9434055201, 6292222444 (DM, South 24 Parganas District), 
+-- HOD Nodal = 9477399095, 9434172049
+-- Data Integrator = 9559000099
+-- 
+
+--=====================================================
 
 
 ["9999999900","9999999901","9999999902","9999999903","9999999904","9999999905","9999999906","9999999907","9999999908","9999999909","9999999910","9999999911","9999999912","9999999913","9999999914",
-"9999999915","9999999916","9999999917","9999999918","9999999919","9999999920","9999999999","9330027052","8170045634","8101859077","9836072377","9434172049","9477399095","9297929297","9874263537",
+"9999999915","9999999916","9999999917","9999999918","9999999919","9330027052","8170045634","8101859077","9434172049","9477399095","9297929297","9874263537",
 "6292222444","9434495405","9559000099","9434055201","7865925510"]
 
 ["9999999900","9999999901","9999999902","9999999903","9999999904","9999999905","9999999906","9999999907","9999999908","9999999909","9999999910","9999999911",
@@ -162,3 +172,44 @@ select gm.*, cdm.lg_directory_district_code as lgd_dist, cbm.lg_directory_block_
 --	updated_on timestamptz NULL,
 --	CONSTRAINT grievance_retruned_data_pkey PRIMARY KEY (id)
 --);
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = 'user_type';
+
+select apm.*,
+au.admin_user_id,
+au.u_phone
+from admin_position_master apm 
+inner join admin_user_position_mapping aupm on aupm.position_id = apm.position_id and aupm.status = 1
+inner join admin_user au on au.admin_user_id = aupm.admin_user_id 
+where apm.office_type = 5 and apm.record_status = 1 and au.u_phone = '9732333899';
+
+
+
+select * from user_otp where u_phone = '9732333899';
+
+select * from control_json cj;
+
+
+select * from admin_user_role_master aurm;
+
+select * from user_type_role_mapping utrm;
+
+
+select current_timestamp;
