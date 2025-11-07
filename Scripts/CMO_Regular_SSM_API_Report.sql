@@ -25,6 +25,7 @@ ORDER by batch_id asc;
 select 
 
 select * from cmo_emp_batch_run_details cebrd;
+select * from cmo_batch_grievance_line_item cbgli where cbgli.education_qualification_code is not null limit 1;
 
 --===========================================================
 
@@ -48,6 +49,7 @@ from
 where a.batchs < 96;
 
 
+select * from grievance_master gm
 --=============================================================================================
 --========================== SSM API Regular Pulled Batches Check =============================
 --=============================================================================================

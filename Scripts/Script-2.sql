@@ -184,7 +184,7 @@ select gm.*, cdm.lg_directory_district_code as lgd_dist, cbm.lg_directory_block_
                 
                 
                 
-                
+select                 
                 
                 
                 

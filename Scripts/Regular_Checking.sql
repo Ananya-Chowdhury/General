@@ -3,7 +3,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-06'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-07'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -30,7 +30,7 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-11-05'
+where cspd.actual_push_date::date = '2025-11-06'
 order by cmo_ssm_push_details_id desc; -- limit 100;
 
 
@@ -77,7 +77,7 @@ and (gm.grievance_source = 5 or gm.received_at = 6)
 
 
 --- Get The SSM API Push Count ----
-SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-10-30');
+SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-11-06');
 
 
 --- SSM PUSH DETAILS ------ 
@@ -168,6 +168,10 @@ where cbrd.batch_date::date = '2025-01-04'::date
 order by cbrd.batch_id desc;
 
 
+----- Control Json ------
+select * from control_json cj ;
+
+
 
 --- Indivitual SSM Pull Data check ---
 select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id = 37757 /*and status = 5*/;
@@ -204,6 +208,8 @@ select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = ''
 
 ---------------- Grievance Query ---------------
 select * from public.grievance_master gm where grievance_no in ('SSM4837610');
+select * from grievance_master gm where gm.grievance_no like '%SSM%' order by gm.grievance_id desc limit 10;  --6036139
+select * from grievance_master gm order by gm.grievance_id desc;
 select * from public.grievance_master gm where gm.grievance_id = 5235053;
 select * from public.grievance_lifecycle gl where gl.grievance_id = 5894923 order by gl.assigned_on desc;
 select * from public.grievance_master gm where gm.grievance_no = 'CMO41972931';
@@ -231,6 +237,10 @@ select * from admin_position_master apm where apm.position_id = 15405;
 select * from admin_user_position_mapping aupm where aupm.admin_user_id = 15001;
 select * from admin_user_position_mapping aupm where aupm.position_id = 1227;
 select * from admin_position_master apm where apm.office_id = 35 and role_master_id = 7 and record_status = 1;
+select * from admin_position_master apm where role_master_id = 9 and record_status = 1;
+select * from admin_user_role_master aurm ;
+select * from cmo_domain_lookup_master cdlm ;
+select * from cmo_grievance_category_master cgcm ;
 
 
 --select * from grievance_returned_data grd ;
@@ -472,6 +482,7 @@ select * from public.cmo_closure_reason_master ccrm;
 select * from cmo_grievance_category_master cgcm ;
 select * from user_token ut where ut.c_m_no = '9635821533';
 select * from user_token ut order by ut.token_id desc limit 10;
+
 
 
 --- FOR CHECKING POSITION AND USER MAPPING ---- ( One Position never HAVE two different User but One User can have two different positions)
