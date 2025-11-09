@@ -43,7 +43,20 @@ select * from admin_user au where admin_user_id in (11784,2000);
 select * from grievance_master gm where gm.assigned_to_office_id = 3;
 select * from admin_user_details aud where aud.official_phone ='8';
 select * from grievance_master gm where gm.pri_cont_no = '9163479418'; --8101859077
+select * from cmo_employment_status_master cesm ;
+select * from cmo_batch_grievance_line_item cbgli limit 1;
+select * from grievance_master gm where gm.grievance_no like '%SSM%' limit 1;
+select domain_code, domain_text, domain_value  from public.cmo_domain_lookup_master where domain_type = 'grievance_source';
+select * from cmo_districts_master cdm ;
+select * from cmo_sub_districts_master csdm ;
 
+
+select * from cmo_sub_districts_master csdm 
+inner join cmo_districts_master cdm on cdm.district_id = csdm.district_id 
+where cdm.district_code = '10';
+
+select * from document_master dm ;
+select * from cmo_domain_lookup_master cdlm ;
  
 
 ["9999999900","9999999901","9999999902","9999999903","9999999904","9999999905","9999999906","9999999907","9999999908","9999999909","9999999910","9999999911","9999999912","9999999913","9999999914",

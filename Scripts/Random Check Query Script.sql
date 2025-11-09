@@ -1017,12 +1017,33 @@ left join admin_user_role_master aurm2 on aurm2.role_master_id = apm3.role_maste
 left join grievance_retruned_data grd on grd.grievance_id = md.grievance_id and grd.status = 1
 where glh.id is null and md.status in (14)
         and replace(lower(md.emergency_flag),' ','') like '%n%'
-    order by updated_on asc offset 0 limit 30
+    order by updated_on asc offset 0 limit 30;
 
 
 
 
+----------------------------  SSM MASTER DATA VALIDATION ---------------------------------------------------------------
+select * from cmo_batch_grievance_line_item cbgli limit 1;
+   
+select * from cmo_grivence_receive_mode_master ;
+select * from cmo_domain_lookup_master where domain_type = 'received_at_location';
+select domain_id, domain_code, domain_value, domain_abbr from public.cmo_domain_lookup_master where domain_type = 'gender';
+select * from grievance_master gm where gm.applicant_name = ' ' limit 1 ;
+select * from cmo_states_master csm ;
+select * from public.cmo_municipality_master cmm;
+select * from cmo_sub_divisions_master csdm where csdm.sub_division_id = 4;
+select * from cmo_blocks_master cbm ;
+select * from cmo_wards_master;
 
 
+select * 
+from cmo_blocks_master cbm 
+inner join cmo_sub_divisions_master csdm on csdm.sub_division_id = cbm.sub_division_id 
+where block_id = 26;
 
 
+select * from document_master dm ;
+select * from cmo_domain_lookup_master cdlm ;
+
+
+select * from ssm_grievance_data_document_mapping ;
