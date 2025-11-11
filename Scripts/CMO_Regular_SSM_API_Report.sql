@@ -12,7 +12,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-03'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-07'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -22,11 +22,27 @@ WHERE batch_date::date = '2025-09-26'
 and status = 'S'
 ORDER by batch_id asc; 
 
-select 
+select * from cmo_batch_run_details cbrd where cbrd.batch_date::date = '2025-11-07' and cbrd.status = 'S';
+select * from cmo_emp_batch_run_details cebrd where cebrd.batch_date::date = '2025-11-08' and cebrd.status = 'S';
+
+
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5344333'; 
+
+select cbgli.*
+from cmo_batch_grievance_line_item cbgli 
+inner join cmo_batch_run_details cbrd on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id 
+where cbrd.batch_date::date = '2025-11-07' and cbrd.status = 'S';
+
+
+select * 
+
+
 
 select * from cmo_emp_batch_run_details cebrd;
 select * from cmo_batch_grievance_line_item cbgli where cbgli.education_qualification_code is not null limit 1;
 select * from grievance_master gm limit 1;
+
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_received_date::date = '2025-11-07';
 
 --===========================================================
 
@@ -50,7 +66,6 @@ from
 where a.batchs < 96;
 
 
-select * from grievance_master gm
 --=============================================================================================
 --========================== SSM API Regular Pulled Batches Check =============================
 --=============================================================================================
@@ -419,7 +434,7 @@ SELECT
 FROM batch_summary a
 LEFT JOIN status_summary s ON a.batch_date = s.batch_date
 LEFT JOIN pending_batches_summary pb ON a.batch_date = pb.batch_date
-WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-11-05'
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-11-06'
 ORDER BY a.batch_date DESC;
 
 -------------------------------------------------------------------------------
