@@ -213,3 +213,7 @@ select * from user_type_role_mapping utrm;
 
 
 select current_timestamp;
+
+
+--======================================================================================
+select * from ssm_grievance_data_document_mapping ;

@@ -436,7 +436,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9999999999'   --9147888180
+WHERE uo.u_phone = '9434055201'   --9147888180
 ORDER BY created_on desc limit 5;
 
 SELECT * 

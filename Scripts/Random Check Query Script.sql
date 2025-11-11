@@ -1024,7 +1024,9 @@ where glh.id is null and md.status in (14)
 
 ----------------------------  SSM MASTER DATA VALIDATION ---------------------------------------------------------------
 select * from cmo_batch_grievance_line_item cbgli limit 1;
-   
+select * from cmo_emp_batch_run_details cebrd where cebrd.data_count > 10;
+select * from cmo_batch_run_details cbrd limit 1;
+
 select * from cmo_grivence_receive_mode_master ;
 select * from cmo_domain_lookup_master where domain_type = 'received_at_location';
 select domain_id, domain_code, domain_value, domain_abbr from public.cmo_domain_lookup_master where domain_type = 'gender';
@@ -1034,7 +1036,7 @@ select * from public.cmo_municipality_master cmm;
 select * from cmo_sub_divisions_master csdm where csdm.sub_division_id = 4;
 select * from cmo_blocks_master cbm ;
 select * from cmo_wards_master;
-
+select * from cmo_grievance_category_master cgcm where cgcm.grievance_category_code = '08'
 
 select * 
 from cmo_blocks_master cbm 
@@ -1042,8 +1044,16 @@ inner join cmo_sub_divisions_master csdm on csdm.sub_division_id = cbm.sub_divis
 where block_id = 26;
 
 
-select * from document_master dm ;
+select * from document_master dm order by doc_id desc limit 5;
 select * from cmo_domain_lookup_master cdlm ;
 
 
 select * from ssm_grievance_data_document_mapping ;
+
+
+select domain_code from cmo_domain_lookup_master cdlm where cdlm.domain_type = 'doc_type';
+
+select parameter_value from cmo_parameter_master cpm where cpm.parameter_key = 'sftp_flag';
+
+
+select * from cmo_batch_run_details cbrd limit 1;

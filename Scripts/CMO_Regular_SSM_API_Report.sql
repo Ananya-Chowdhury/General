@@ -9,40 +9,81 @@
 ---=================================================
 
 --===========================================================
+
+
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-07'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-09'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-09-26'
+WHERE batch_date::date = '2025-11-09'
 and status = 'S'
-ORDER by batch_id asc; 
+ORDER by batch_id asc;
 
-select * from cmo_batch_run_details cbrd where cbrd.batch_date::date = '2025-11-07' and cbrd.status = 'S';
-select * from cmo_emp_batch_run_details cebrd where cebrd.batch_date::date = '2025-11-08' and cebrd.status = 'S';
+select * from cmo_batch_run_details cbrd where cbrd.batch_date::date = '2025-11-08' and cbrd.status = 'S';
+select * from cmo_emp_batch_run_details cebrd where cebrd.batch_date::date = '2025-11-07' and cebrd.status = 'S';
 
 
 select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5344333'; 
+
 
 select cbgli.*
 from cmo_batch_grievance_line_item cbgli 
 inner join cmo_batch_run_details cbrd on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id 
 where cbrd.batch_date::date = '2025-11-07' and cbrd.status = 'S';
 
+select * from cmo_post_office_master cpom where cpom.po_code = '0160' and cpom.district_id = 2;
+select * from cmo_districts_master cdm where cdm.district_code  = '13';
+select * from cmo_districts_master cdm where cdm.district_id = 2;
 
-select * 
 
+
+--select cbgli.griev_id, cdm.district_name, cdm.district_id, cbgli.po_code, cpom.po_name
+--from cmo_batch_grievance_line_item cbgli 
+--inner join cmo_batch_run_details cbrd on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id 
+--inner join cmo_districts_master cdm on cbgli.dist_code = cdm.district_code 
+--inner join cmo_post_office_master cpom on cpom.po_code = cbgli.po_code and cdm.district_id = cpom.district_id
+----where cbrd.batch_date::date = '2025-11-08'::date and cbrd.status = 'S' 
+--and cbgli.status = 2 and cbgli.griev_received_date::date = '2025-11-08'
+--order by cbgli.griev_id asc;
+
+
+
+select
+	cbgli.griev_id, cdm.district_name, cdm.district_id, cbgli.po_code, cpom.po_name, cbgli.emergency 
+from cmo_batch_run_details cbrd
+inner join cmo_batch_grievance_line_item cbgli on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id and cbgli.status = 2
+left join cmo_districts_master cdm on cbgli.dist_code = cdm.district_code
+left join cmo_post_office_master cpom on cpom.po_code = cbgli.po_code and cpom.district_id = cdm.district_id
+where cbrd.batch_date::date = '2025-11-07'::date
+order by cbgli.griev_id asc;
+
+
+
+
+
+select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = 'doc_type';
+
+
+
+
+--UPDATE cmo_batch_grievance_line_item AS cbgli
+--SET status = 2, error = 'SUCCESS'
+--from cmo_batch_run_details AS cbrd
+--where cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id AND cbrd.batch_date::date = '2025-11-07' AND cbrd.status = 'S';
 
 
 select * from cmo_emp_batch_run_details cebrd;
 select * from cmo_batch_grievance_line_item cbgli where cbgli.education_qualification_code is not null limit 1;
 select * from grievance_master gm limit 1;
 
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_received_date::date = '2025-11-07';
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_received_date::date = '2025-11-10';
+
+select * from ssm_grievance_data_document_mapping sgddm ;
 
 --===========================================================
 
@@ -388,9 +429,11 @@ status_summary AS (
         -- total count of grievances processed
         COUNT(*) AS total_records,
         -- ✅ success grievances that exist in grievance_master
-        COUNT(*) FILTER (WHERE cbgli.status = 2 AND EXISTS (SELECT 1 FROM grievance_master gm WHERE gm.grievance_no = cbgli.griev_id)) AS grievances_success_count,
+--        COUNT(*) FILTER (WHERE cbgli.status = 2 AND EXISTS (SELECT 1 FROM grievance_master gm WHERE gm.grievance_no = cbgli.griev_id)) AS grievances_success_count,
+        COUNT(*) FILTER (WHERE cbgli.status = 2) AS grievances_success_count,
         -- ❌ failed grievances that do NOT exist in grievance_master
-        COUNT(*) FILTER (WHERE cbgli.status = 3 AND NOT EXISTS (SELECT 1 FROM grievance_master gm WHERE gm.grievance_no = cbgli.griev_id)) AS grievances_failed_count
+--        COUNT(*) FILTER (WHERE cbgli.status = 3 AND NOT EXISTS (SELECT 1 FROM grievance_master gm WHERE gm.grievance_no = cbgli.griev_id)) AS grievances_failed_count
+        COUNT(*) FILTER (WHERE cbgli.status = 3) AS grievances_failed_count
     FROM cmo_batch_run_details cbrd
     INNER JOIN cmo_batch_grievance_line_item cbgli ON cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id
     GROUP BY cbrd.batch_date::date  
@@ -434,7 +477,7 @@ SELECT
 FROM batch_summary a
 LEFT JOIN status_summary s ON a.batch_date = s.batch_date
 LEFT JOIN pending_batches_summary pb ON a.batch_date = pb.batch_date
-WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-11-06'
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-11-10'
 ORDER BY a.batch_date DESC;
 
 -------------------------------------------------------------------------------
@@ -1327,3 +1370,7 @@ and (gm.grievance_source = 5 or gm.received_at = 6);
 
 
 select * from cmo_ssm_push_details cspd where cspd.actual_push_date::date = '2025-11-03' limit 1;
+
+select sgddm.*, dm.* from ssm_grievance_data_document_mapping sgddm
+inner join document_master dm on dm.doc_id = sgddm.doc_id
+where batch_date::date = '2025-11-08'::date;
