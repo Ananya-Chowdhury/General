@@ -1,4 +1,8 @@
-SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-11-05');
+
+---- Total Data Count ----------->>>>>>>>
+SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-11-11');
+
+----- Total Sending Data field ------->>>>>>>>
 SELECT * from public.cmo_ssm_api_push_data_v2('2025-11-05');
 
 
@@ -221,8 +225,8 @@ select
 	cspd.is_reprocessed,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
---where cspd.actual_push_date::date = '2025-10-16' 
-where cspd.actual_push_date::date between '2024-11-12' and '2025-10-29' and cspd.status = 'F'
+where cspd.actual_push_date::date = '2025-10-07' 
+--where cspd.actual_push_date::date between '2024-11-12' and '2025-10-29' and cspd.status = 'F'
 order by cmo_ssm_push_details_id desc;
 
 
