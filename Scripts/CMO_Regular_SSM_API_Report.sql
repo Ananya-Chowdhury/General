@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-06'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-10'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -24,19 +24,53 @@ WHERE batch_date::date = '2025-11-09'
 and status = 'S'
 ORDER by batch_id asc;
 
-select * from cmo_batch_run_details cbrd where cbrd.batch_date::date = '2025-11-10' and cbrd.status = 'S' order by batch_id asc;
+select * from cmo_batch_run_details cbrd where cbrd.batch_date::date = '2025-11-06' and cbrd.status = 'S' order by batch_id asc;
 select * from cmo_emp_batch_run_details cebrd where cebrd.batch_date::date = '2025-11-07' and cebrd.status = 'S';
 select * from grievance_master limit 1;
 
-select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (41101,41100,41099);
+select * from cmo_batch_run_details cbrd WHERE batch_date::date = '2025-11-10' and status = 'S' ORDER by batch_id desc;
+
+
+
+
+select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (41095);
+select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (41064)
+
+
+select count(*) from public.grievance_master where grievance_no = 'SSM5349085' or usb_unique_id = 'SSM5349085';
+select * from public.grievance_master where grievance_no = 'SSM5360981' or usb_unique_id = 'SSM5360981';		
+
+
+---- Data Insert Checking -----
+select count(cbgli.griev_id) 
+from cmo_batch_run_details cbrd 
+inner join cmo_batch_grievance_line_item cbgli on cbgli.cmo_batch_run_details_id = cbrd.cmo_batch_run_details_id  
+inner join grievance_master gm on  gm.grievance_no = cbgli.griev_id 
+where cbrd.batch_date::date = '2025-11-08'
+
+
 
 select cbgli.*, gm.status, gm.updated_on, gm.created_on  from cmo_batch_grievance_line_item cbgli 
 inner join grievance_master gm on  gm.grievance_no  = cbgli.griev_id 
 where cbgli.cmo_batch_run_details_id in (41131);
 
 
-select * from cmo_batch_run_details cbrd where cbrd.batch_date::date = '2024-11-06' and cbrd.batch_id = 96;
-select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id = 41131;
+select * from cmo_batch_run_details cbrd where cbrd.batch_date::date = '2025-11-10' and cbrd.data_count > 0 order by data_count asc /*and cbrd.batch_id = 96*/;
+
+select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id = 40723;
+
+
+select cbrd.* 
+from cmo_batch_grievance_line_item cbgli 
+inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id 
+--where cbgli.cmo_batch_run_details_id = 41131;
+--
+
+
+select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (40649);
+select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (40603)
+
+
 select * from grievance_master gm where gm.grievance_no in ('SSM2955552','SSM2955721','SSM2958872','SSM2958892','SSM2958901');
 select * from grievance_master gm where gm.usb_unique_id in ('SSM2955552','SSM2955721','SSM2958872','SSM2958892','SSM2958901')
 
@@ -44,6 +78,11 @@ select * from grievance_master gm where gm.usb_unique_id in ('SSM2955552','SSM29
 select * from cmo_batch_grievance_line_item cbgli 
 inner join cmo_emp_batch_run_details cebrd on cebrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id and cebrd.status = 'S'
 where cebrd.batch_date::date = '2025-11-10';
+
+--update cmo_batch_grievance_line_item cbgli 
+--set status = 2, error = 'SUCCESS' 
+--from cmo_emp_batch_run_details cebrd
+--where cebrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id and cebrd.status = 'S' and cebrd.batch_date::date = '2025-11-08' and cbgli.status = 5 and cbgli.error = 'DUPLICATE'
 
 
 select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5344333'; 
