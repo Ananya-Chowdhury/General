@@ -207,7 +207,7 @@ select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = ''
 --=========================================================================================================================================================================
 
 ---------------- Grievance Query ---------------
-select * from public.grievance_master gm where grievance_no in ('SSM4837610');
+select * from public.grievance_master gm where grievance_no in ('SSM5263087');
 select * from grievance_master gm where gm.grievance_no like '%SSM%' order by gm.grievance_id desc limit 10;  --6036139
 select * from grievance_master gm order by gm.grievance_id desc;
 select * from public.grievance_master gm where gm.grievance_id = 5235053;
@@ -219,7 +219,7 @@ select * from public.admin_user au where au.admin_user_id = 10920;
 select * from public.user_token ut where ut.user_id = 105 order by ut.token_id desc;
 select * from public.cmo_closure_reason_master ccrm ;
 select * from public.grievance_master gm where gm.pri_cont_no = '9163479418';  --8101859077
-select * from public.grievance_lifecycle gl where gl.grievance_id = 5235362;
+select * from public.grievance_lifecycle gl where gl.grievance_id = 5962235;
 select count(1) from public.bulk_griev_status_mesg_assign bgsma;
 select * from grievance_master gm where gm.doc_updated ='Y' limit 10;
 select * from document_master dm where dm.doc_id = 106657; --100317

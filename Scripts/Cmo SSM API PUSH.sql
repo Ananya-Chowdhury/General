@@ -1,6 +1,6 @@
 
 ---- Total Data Count ----------->>>>>>>>
-SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-11-11');
+SELECT * from public.cmo_ssm_api_push_data_count_v2('2025-11-09');
 
 ----- Total Sending Data field ------->>>>>>>>
 SELECT * from public.cmo_ssm_api_push_data_v2('2025-11-05');
@@ -225,7 +225,7 @@ select
 	cspd.is_reprocessed,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-10-07' 
+where cspd.actual_push_date::date = '2025-11-09'    ---2025-11-06, 2025-11-07, 2025-11-08, 2025-11-09, 2025-11-10
 --where cspd.actual_push_date::date between '2024-11-12' and '2025-10-29' and cspd.status = 'F'
 order by cmo_ssm_push_details_id desc;
 
@@ -301,3 +301,9 @@ WHERE gl.assigned_on::date = '2025-10-17'::DATE
   AND gl.grievance_status != 1
   AND (gm.grievance_source = 5 OR gm.received_at = 6)
   group by gl.grievance_id ;
+
+
+
+
+--- Failed Grievances Pushed 
+select cmo_ssm_push_details_id from cmo_ssm_push_details where status='F' and is_reprocessed = False order by cmo_ssm_push_details_id asc limit 200;

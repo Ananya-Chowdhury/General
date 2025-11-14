@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-10'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-14'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -23,6 +23,7 @@ FROM cmo_batch_run_details cbrd
 WHERE batch_date::date = '2025-11-09'
 and status = 'S'
 ORDER by batch_id asc;
+
 
 select * from cmo_batch_run_details cbrd where cbrd.batch_date::date = '2025-11-06' and cbrd.status = 'S' order by batch_id asc;
 select * from cmo_emp_batch_run_details cebrd where cebrd.batch_date::date = '2025-11-07' and cebrd.status = 'S';
@@ -535,7 +536,7 @@ SELECT
 FROM batch_summary a
 LEFT JOIN status_summary s ON a.batch_date = s.batch_date
 LEFT JOIN pending_batches_summary pb ON a.batch_date = pb.batch_date
-WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-11-15'
+WHERE a.batch_date BETWEEN '2024-11-12' AND '2025-11-30'
 ORDER BY a.batch_date DESC;
 
 -------------------------------------------------------------------------------
