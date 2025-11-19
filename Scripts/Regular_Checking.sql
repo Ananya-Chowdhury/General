@@ -3,7 +3,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-13'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-18'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -30,7 +30,7 @@ select
 	cspd.response,
 	cspd.created_no
 from cmo_ssm_push_details cspd 
-where cspd.actual_push_date::date = '2025-11-12'
+where cspd.actual_push_date::date = '2025-11-18'
 order by cmo_ssm_push_details_id desc; -- limit 100;
 
 
@@ -224,6 +224,7 @@ select count(1) from public.bulk_griev_status_mesg_assign bgsma;
 select * from grievance_master gm where gm.doc_updated ='Y' limit 10;
 select * from document_master dm where dm.doc_id = 106657; --100317
 select * from cmo_grievance_category_master cgcm ;
+select * from cmo_domain_lookup_master cdlm ;
 
 
 ----------- Admin Position Fatch Query ----------

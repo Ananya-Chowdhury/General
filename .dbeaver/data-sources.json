@@ -238,6 +238,35 @@
 				"closeIdleConnection": true,
 				"auth-model": "native"
 			}
+		},
+		"postgres-jdbc-19a96a65c2e-7fcab41aa9a1146b": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "postgres",
+			"save-password": true,
+			"configuration": {
+				"host": "192.168.0.2",
+				"port": "5444",
+				"database": "postgres",
+				"url": "jdbc:postgresql://192.168.0.2:5444/postgres",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "true",
+					"@dbeaver-chosen-role@": "",
+					"@dbeaver-show-template-db@": "false",
+					"@dbeaver-show-unavailable-db@": "false",
+					"show-database-statistics": "false",
+					"@dbeaver-read-all-data-types-db@": "false",
+					"read-keys-with-columns": "false",
+					"replace-legacy-timezone": "false",
+					"@dbeaver-use-prepared-statements-db@": "false",
+					"postgresql.dd.plain.string": "false",
+					"postgresql.dd.tag.string": "false"
+				},
+				"auth-model": "native"
+			}
 		}
 	},
 	"virtual-models": {"postgres-jdbc-198738c5c23-3a4863b3e2f006b6":{"cmo_grievance_portal_prod":{"public":{":griev_ids_pnrd_p3":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}},":griev_ids_pnrd_e_p2_road":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}},":cmo_ssm_push_details":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}}}}}},

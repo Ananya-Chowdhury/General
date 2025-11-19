@@ -57,7 +57,6 @@
 			"custom-properties": {
 				"resultset.confirm.beforeSave": "false",
 				"resultset.datetime.editor": "false",
-				"resultset.maxrows": "1000000",
 				"transaction.auto.close.ttl": "3600",
 				"transaction.smart.commit": "true"
 			}
@@ -237,6 +236,25 @@
 				"configurationType": "MANUAL",
 				"type": "dev",
 				"closeIdleConnection": true,
+				"auth-model": "native"
+			}
+		},
+		"postgres-jdbc-19a96a65c2e-7fcab41aa9a1146b": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "postgres",
+			"save-password": true,
+			"configuration": {
+				"host": "192.168.0.2",
+				"port": "5432",
+				"database": "postgres",
+				"url": "jdbc:postgresql://192.168.0.2:5432/postgres",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false"
+				},
 				"auth-model": "native"
 			}
 		}

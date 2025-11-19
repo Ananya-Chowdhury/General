@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-14'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-18'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -32,14 +32,24 @@ select * from grievance_master limit 1;
 select * from cmo_batch_run_details cbrd WHERE batch_date::date = '2025-11-10' and status = 'S' ORDER by batch_id desc;
 
 
+select count(*) from grievance_master gm 
+inner join cmo_batch_grievance_line_item cbgli on cbgli.griev_id = gm.grievance_no or cbgli.griev_id = gm.usb_unique_id 
+where gm.grievance_no = 'SSM2974005'
 
 
-select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (41095);
-select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (41064)
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5389788'
+
+
+select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (41770,41771);
+select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (41715);
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5389788';
 
 
 select count(*) from public.grievance_master where grievance_no = 'SSM5349085' or usb_unique_id = 'SSM5349085';
-select * from public.grievance_master where grievance_no = 'SSM5360981' or usb_unique_id = 'SSM5360981';		
+select * from public.grievance_master where grievance_no = 'SSM5389788' or usb_unique_id = 'SSM5389788';	
+
+select * from grievance_master gm where gm.grievance_no like '%SSM%' order by gm.grievance_id desc limit 20;
+select * from ssm_grievance_data_document_mapping sgddm ;
 
 
 ---- Data Insert Checking -----
@@ -53,7 +63,7 @@ where cbrd.batch_date::date = '2025-11-08'
 
 select cbgli.*, gm.status, gm.updated_on, gm.created_on  from cmo_batch_grievance_line_item cbgli 
 inner join grievance_master gm on  gm.grievance_no  = cbgli.griev_id 
-where cbgli.cmo_batch_run_details_id in (41131);
+where cbgli.cmo_batch_run_details_id in (41536);
 
 
 select * from cmo_batch_run_details cbrd where cbrd.batch_date::date = '2025-11-10' and cbrd.data_count > 0 order by data_count asc /*and cbrd.batch_id = 96*/;
@@ -86,7 +96,7 @@ where cebrd.batch_date::date = '2025-11-10';
 --where cebrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id and cebrd.status = 'S' and cebrd.batch_date::date = '2025-11-08' and cbgli.status = 5 and cbgli.error = 'DUPLICATE'
 
 
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5344333'; 
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5386837'; 
 
 
 select cbgli.*
@@ -579,7 +589,8 @@ select distinct
 	spdf.cmo_batch_run_details_id,
 	count(spdf.error)::integer
 from ssm_pull_data_failed spdf
-where spdf.batch_date between '2024-11-12'::date and (current_timestamp::date) --  - INTERVAL '1 day')::date
+--where spdf.batch_date between '2024-11-12'::date and (current_timestamp::date) --  - INTERVAL '1 day')::date
+where spdf.batch_date::date = '2025-11-17'::date --  - INTERVAL '1 day')::date
 group by spdf.batch_date,spdf.error,spdf.from_time,spdf.to_time, spdf.griev_id, spdf.cmo_batch_run_details_id
 order by spdf.batch_date desc;
 
@@ -662,6 +673,7 @@ where cbgli.griev_id in ('SSM4352563','SSM4352782','SSM4352712','SSM4352641','SS
 
 
 select * from cmo_batch_grievance_line_item limit 1;
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5388355';
 select * from cmo_batch_run_details cbrd order by cmo_batch_run_details_id desc limit 1;
 
 select griev_cat_code from cmo_batch_grievance_line_item order by griev_cat_code;
@@ -700,7 +712,7 @@ select * from cmo_skill_master csm ;
 
 
 ---- Professional Qualification 
-select * from cmo_professional_qualification_master cpqm;
+select * from cmo_professional_qualification_master cpqm where cpqm.professional_qualification_code = '00';
 
 
 ---- Education Qualification

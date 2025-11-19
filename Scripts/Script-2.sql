@@ -13,14 +13,15 @@ where gl.lifecycle_id  = 29562;
 
 SELECT * 
 FROM user_otp uo  
-WHERE uo.u_phone = '9732525502'
+WHERE uo.u_phone = '9477399095'
 ORDER BY created_on desc;
 
 
 
 
 select * from grievance_master gm where gm.grievance_id in (22885,22886,22887,22888,22889);
-select * from grievance_master gm;
+select * from grievance_master gm where gm.grievance_no = 'SSM5341070';
+select * from grievance_lifecycle gl where gl.grievance_id = 22905;
 
 
 select * from cmo_office_master com; -- 13
