@@ -223,7 +223,7 @@ select * from public.grievance_lifecycle gl where gl.grievance_id = 5962235;
 select count(1) from public.bulk_griev_status_mesg_assign bgsma;
 select * from grievance_master gm where gm.doc_updated ='Y' limit 10;
 select * from document_master dm where dm.doc_id = 106657; --100317
-select * from cmo_grievance_category_master cgcm ;
+select * from document_master dm where dm.upload_doc_type = 6;
 select * from cmo_domain_lookup_master cdlm ;
 
 

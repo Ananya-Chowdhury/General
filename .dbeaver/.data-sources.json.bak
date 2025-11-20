@@ -242,18 +242,28 @@
 		"postgres-jdbc-19a96a65c2e-7fcab41aa9a1146b": {
 			"provider": "postgresql",
 			"driver": "postgres-jdbc",
-			"name": "postgres",
+			"name": "CMO-DEV-DB-REPLICA",
 			"save-password": true,
 			"configuration": {
 				"host": "192.168.0.2",
-				"port": "5432",
+				"port": "5444",
 				"database": "postgres",
-				"url": "jdbc:postgresql://192.168.0.2:5432/postgres",
+				"url": "jdbc:postgresql://192.168.0.2:5444/postgres",
 				"configurationType": "MANUAL",
 				"type": "dev",
 				"closeIdleConnection": true,
 				"provider-properties": {
-					"@dbeaver-show-non-default-db@": "false"
+					"@dbeaver-show-non-default-db@": "true",
+					"@dbeaver-chosen-role@": "",
+					"@dbeaver-show-template-db@": "false",
+					"@dbeaver-show-unavailable-db@": "false",
+					"show-database-statistics": "false",
+					"@dbeaver-read-all-data-types-db@": "false",
+					"read-keys-with-columns": "false",
+					"replace-legacy-timezone": "false",
+					"@dbeaver-use-prepared-statements-db@": "false",
+					"postgresql.dd.plain.string": "false",
+					"postgresql.dd.tag.string": "false"
 				},
 				"auth-model": "native"
 			}

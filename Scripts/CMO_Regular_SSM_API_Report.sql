@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-18'  -- 2025-09-26, 2025-10-03 not fatched
+WHERE batch_date::date = '2025-11-19'  -- 2025-09-26, 2025-10-03 not fatched
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -42,7 +42,7 @@ select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM538
 
 select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (41770,41771);
 select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (41715);
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5389788';
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5385770';
 
 
 select count(*) from public.grievance_master where grievance_no = 'SSM5349085' or usb_unique_id = 'SSM5349085';
