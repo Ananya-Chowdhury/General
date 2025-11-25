@@ -57,7 +57,7 @@
 			"custom-properties": {
 				"resultset.confirm.beforeSave": "false",
 				"resultset.datetime.editor": "false",
-				"resultset.maxrows": "1000",
+				"resultset.maxrows": "10000",
 				"transaction.auto.close.ttl": "3600",
 				"transaction.smart.commit": "true"
 			}

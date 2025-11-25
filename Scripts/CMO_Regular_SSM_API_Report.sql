@@ -14,13 +14,13 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-20'  -- 20.11.2025 3384,  19.11.2025  3787 3790
+WHERE batch_date::date = '2025-11-24'  -- 20.11.2025 3384,  19.11.2025  3787 3790
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-19'
+WHERE batch_date::date = '2025-02-15'
 and status = 'S'
 ORDER by batch_id desc;
 
@@ -34,18 +34,19 @@ select * from cmo_batch_run_details cbrd WHERE batch_date::date = '2025-11-10' a
 
 select count(*) from grievance_master gm 
 inner join cmo_batch_grievance_line_item cbgli on cbgli.griev_id = gm.grievance_no or cbgli.griev_id = gm.usb_unique_id 
-where gm.grievance_no = 'SSM2974005'
+where gm.grievance_no = 'SSM5403074'
 
 
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5385770'
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5405493'
 
 
 select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (41770,41771);
 select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (41715);
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5403074';
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM3299022';
 
 
-select count(*) from public.grievance_master where grievance_no = 'SSM5349085' or usb_unique_id = 'SSM5349085';
+select count(*) from public.grievance_master where grievance_no = 'SSM3288070' or usb_unique_id = 'SSM3288070';
+select * from public.grievance_master where grievance_no = 'SSM3285002' or usb_unique_id = 'SSM3285002';
 select * from public.grievance_master where grievance_no = 'SSM5389788' or usb_unique_id = 'SSM5389788';	
 
 select * from grievance_master gm where gm.grievance_no like '%SSM%' order by gm.grievance_id desc limit 20;
@@ -74,13 +75,13 @@ select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_deta
 select * 
 from cmo_batch_grievance_line_item cbgli 
 inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id 
-where cbgli.griev_id = 'SSM5403074';
+where cbgli.griev_id = 'SSM3288070';
 --where cbgli.cmo_batch_run_details_id = 41131;
 --
 
 
-select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (40649);
-select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (40603)
+select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (42056);
+select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (42507)
 
 
 select * from grievance_master gm where gm.grievance_no in ('SSM2955552','SSM2955721','SSM2958872','SSM2958892','SSM2958901');
@@ -383,7 +384,8 @@ FROM (
         FROM cmo_batch_run_details cbrd
         LEFT JOIN cmo_batch_time_master cbtm 
             ON cbtm.batch_time_master_id = cbrd.batch_id
-        WHERE cbrd.status = 'S'
+        WHERE cbrd.status = 'S' 
+        and cbrd.status = 'S' and cbrd.batch_date::date >= '2024-12-19'::date
         GROUP BY cbrd.batch_date::date
         ORDER BY cbrd.batch_date::date DESC
     ) a
@@ -568,6 +570,7 @@ with ssm_pull_data_failed as (
 	-- Failed Entry (Not validated) - 4215
 	select
 		cbrd.batch_date,
+		cbrd.batch_id,
 		cbrd.from_time,
 		cbrd.to_time,
 		cbrd.created_no,
@@ -583,6 +586,7 @@ with ssm_pull_data_failed as (
 )
 select distinct
 	spdf.batch_date::date,
+	spdf.batch_id,
 	spdf.from_time,
 	spdf.to_time,
 	spdf.error::varchar,
@@ -590,10 +594,10 @@ select distinct
 	spdf.cmo_batch_run_details_id,
 	count(spdf.error)::integer
 from ssm_pull_data_failed spdf
-where spdf.batch_date between '2025-11-01'::date and '2025-11-20'::date --  - INTERVAL '1 day')::date
---where spdf.batch_date between '2025-11-01'::date and (current_timestamp::date) --  - INTERVAL '1 day')::date
---where spdf.batch_date::date = '2025-11-01'::date --  - INTERVAL '1 day')::date
-group by spdf.batch_date,spdf.error,spdf.from_time,spdf.to_time, spdf.griev_id, spdf.cmo_batch_run_details_id
+--where spdf.batch_date between '2025-11-01'::date and '2025-11-20'::date --  - INTERVAL '1 day')::date
+--where spdf.batch_date between '2025-11-24'::date and (current_timestamp::date  - INTERVAL '1 day')::date
+--where spdf.batch_date::date = '2025-11-24'::date  - INTERVAL '1 day')::date
+group by spdf.batch_date,spdf.error,spdf.from_time,spdf.to_time, spdf.griev_id, spdf.cmo_batch_run_details_id,spdf.batch_id
 order by spdf.batch_date desc;
 
 
@@ -696,8 +700,8 @@ select * from cmo_blocks_master cbm ;
 
 ---- Police Station 
 select * from cmo_police_station_master cpsm where cpsm.ps_code = '804';
-select * from cmo_police_station_master cpsm ; -- ps_id = 1 for not known 
-
+select * from cmo_police_station_master cpsm where cpsm.sub_district_id = 8 ; -- ps_id = 1 for not known 
+--
 ---- Gram Panchayet 
 select * from cmo_gram_panchayat_master cgpm where cgpm.gp_code = '003187';
 select * from cmo_gram_panchayat_master cgpm ;
@@ -724,6 +728,8 @@ select * from cmo_educational_qualification_master ceqm ;
 ----- Assembly Constitution -----
 select * from cmo_assembly_master cam where cam.assembly_code = '279;'
 
+
+select * from cmo_sub_districts_master csdm ;
 ---------------------------------------------------------------------------------------------------
 
 --==================================================================================================
@@ -1447,3 +1453,39 @@ select * from cmo_ssm_push_details cspd where cspd.actual_push_date::date = '202
 select sgddm.*, dm.* from ssm_grievance_data_document_mapping sgddm
 inner join document_master dm on dm.doc_id = sgddm.doc_id
 where batch_date::date = '2025-11-08'::date;
+
+
+
+
+
+---Re Process For SSM Failure Pull 
+with
+    batch_line as (
+        select 
+            cbgli.cmo_batch_run_details_id
+        from cmo_batch_grievance_line_item cbgli
+        where cbgli.status = 3 
+        group by cbgli.cmo_batch_run_details_id
+    )
+select
+    bl.cmo_batch_run_details_id,
+    cbrd.batch_id,
+    cbrd.batch_date,
+    cbrd.from_time,
+    cbrd.to_time,
+    cebrd.cmo_emp_batch_run_details_id,
+    cbrd.data_count
+from batch_line bl
+inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = bl.cmo_batch_run_details_id
+    and cbrd.batch_date::date between '2024-11-21'::date and '2025-11-21'::date
+inner join cmo_emp_batch_run_details cebrd on cbrd.batch_date = cebrd.batch_date and cbrd.batch_id = cebrd.batch_id
+order by cbrd.batch_date asc;
+
+
+
+
+
+
+
+
+

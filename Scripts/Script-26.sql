@@ -21,3 +21,4 @@ select * from cmo_grievance_category_master cgcm;
 
 
 select * from user_token ut where ut.user_id = 10340;
+
