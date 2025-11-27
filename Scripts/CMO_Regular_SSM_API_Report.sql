@@ -14,17 +14,18 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-24'  -- 20.11.2025 3384,  19.11.2025  3787 3790
+WHERE batch_date::date = '2025-11-26'  -- 20.11.2025 3384,  19.11.2025  3787 3790
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-02-15'
+WHERE batch_date::date = '2025-04-04'
 and status = 'S'
 ORDER by batch_id desc;
 
 
+select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id = 15962;
 select * from cmo_batch_run_details cbrd where cbrd.batch_date::date = '2025-11-06' and cbrd.status = 'S' order by batch_id asc;
 select * from cmo_emp_batch_run_details cebrd where cebrd.batch_date::date = '2025-11-07' and cebrd.status = 'S';
 select * from grievance_master limit 1;
@@ -39,15 +40,42 @@ where gm.grievance_no = 'SSM5403074'
 
 select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5405493'
 
+select * from cmo_batch_grievance_line_item cbgli 
+inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id 
+where cbgli.status = 1 and cbrd.batch_date::date != '2025-11-26';
 
-select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (41770,41771);
-select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (41715);
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM3299022';
+
+--==============================================================================
+--======================= R E P R O C E S S ====================================
+--==============================================================================
+
+--- Failure Reprocessed Data Coumt ----
+select * from cmo_batch_grievance_line_item cbgli 
+--inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id 
+where /*cbgli.status = 1 and*/ cbgli.error = 'REPROCESS';
+
+select distinct count(cbgli.griev_id) from cmo_batch_grievance_line_item cbgli
+where /*cbgli.status = 1 and*/ cbgli.error = 'REPROCESS';
+
+select cbgli.cmo_batch_run_details_id from cmo_batch_grievance_line_item cbgli where cbgli.error = 'REPROCESS' order by cmo_batch_run_details_id asc limit 1;
+select * from cmo_batch_grievance_line_item where status = 1 and error = 'REPROCESS' and cmo_batch_run_details_id in (11877) order by cmo_batch_run_details_id asc;
+select cbgli.cmo_batch_run_details_id from cmo_batch_grievance_line_item cbgli where cbgli.error = 'REPROCESS' and cbgli.cmo_batch_run_details_id in (11877) order by cbgli.cmo_batch_run_details_id asc;
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM1011115';
+
+select * from public.cmo_batch_grievance_line_item where status = 1 and error = 'REPROCESS' and cmo_batch_run_details_id in (11777) order by cmo_batch_run_details_id asc
+
+select count(*) from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM1011115' and cbgli.status = 2
+
+--==================================================================================
+
+select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (15962);
+select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (15962);
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM4355314';
 
 
 select count(*) from public.grievance_master where grievance_no = 'SSM3288070' or usb_unique_id = 'SSM3288070';
 select * from public.grievance_master where grievance_no = 'SSM3285002' or usb_unique_id = 'SSM3285002';
-select * from public.grievance_master where grievance_no = 'SSM5389788' or usb_unique_id = 'SSM5389788';	
+select * from public.grievance_master where grievance_no = 'SSM4355314' or usb_unique_id = 'SSM4355314';	
 
 select * from grievance_master gm where gm.grievance_no like '%SSM%' order by gm.grievance_id desc limit 20;
 select * from ssm_grievance_data_document_mapping sgddm ;
@@ -64,18 +92,18 @@ where cbrd.batch_date::date = '2025-11-08'
 
 select cbgli.*, gm.status, gm.updated_on, gm.created_on  from cmo_batch_grievance_line_item cbgli 
 inner join grievance_master gm on  gm.grievance_no  = cbgli.griev_id 
-where cbgli.cmo_batch_run_details_id in (41536);
+where cbgli.cmo_batch_run_details_id in (15835);
 
 
 select * from cmo_batch_run_details cbrd where cbrd.batch_date::date = '2025-11-10' and cbrd.data_count > 0 order by data_count asc /*and cbrd.batch_id = 96*/;
 
-select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id = 40723;
+
 
 
 select * 
 from cmo_batch_grievance_line_item cbgli 
 inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id 
-where cbgli.griev_id = 'SSM3288070';
+where cbgli.griev_id = 'SSM4311094';
 --where cbgli.cmo_batch_run_details_id = 41131;
 --
 
@@ -98,7 +126,7 @@ where cebrd.batch_date::date = '2025-11-10';
 --where cebrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id and cebrd.status = 'S' and cebrd.batch_date::date = '2025-11-08' and cbgli.status = 5 and cbgli.error = 'DUPLICATE'
 
 
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5386837'; 
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM4355314'; 
 
 
 select cbgli.*
@@ -1458,7 +1486,7 @@ where batch_date::date = '2025-11-08'::date;
 
 
 
----Re Process For SSM Failure Pull 
+---Re-Process For SSM Failure Pull ----
 with
     batch_line as (
         select 
@@ -1477,7 +1505,7 @@ select
     cbrd.data_count
 from batch_line bl
 inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = bl.cmo_batch_run_details_id
-    and cbrd.batch_date::date between '2024-11-21'::date and '2025-11-21'::date
+    and cbrd.batch_date::date between '2025-04-04'::date and '2025-04-04'::date and cbrd.batch_id = 77 /*bl.cmo_batch_run_details_id = 15962*/
 inner join cmo_emp_batch_run_details cebrd on cbrd.batch_date = cebrd.batch_date and cbrd.batch_id = cebrd.batch_id
 order by cbrd.batch_date asc;
 

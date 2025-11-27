@@ -437,7 +437,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9434055201'   --9147888180
+WHERE uo.u_phone = '6292222444'   --9147888180
 ORDER BY created_on desc limit 5;
 
 SELECT * 
@@ -464,15 +464,15 @@ select * from public.cmo_office_master com where com.office_type =  8;
 select * from public.cmo_office_master com where com.office_id = 35;
 select * from public.cmo_sub_divisions_master csdm where csdm.district_id = 20;
 select * from public.cmo_districts_master cdm;
-select * from public.admin_user_details aud where aud.admin_user_id =;
-select * from public.admin_user_position_mapping aupm where aupm.admin_user_id = 12660 and aupm.position_id = 3433;
-select * from public.admin_user au where au.admin_user_id = 11152;
-select * from public.admin_position_master apm where /*apm.position_id = 3433*/ apm.office_type = 9;
+select * from public.admin_user_details aud where aud.admin_user_id =76;
+select * from public.admin_user_position_mapping aupm where aupm.admin_user_id = 76 /*and aupm.position_id = 3433*/;
+select * from public.admin_user au where au.admin_user_id = 76;
+select * from public.admin_position_master apm where apm.position_id = 3433 /*apm.office_type = 9*/;
 select count(1) from public.grievance_master gm where gm.assigned_to_position = 3433 and gm.assigned_to_id = 3433;
 select count(1) from public.grievance_lifecycle gl where gl.assigned_to_position = 3433;
 select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = 'office_type';
 select * from cmo_police_station_master cpsm where cpsm.sub_district_id = 13;
-select * from public.admin_user au where au.u_phone = '9999999999'; --8101859077   --->>>> -105 -106 admin_user_id
+select * from public.admin_user au where au.u_phone = '6292222444'; --8101859077   --->>>> -105 -106 admin_user_id
 select * from public.admin_user_details aud where aud.official_phone = '9999999999'; --9903821521
 select * from public.cmo_parameter_master cpm ;
 select * from public.grievance_master gm where gm.pri_cont_no = '9163479418';
@@ -483,6 +483,7 @@ select * from public.cmo_closure_reason_master ccrm;
 select * from cmo_grievance_category_master cgcm ;
 select * from user_token ut where ut.c_m_no = '9635821533';
 select * from user_token ut order by ut.token_id desc limit 10;
+select * from admin_user_details aud where aud.official_name Like '%Shri Arvind%';
 
 
 
