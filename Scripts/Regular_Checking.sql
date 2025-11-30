@@ -207,11 +207,11 @@ select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = ''
 --=========================================================================================================================================================================
 
 ---------------- Grievance Query ---------------
-select * from public.grievance_master gm where grievance_no in ('SSM5263087');
+select * from public.grievance_master gm where grievance_no in ('SSM1111122222');
 select * from grievance_master gm where gm.grievance_no like '%SSM%' order by gm.grievance_id desc limit 10;  --6036139
 select * from grievance_master gm order by gm.grievance_id desc;
-select * from public.grievance_master gm where gm.grievance_id = 5235053;
-select * from public.grievance_lifecycle gl where gl.grievance_id = 5894923 order by gl.assigned_on desc;
+select * from public.grievance_master gm where gm.grievance_id = 1267014;
+select * from public.grievance_lifecycle gl where gl.grievance_id = 6066106 order by gl.assigned_on desc;
 select * from public.grievance_master gm where gm.grievance_no = 'CMO41972931';
 select * from public.admin_position_master apm where apm.position_id = 10140;               -- assigned_to_postion = position_id      admin_postion_master
 select * from public.admin_user_position_mapping aupm where aupm.position_id = 11360;       --12745 (6) --10140 --12708 (7) --
@@ -241,6 +241,7 @@ select * from admin_position_master apm where apm.office_id = 35 and role_master
 select * from admin_position_master apm where role_master_id = 9 and record_status = 1;
 select * from admin_user_role_master aurm ;
 select * from cmo_domain_lookup_master cdlm ;
+select * from cmo_parameter_master cpm ;
 select * from cmo_grievance_category_master cgcm ;
 
 
@@ -265,7 +266,7 @@ select * from grievance_retruned_data grd ;
         inner join admin_user_role_master aurm on aurm.role_master_id = admin_position_master.role_master_id
         inner join cmo_office_master com on com.office_id = admin_position_master.office_id
     where admin_position_master.office_id is not null /*and admin_position_master.role_master_id in (4,5,6)*/ and admin_user_position_mapping.status = 1  and admin_position_master.record_status= 1
-    and admin_position_master.position_id = 851
+    /*and admin_position_master.position_id = 851*/
     group by admin_user_details.official_name, admin_user_details.official_phone, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name, 
     admin_user_details.admin_user_id, admin_user_position_mapping.status, admin_position_master.record_status
 order by admin_position_master.office_id asc;
@@ -336,7 +337,8 @@ select
 	gl.assigned_by_office_id,
 	gl.assigned_to_office_id
 from public.grievance_lifecycle gl 
-where gl.grievance_id = 4468914; -- 868643
+where gl.grievance_id = 5555
+order by assigned_on desc; -- 868643
 
 
 select * from cmo_domain_lookup_master cdlm;
@@ -437,7 +439,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '6292222444'   --9147888180
+WHERE uo.u_phone = '9732525502'   --9147888180
 ORDER BY created_on desc limit 5;
 
 SELECT * 
@@ -472,18 +474,20 @@ select count(1) from public.grievance_master gm where gm.assigned_to_position = 
 select count(1) from public.grievance_lifecycle gl where gl.assigned_to_position = 3433;
 select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = 'office_type';
 select * from cmo_police_station_master cpsm where cpsm.sub_district_id = 13;
-select * from public.admin_user au where au.u_phone = '6292222444'; --8101859077   --->>>> -105 -106 admin_user_id
+select * from public.admin_user au where au.u_phone = '8777729301'; --8101859077   --->>>> -105 -106 admin_user_id
 select * from public.admin_user_details aud where aud.official_phone = '9999999999'; --9903821521
 select * from public.cmo_parameter_master cpm ;
 select * from public.grievance_master gm where gm.pri_cont_no = '9163479418';
 select * from public.grievance_master gm where gm.grievance_id = 2512493;
-select * from public.grievance_master gm2 where gm2.grievance_no = 'SSM4767959';
+select * from public.grievance_master gm2 where gm2.grievance_no = 'SSM1111111111';
 select * from public.grievance_lifecycle gl where gl.grievance_id = 2512493 order by gl.assigned_on  desc;
 select * from public.cmo_closure_reason_master ccrm;
 select * from cmo_grievance_category_master cgcm ;
 select * from user_token ut where ut.c_m_no = '9635821533';
 select * from user_token ut order by ut.token_id desc limit 10;
+select * from user_token ut where ut.user_id = 10920 order by ut.token_id desc limit 10;
 select * from admin_user_details aud where aud.official_name Like '%Shri Arvind%';
+
 
 
 
@@ -856,6 +860,13 @@ select * from wcd_joy_bangla_transactions wjbt where wjbt.grievance_id = 4023588
 --1 as status, now() as created_on
 --from grievance_lifecycle gl
 --where gl.assign_comment = 'Auto-assigned by System';
+
+
+ select gm.grievance_id 
+    from grievance_master gm
+    inner join grievance_auto_assign_map gaam on gaam.grievance_cat_id = gm.grievance_category and gaam.status = 1
+    where gm.status = 1 and gm.received_at = 5 and gm.grievance_no like 'SSM%' 
+    order by gm.grievance_id desc limit 10
 
 
 select * from grievance_auto_assign_audit;

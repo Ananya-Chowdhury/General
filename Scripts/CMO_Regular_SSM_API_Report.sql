@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-26'  -- 20.11.2025 3384,  19.11.2025  3787 3790
+WHERE batch_date::date = '2025-11-27'  -- 20.11.2025 3384,  19.11.2025  3787 3790
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -57,28 +57,73 @@ where /*cbgli.status = 1 and*/ cbgli.error = 'REPROCESS';
 select distinct count(cbgli.griev_id) from cmo_batch_grievance_line_item cbgli
 where /*cbgli.status = 1 and*/ cbgli.error = 'REPROCESS';
 
-select cbgli.cmo_batch_run_details_id from cmo_batch_grievance_line_item cbgli where cbgli.error = 'REPROCESS' order by cmo_batch_run_details_id asc limit 1;
+select cbgli.cmo_batch_run_details_id from cmo_batch_grievance_line_item cbgli where cbgli.error = 'REPROCESS' order by cmo_batch_run_details_id asc;
 select * from cmo_batch_grievance_line_item where status = 1 and error = 'REPROCESS' and cmo_batch_run_details_id in (11877) order by cmo_batch_run_details_id asc;
-select cbgli.cmo_batch_run_details_id from cmo_batch_grievance_line_item cbgli where cbgli.error = 'REPROCESS' and cbgli.cmo_batch_run_details_id in (11877) order by cbgli.cmo_batch_run_details_id asc;
+
+select distinct cbgli.cmo_batch_run_details_id from cmo_batch_grievance_line_item cbgli where cbgli.error = 'REPROCESS' /*and cbgli.cmo_batch_run_details_id in (11877) */ order by cbgli.cmo_batch_run_details_id asc;
 select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM1011115';
 
-select * from public.cmo_batch_grievance_line_item where status = 1 and error = 'REPROCESS' and cmo_batch_run_details_id in (11777) order by cmo_batch_run_details_id asc
+select * from public.cmo_batch_grievance_line_item where status = 1 and error = 'REPROCESS' and cmo_batch_run_details_id in (41909) order by cmo_batch_run_details_id asc
 
-select count(*) from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM1011115' and cbgli.status = 2
+select count(*) from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM3994762' and cbgli.status = 2
 
 --==================================================================================
 
 select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (15962);
 select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (15962);
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM4355314';
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM4360473';
 
 
 select count(*) from public.grievance_master where grievance_no = 'SSM3288070' or usb_unique_id = 'SSM3288070';
 select * from public.grievance_master where grievance_no = 'SSM3285002' or usb_unique_id = 'SSM3285002';
-select * from public.grievance_master where grievance_no = 'SSM4355314' or usb_unique_id = 'SSM4355314';	
+select * from public.grievance_master where grievance_no = 'SSM4288756' or usb_unique_id = 'SSM4288756';	
 
 select * from grievance_master gm where gm.grievance_no like '%SSM%' order by gm.grievance_id desc limit 20;
 select * from ssm_grievance_data_document_mapping sgddm ;
+
+
+--=======================================================================================================================
+---------------------------------------  SSM MASTER DATA VALIDATION -----------------------------------------------------
+--=======================================================================================================================
+
+select * from cmo_batch_grievance_line_item cbgli limit 1;
+select * from cmo_emp_batch_run_details cebrd where cebrd.data_count > 10;
+select * from cmo_batch_run_details cbrd limit 1;
+
+select * from cmo_grivence_receive_mode_master ;
+select * from cmo_domain_lookup_master where domain_type = 'received_at_location';
+select domain_id, domain_code, domain_value, domain_abbr from public.cmo_domain_lookup_master where domain_type = 'gender';
+select * from grievance_master gm where gm.applicant_name = ' ' limit 1 ;
+select * from cmo_states_master csm ;
+select * from public.cmo_municipality_master cmm;
+select * from cmo_sub_divisions_master csdm where csdm.sub_division_id = 4;
+select * from cmo_blocks_master cbm ;
+select * from cmo_wards_master;
+select * from cmo_grievance_category_master cgcm where cgcm.grievance_category_code = '08'
+
+select * 
+from cmo_blocks_master cbm 
+inner join cmo_sub_divisions_master csdm on csdm.sub_division_id = cbm.sub_division_id 
+where block_id = 26;
+
+
+select * from document_master dm order by doc_id desc limit 5;
+select * from cmo_domain_lookup_master cdlm ;
+
+
+select * from ssm_grievance_data_document_mapping ;
+
+
+select domain_code from cmo_domain_lookup_master cdlm where cdlm.domain_type = 'doc_type';
+
+select parameter_value from cmo_parameter_master cpm where cpm.parameter_key = 'sftp_flag';
+
+
+select * from cmo_batch_run_details cbrd limit 1;
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
 
 
 ---- Data Insert Checking -----
@@ -707,7 +752,7 @@ where cbgli.griev_id in ('SSM4352563','SSM4352782','SSM4352712','SSM4352641','SS
 
 
 select * from cmo_batch_grievance_line_item limit 1;
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5388355';
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM4288373 ';
 select * from cmo_batch_run_details cbrd order by cmo_batch_run_details_id desc limit 1;
 
 select griev_cat_code from cmo_batch_grievance_line_item order by griev_cat_code;
@@ -746,7 +791,7 @@ select * from cmo_skill_master csm ;
 
 
 ---- Professional Qualification 
-select * from cmo_professional_qualification_master cpqm where cpqm.professional_qualification_code = '00';
+select * from cmo_professional_qualification_master cpqm where cpqm.professional_qualification_code = '99';
 
 
 ---- Education Qualification
