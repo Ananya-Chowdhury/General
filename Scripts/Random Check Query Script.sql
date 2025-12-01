@@ -1844,8 +1844,8 @@ master_district_block_grv_data AS (
     left join under_processing_ids on under_processing_ids.grievance_id = md.grievance_id
     left join grievance_retruned_data grd on grd.grievance_id = md.grievance_id and grd.status = 1
     where md.status in (1,2,16)
-    and not exists (select 1 from grievance_auto_assign_map gam where gam.grievance_cat_id = md.grievance_category and gam.status = 1)
-    order by updated_on asc limit 30 offset 0
+    /*and not exists (select 1 from grievance_auto_assign_map gam where gam.grievance_cat_id = md.grievance_category and gam.status = 1)*/
+--    order by updated_on asc limit 30 offset 0
 )
 select mdbgd.*
 from master_district_block_grv_data mdbgd;

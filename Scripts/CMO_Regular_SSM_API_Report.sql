@@ -785,7 +785,7 @@ select * from cmo_wards_master cwm ;
 
 ---- Post Office
 select * from cmo_post_office_master cpom where cpom.po_code = '0448';
-select * from cmo_post_office_master cpom where cpom.po_name = ;
+select * from cmo_post_office_master cpom where cpom.po_name = 'Rajnagar B.O';
 
 ---- Skills Master 
 select * from cmo_skill_master csm ;
