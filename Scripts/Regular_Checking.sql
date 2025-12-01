@@ -417,7 +417,7 @@ select * from public.admin_user au limit 1;
 select * from public.admin_position_master apm where apm.record_status = 1 and apm.role_master_id = 9;
 select * from public.admin_user_position_mapping aupm where aupm.status = 1 and aupm.position_id = 1;
 select * from public.grievance_master gm where gm.status = 15;
-select * from public.grievance_lifecycle gl where gl.grievance_id = 3554042 order by gl.assigned_on asc;   --5740559
+select * from public.grievance_lifecycle gl where gl.grievance_id in (5809393,5826479,5826784,5827117,5827360,6066081,6066106,6066154,6066164,6066165,6066166) order by gl.assigned_on asc;   --5740559
 select * from public.grievance_master gm where gm.grievance_id = 12139;
 select * from public.grievance_lifecycle gl where gl.lifecycle_id = 8186648;  --2670392
 select * from grievance_master gm where gm.pri_cont_no = '9163479418';   --5809393

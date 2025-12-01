@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-11-27'  -- 20.11.2025 3384,  19.11.2025  3787 3790
+WHERE batch_date::date = '2025-11-29'  -- 20.11.2025 3384,  19.11.2025  3787 3790
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -785,6 +785,7 @@ select * from cmo_wards_master cwm ;
 
 ---- Post Office
 select * from cmo_post_office_master cpom where cpom.po_code = '0448';
+select * from cmo_post_office_master cpom where cpom.po_name = ;
 
 ---- Skills Master 
 select * from cmo_skill_master csm ;
@@ -1550,7 +1551,7 @@ select
     cbrd.data_count
 from batch_line bl
 inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = bl.cmo_batch_run_details_id
-    and cbrd.batch_date::date between '2025-04-04'::date and '2025-04-04'::date and cbrd.batch_id = 77 /*bl.cmo_batch_run_details_id = 15962*/
+    and cbrd.batch_date::date between '2025-11-01'::date and '2025-11-19'::date /*and cbrd.batch_id = 77*/ /*bl.cmo_batch_run_details_id = 15962*/
 inner join cmo_emp_batch_run_details cebrd on cbrd.batch_date = cebrd.batch_date and cbrd.batch_id = cebrd.batch_id
 order by cbrd.batch_date asc;
 
