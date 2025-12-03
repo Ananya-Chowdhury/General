@@ -386,7 +386,7 @@ ORDER BY cebrd.batch_id desc;
 select * from cmo_batch_grievance_line_item cbgli order by cbgli.cmo_batch_run_details_id desc;
 
 
-select * from public.grievance_master gm where grievance_no = 'SSM5386701'; 
+select * from public.grievance_master gm where grievance_no = 'SSM5390190'; 
 select * from public.cmo_batch_grievance_line_item cbgli where griev_id = 'SSM2962283';
 select * from public.grievance_lifecycle gl where gl.grievance_id = 3882162 order by assigned_on ;
 select * from public.admin_user_details aud where admin_user_id = 3186; -- Md. Ashif Ikbal
@@ -422,7 +422,7 @@ select * from public.grievance_master gm where gm.grievance_id = 12139;
 select * from public.grievance_lifecycle gl where gl.lifecycle_id = 8186648;  --2670392
 select * from grievance_master gm where gm.pri_cont_no = '9163479418';   --5809393
 select * from grievance_locking_history glh where glh.grievance_id = 5809393;
-select * from grievance_master gm order by grievance_id desc limit 300;
+select count(*) from grievance_master gm where gm.grievance_no like 'SSM%' and gm.created_on::date = '2025-12-03'::date group by gm.grievance_id order by gm.grievance_id desc ;
 
 
 select * from public.cmo_action_taken_note_master catnm;

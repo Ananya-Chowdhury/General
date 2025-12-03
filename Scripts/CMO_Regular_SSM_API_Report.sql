@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-12-01'  -- 43119
+WHERE batch_date::date = '2025-12-02'  -- 43119
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -72,7 +72,7 @@ select count(*) from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 
 
 select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id in (15962);
 select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id in (15962);
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM4360473';
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5389788';
 
 
 select count(*) from public.grievance_master where grievance_no = 'SSM3288070' or usb_unique_id = 'SSM3288070';
@@ -721,7 +721,8 @@ ORDER BY lf.batch_date DESC;
 
 
 
-select * from grievance_master gm where gm.grievance_no in ('SSM67890','SSM12345');
+select * from grievance_master gm where gm.grievance_no in ('SSM12345','SSM112233');
+select * from grievance_lifecycle gl where gl.grievance_id in (6071960);
 select * from cmo_batch_grievance_line_item cbgli where cbgli.status = 3;
 select * from cmo_emp_batch_run_details order by cmo_emp_batch_run_details_id desc limit 1;
 
@@ -766,7 +767,7 @@ select * from grievance_master gm where gm.applicant_address = 'Landmark: Kotalp
 
 
 ---- District Master 
-select * from cmo_districts_master cdm where cdm.district_code = '19';
+select * from cmo_districts_master cdm where cdm.district_code = '03';
 select * from cmo_districts_master cdm;
 select * from cmo_districts_master cdm where cdm.district_name = 'Birbhum';
 
@@ -802,7 +803,7 @@ select * from cmo_wards_master cwm where cwm.ward_code ='007069'
 select * from cmo_municipality_master cmm where cmm.municipality_code = '517';
 
 ---- Post Office
-select * from cmo_post_office_master cpom where cpom.po_code = '0364';
+select * from cmo_post_office_master cpom where cpom.po_code = '0156' and cpom.district_id = 4;
 select * from cmo_post_office_master cpom where cpom.po_name = 'Rajnagar B.O';
 
 ---- Skills Master 
