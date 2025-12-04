@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-12-02'  -- 43119
+WHERE batch_date::date = '2025-12-03'  -- 43119
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -756,7 +756,7 @@ where cbgli.griev_id in ('SSM4352563','SSM4352782','SSM4352712','SSM4352641','SS
 select cbrd.cmo_batch_run_details_id from cmo_batch_run_details cbrd where cbrd.status = 'S' and cbrd.batch_date::date between '2025-11-07'::date and '2025-12-01' and cbrd.processed = true order by cbrd.batch_id asc
 
 select * from cmo_batch_grievance_line_item limit 1;
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM4288373 ';
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5385968';
 select * from cmo_batch_run_details cbrd order by cmo_batch_run_details_id desc limit 1;
 
 select griev_cat_code from cmo_batch_grievance_line_item order by griev_cat_code;
@@ -767,7 +767,7 @@ select * from grievance_master gm where gm.applicant_address = 'Landmark: Kotalp
 
 
 ---- District Master 
-select * from cmo_districts_master cdm where cdm.district_code = '03';
+select * from cmo_districts_master cdm where cdm.district_code = '18';
 select * from cmo_districts_master cdm;
 select * from cmo_districts_master cdm where cdm.district_name = 'Birbhum';
 
@@ -819,7 +819,7 @@ select * from cmo_educational_qualification_master ceqm ;
 
 
 ----- Assembly Constitution -----
-select * from cmo_assembly_master cam where cam.assembly_code = '279';
+select * from cmo_assembly_master cam where cam.assembly_code = '220';
 select * from cmo_assembly_master cam where cam.assembly_name = 'Nalhati';
 
 
@@ -1594,7 +1594,7 @@ select
     cbrd.data_count
 from batch_line bl
 inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = bl.cmo_batch_run_details_id
-    and cbrd.batch_date::date between '2025-11-01'::date and '2025-11-19'::date /*and cbrd.batch_id = 77*/ /*bl.cmo_batch_run_details_id = 15962*/
+    and cbrd.batch_date::date between '2025-04-03'::date and '2025-04-04'::date /*and cbrd.batch_id = 77*/ /*bl.cmo_batch_run_details_id = 15962*/
 inner join cmo_emp_batch_run_details cebrd on cbrd.batch_date = cebrd.batch_date and cbrd.batch_id = cebrd.batch_id
 order by cbrd.batch_date asc;
 
