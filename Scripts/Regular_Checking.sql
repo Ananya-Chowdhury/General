@@ -210,7 +210,7 @@ select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = ''
 select * from public.grievance_master gm where grievance_no in ('SSM1111122222');
 select * from grievance_master gm where gm.grievance_no like '%SSM%' order by gm.grievance_id desc limit 10;  --6036139
 select * from grievance_master gm order by gm.grievance_id desc;
-select * from public.grievance_master gm where gm.grievance_id = 1267014;
+select * from public.grievance_master gm where gm.grievance_id = 6066383;
 select * from public.grievance_lifecycle gl where gl.grievance_id = 6066106 order by gl.assigned_on desc;
 select * from public.grievance_master gm where gm.grievance_no = 'CMO41972931';
 select * from public.admin_position_master apm where apm.position_id = 10140;               -- assigned_to_postion = position_id      admin_postion_master
@@ -219,7 +219,7 @@ select * from public.admin_user au where au.admin_user_id = 10920;
 select * from public.user_token ut where ut.user_id = 105 order by ut.token_id desc;
 select * from public.cmo_closure_reason_master ccrm ;
 select * from public.grievance_master gm where gm.pri_cont_no = '9163479418';  --8101859077
-select * from public.grievance_lifecycle gl where gl.grievance_id = 5962235;
+select * from public.grievance_lifecycle gl where gl.grievance_id in (6066383);
 select count(1) from public.bulk_griev_status_mesg_assign bgsma;
 select * from grievance_master gm where gm.doc_updated ='Y' limit 10;
 select * from document_master dm where dm.doc_id = 106657; --100317
@@ -386,7 +386,7 @@ ORDER BY cebrd.batch_id desc;
 select * from cmo_batch_grievance_line_item cbgli order by cbgli.cmo_batch_run_details_id desc;
 
 
-select * from public.grievance_master gm where grievance_no = 'SSM5386608'; 
+select * from public.grievance_master gm where grievance_no = 'SSM112233'; 
 select * from public.cmo_batch_grievance_line_item cbgli where griev_id = 'SSM2962283';
 select * from public.grievance_lifecycle gl where gl.grievance_id = 6071989 order by assigned_on ;
 select * from public.admin_user_details aud where admin_user_id = 3186; -- Md. Ashif Ikbal
@@ -417,7 +417,7 @@ select * from public.admin_user au limit 1;
 select * from public.admin_position_master apm where apm.record_status = 1 and apm.role_master_id = 9;
 select * from public.admin_user_position_mapping aupm where aupm.status = 1 and aupm.position_id = 1;
 select * from public.grievance_master gm where gm.status = 15;
-select * from public.grievance_lifecycle gl where gl.grievance_id in (5809393,5826479,5826784,5827117,5827360,6066081,6066106,6066154,6066164,6066165,6066166) order by gl.assigned_on asc;   --5740559
+select * from public.grievance_lifecycle gl where gl.grievance_id in (6066383,6071989) order by gl.assigned_on asc;   --5740559
 select * from public.grievance_master gm where gm.grievance_id = 12139;
 select * from public.grievance_lifecycle gl where gl.lifecycle_id = 8186648;  --2670392
 select * from grievance_master gm where gm.pri_cont_no = '9163479418';   --5809393
@@ -439,7 +439,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9732525502'   --9147888180
+WHERE uo.u_phone = '6292222444'   --9147888180
 ORDER BY created_on desc limit 5;
 
 SELECT * 
@@ -667,12 +667,15 @@ ORDER BY pg_stat_activity.query_start;
 select * from pg_stat_activity where query = 'SELECT * FROM "hod_all_weekly_modified_othins"()';
 select * from pg_stat_activity where query = 'SELECT * FROM "hcm_mis"()';
 select * from pg_stat_activity where query = 'SET search_path = public,public,"$user"';
+select * from pg_stat_activity where query = 'SELECT * FROM daily_report(start_date=>'2025-12-04',end_date=>'2025-12-04')';  
+select * from pg_stat_activity where query = 'select * from admin_user_position_mapping aupm where admin_user_id =8571--11773,14961,8571';  
+SELECT * FROM pg_stat_activity WHERE query = 'SELECT * FROM daily_report(start_date => ''2025-12-04'', end_date => ''2025-12-04'')';
 
 --------- Cancel PID Locks ---------
 select * from pg_cancel_backend(2636372);
 
  -------- Cancel pid Locks ------
-select * from pg_catalog.pg_cancel_backend(3415343);
+select * from pg_catalog.pg_cancel_backend(1638530);
    
 ------  kill function query ----------
 SELECT * FROM manage_top_query(True);

@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-12-03'  -- 43119
+WHERE batch_date::date = '2025-12-04'  -- 43119
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -756,7 +756,7 @@ where cbgli.griev_id in ('SSM4352563','SSM4352782','SSM4352712','SSM4352641','SS
 select cbrd.cmo_batch_run_details_id from cmo_batch_run_details cbrd where cbrd.status = 'S' and cbrd.batch_date::date between '2025-11-07'::date and '2025-12-01' and cbrd.processed = true order by cbrd.batch_id asc
 
 select * from cmo_batch_grievance_line_item limit 1;
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5385968';
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5405493';
 select * from cmo_batch_run_details cbrd order by cmo_batch_run_details_id desc limit 1;
 
 select griev_cat_code from cmo_batch_grievance_line_item order by griev_cat_code;
@@ -772,12 +772,12 @@ select * from cmo_districts_master cdm;
 select * from cmo_districts_master cdm where cdm.district_name = 'Birbhum';
 
 ---- Grievance Category  
-select * from cmo_grievance_category_master cgcm where cgcm.grievance_category_code = 'J4';
+select * from cmo_grievance_category_master cgcm where cgcm.grievance_category_code = 'OT3';
 select * from cmo_grievance_category_master cgcm ;
 select * from cmo_grievance_category_master cgcm where cgcm.grievance_category_desc = 'Employment Prayer';
 
 ---- Block Master 
-select * from cmo_blocks_master cbm where cbm.block_code = '294';
+select * from cmo_blocks_master cbm where cbm.block_code = '525';
 select * from cmo_blocks_master cbm ;
 select * from cmo_blocks_master cbm where cbm.block_name = 'NALHATI-I';
 
@@ -785,12 +785,12 @@ select * from cmo_blocks_master cbm where cbm.block_name = 'NALHATI-I';
 select * from cmo_sub_divisions_master csdm where csdm.sub_division_name = 'Rampurhat SDO';
 
 ---- Police Station 
-select * from cmo_police_station_master cpsm where cpsm.ps_code = '0606';
+select * from cmo_police_station_master cpsm where cpsm.ps_code = '0804';
 select * from cmo_police_station_master cpsm where cpsm.ps_name = 'Nalhati';
 select * from cmo_police_station_master cpsm where cpsm.sub_district_id = 8 ; -- ps_id = 1 for not known 
 --
 ---- Gram Panchayet 
-select * from cmo_gram_panchayat_master cgpm where cgpm.gp_code = '002916';
+select * from cmo_gram_panchayat_master cgpm where cgpm.gp_code = '007195';
 select * from cmo_gram_panchayat_master cgpm ;
 select * from cmo_gram_panchayat_master cgpm where cgpm.gp_name = 'BANIOR';
 
@@ -807,11 +807,11 @@ select * from cmo_post_office_master cpom where cpom.po_code = '0156' and cpom.d
 select * from cmo_post_office_master cpom where cpom.po_name = 'Rajnagar B.O';
 
 ---- Skills Master 
-select * from cmo_skill_master csm ;
+select * from cmo_skill_master csm where csm.skill_code = '01' ;
 
 
 ---- Professional Qualification 
-select * from cmo_professional_qualification_master cpqm where cpqm.professional_qualification_code = '99';
+select * from cmo_professional_qualification_master cpqm where cpqm.professional_qualification_code = 'AD';
 
 
 ---- Education Qualification
