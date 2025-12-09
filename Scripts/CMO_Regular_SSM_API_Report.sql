@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-12-04'  -- 43119
+WHERE batch_date::date = '2025-12-08'  -- 43119
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -77,7 +77,7 @@ select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM538
 
 select count(*) from public.grievance_master where grievance_no = 'SSM3288070' or usb_unique_id = 'SSM3288070';
 select * from public.grievance_master where grievance_no = 'SSM3285002' or usb_unique_id = 'SSM3285002';
-select * from public.grievance_master where grievance_no = 'SSM5363428' or usb_unique_id = 'SSM5363428';	
+select * from public.grievance_master where grievance_no = 'SSM1111111' or usb_unique_id = 'SSM1111111';	
 
 select * from grievance_master gm where gm.grievance_no like '%SSM%' order by gm.grievance_id desc limit 20;
 select * from ssm_grievance_data_document_mapping sgddm ;
@@ -735,7 +735,7 @@ select * from cmo_emp_batch_run_details order by cmo_emp_batch_run_details_id de
 
 ---- SSM Batches 
 select * from cmo_batch_grievance_line_item cbgli where /*cbgli.status = 3 and*/ cbgli.griev_id = 'SSM5386733';  -- FAILURE >> |Police Station not found in grievance number SSM4295850
-select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id = 38204;
+select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id = 14975;
 select cbgli.ps_code, cbgli.griev_id, cbgli.error from cmo_batch_grievance_line_item cbgli 
 where cbgli.griev_id in ('SSM4352563','SSM4352782','SSM4352712','SSM4352641','SSM4344439','SSM4344321','SSM4343619','SSM4343494','SSM4343116','SSM4342890','SSM4342859',
 'SSM4342472','SSM4342260','SSM4341795','SSM4340729','SSM4340656','SSM4340161','SSM4342579','SSM4315952','SSM4325769','SSM4344501','SSM4340021','SSM4339528','SSM4339215',
@@ -756,7 +756,8 @@ where cbgli.griev_id in ('SSM4352563','SSM4352782','SSM4352712','SSM4352641','SS
 select cbrd.cmo_batch_run_details_id from cmo_batch_run_details cbrd where cbrd.status = 'S' and cbrd.batch_date::date between '2025-11-07'::date and '2025-12-01' and cbrd.processed = true order by cbrd.batch_id asc
 
 select * from cmo_batch_grievance_line_item limit 1;
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5405493';
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM4292981';
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_date::date = '2025-01-16';
 select * from cmo_batch_run_details cbrd order by cmo_batch_run_details_id desc limit 1;
 
 select griev_cat_code from cmo_batch_grievance_line_item order by griev_cat_code;
@@ -767,7 +768,7 @@ select * from grievance_master gm where gm.applicant_address = 'Landmark: Kotalp
 
 
 ---- District Master 
-select * from cmo_districts_master cdm where cdm.district_code = '18';
+select * from cmo_districts_master cdm where cdm.district_code = '22';
 select * from cmo_districts_master cdm;
 select * from cmo_districts_master cdm where cdm.district_name = 'Birbhum';
 
@@ -785,7 +786,7 @@ select * from cmo_blocks_master cbm where cbm.block_name = 'NALHATI-I';
 select * from cmo_sub_divisions_master csdm where csdm.sub_division_name = 'Rampurhat SDO';
 
 ---- Police Station 
-select * from cmo_police_station_master cpsm where cpsm.ps_code = '0804';
+select * from cmo_police_station_master cpsm where cpsm.ps_code = '0623' and cpsm.district_id = 18;
 select * from cmo_police_station_master cpsm where cpsm.ps_name = 'Nalhati';
 select * from cmo_police_station_master cpsm where cpsm.sub_district_id = 8 ; -- ps_id = 1 for not known 
 --
@@ -793,6 +794,9 @@ select * from cmo_police_station_master cpsm where cpsm.sub_district_id = 8 ; --
 select * from cmo_gram_panchayat_master cgpm where cgpm.gp_code = '007195';
 select * from cmo_gram_panchayat_master cgpm ;
 select * from cmo_gram_panchayat_master cgpm where cgpm.gp_name = 'BANIOR';
+
+---- Sub Divition -----
+select * from cmo_sub_divisions_master csdm where csdm.district_id = 4;
 
 
 ---- Ward Master 
@@ -803,15 +807,15 @@ select * from cmo_wards_master cwm where cwm.ward_code ='007069'
 select * from cmo_municipality_master cmm where cmm.municipality_code = '517';
 
 ---- Post Office
-select * from cmo_post_office_master cpom where cpom.po_code = '0156' and cpom.district_id = 4;
-select * from cmo_post_office_master cpom where cpom.po_name = 'Rajnagar B.O';
+select * from cmo_post_office_master cpom where cpom.po_code = '0351' and cpom.district_id = 4;
+select * from cmo_post_office_master cpom where cpom.po_name = 'Sagrai B.O';
 
 ---- Skills Master 
 select * from cmo_skill_master csm where csm.skill_code = '01' ;
 
 
 ---- Professional Qualification 
-select * from cmo_professional_qualification_master cpqm where cpqm.professional_qualification_code = 'AD';
+select * from cmo_professional_qualification_master cpqm where cpqm.professional_qualification_code = 'AB';
 
 
 ---- Education Qualification
@@ -819,7 +823,7 @@ select * from cmo_educational_qualification_master ceqm ;
 
 
 ----- Assembly Constitution -----
-select * from cmo_assembly_master cam where cam.assembly_code = '220';
+select * from cmo_assembly_master cam where cam.assembly_code = '234' and cam.district_id = 10;
 select * from cmo_assembly_master cam where cam.assembly_name = 'Nalhati';
 
 
@@ -846,6 +850,86 @@ select * from cmo_caste_master ccm where ccm.caste_name = 'SC';
 ------ religion -----
 select * from cmo_religion_master crm where crm.religion_name = 'Hindu';
 select * from cmo_religion_master crm where crm.religion_code = '02';
+
+
+
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM4292981';
+
+
+
+
+------- ALL MASTER DATA VALIDATED QUERY FOR CROSS CHECK ---------
+
+
+select 
+	cbgli.griev_id,
+	cbgli.griev_date,
+	cbgli.received_mode,
+	cgrmm.grivence_source_name as received_mode_name,
+	cbgli.received_at,
+	cdlm.domain_value as received_at_name,
+	cbgli.mobile_number,
+	cbgli.citizen_name,
+	cbgli.citizen_address,
+	cbgli.dist_code,
+	cdm.district_name,
+	case 
+		when cbm.block_id is not null then cbgli.blockm_code
+		else null 
+	end block_code,
+	coalesce(cbm.block_name, 'N/A') as block_name,
+	case 
+		when cmm.municipality_id is not null then cbgli.blockm_code
+		else null 
+	end municip_code,
+	coalesce(cmm.municipality_name, 'N/A') as municiply_name,
+--	csdm.sub_division_name,
+	case 
+		when cgpm.gp_id is not null then cbgli.gp_code
+		else null 
+	end gp_code,
+	coalesce(cgpm.gp_name, 'N/A') as gp_name,
+	case 
+		when cwm.ward_id is not null then cbgli.gp_code
+		else null 
+	end ward_code,
+	coalesce(cwm.ward_name, 'N/A') as ward_name,
+	cbgli.ps_code,
+	coalesce(cpsm.ps_name, 'N/A') as police_name,
+	cbgli.assembly_code,
+	coalesce(cam.assembly_name, 'N/A') as assembly_name,
+	cbgli.po_code,
+	coalesce(cpom.po_name, 'N/A') as post_name,
+	cbgli.gender,
+	cdlm2.domain_value as gender_name,
+	cbgli.citizen_age,
+	cbgli.citizen_email,
+	coalesce(cbgli.alternate_mobile, null) as alter_num,
+	cbgli.citizen_caste,
+	ccm.caste_name,
+	cbgli.citizen_religion,
+	crm.religion_name,
+	cbgli.griev_cat_code,
+	coalesce(cgcm.grievance_category_desc, 'N/A') as grievance_category 
+from cmo_batch_grievance_line_item cbgli 
+left join cmo_grivence_receive_mode_master cgrmm on cgrmm.grivence_source_code = cbgli.received_mode
+left join cmo_domain_lookup_master cdlm on LOWER(REPLACE(cdlm.domain_value, ' ', '')) = LOWER(REPLACE(cbgli.received_at, '_', '')) and cdlm.domain_type = 'grievance_source'
+left join cmo_districts_master cdm on cdm.district_code = cbgli.dist_code
+left join cmo_blocks_master cbm on cbm.block_code = cbgli.blockm_code 
+left join cmo_municipality_master cmm on cmm.municipality_code = cbgli.blockm_code
+--left join cmo_sub_divisions_master csdm on csdm.district_id = cdm.district_id 
+left join cmo_gram_panchayat_master cgpm on cgpm.gp_code = cbgli.gp_code 
+left join cmo_wards_master cwm on cwm.ward_code = cbgli.gp_code 
+left join cmo_police_station_master cpsm on cpsm.ps_code = cbgli.ps_code and cpsm.district_id = cdm.district_id 
+left join cmo_assembly_master cam on cam.assembly_code = cbgli.assembly_code and cam.district_id = cdm.district_id 
+left join cmo_post_office_master cpom on cpom.po_code = cbgli.po_code and cpom.district_id = cdm.district_id 
+left join cmo_domain_lookup_master cdlm2 on cdlm2.domain_abbr = cbgli.gender and cdlm2.domain_type = 'gender'
+left join cmo_caste_master ccm on ccm.caste_code = cbgli.citizen_caste 
+left join cmo_religion_master crm on crm.religion_code = cbgli.citizen_religion 
+left join cmo_grievance_category_master cgcm on cgcm.grievance_category_code = cbgli.griev_cat_code 
+where cbgli.griev_id = 'SSM5424637';
+
+
 
 -------------------------------------------------------------------------------------------------
 
@@ -1594,15 +1678,26 @@ select
     cbrd.data_count
 from batch_line bl
 inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = bl.cmo_batch_run_details_id
-    and cbrd.batch_date::date between '2025-04-03'::date and '2025-04-04'::date /*and cbrd.batch_id = 77*/ /*bl.cmo_batch_run_details_id = 15962*/
+    and cbrd.batch_date::date between '2025-03-25'::date and '2025-03-25'::date and cbrd.batch_id = 63 /*bl.cmo_batch_run_details_id = 15962*/
 inner join cmo_emp_batch_run_details cebrd on cbrd.batch_date = cebrd.batch_date and cbrd.batch_id = cebrd.batch_id
 order by cbrd.batch_date asc;
 
 
 
 
-
-
+--
+--UPDATE cmo_batch_grievance_line_item set
+--education_qualification = 'Class 8',
+--other_profession = 'NA',
+--other_qualification = 'NA',
+--em_employment_type_code = 'None',
+--em_employment_status_code = '02',
+--professional_qualification = '28',
+--other_professional_qualification = 'NA',
+--professional_qualification_name = 'Class 8',
+--skills = '11', other_skills = 'NA',
+--sub_category_code = '33', education_qualification_code = '18'
+--where cmo_batch_run_details_id = 14975 and griev_id = 'SSM4292981' and status = 3;
 
 
 

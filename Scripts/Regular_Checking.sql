@@ -207,12 +207,12 @@ select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = ''
 --=========================================================================================================================================================================
 
 ---------------- Grievance Query ---------------
-select * from public.grievance_master gm where grievance_no in ('SSM1111122222');
+select * from public.grievance_master gm where grievance_no in ('SSM1111111', 'SSM2222222');
 select * from grievance_master gm where gm.grievance_no like '%SSM%' order by gm.grievance_id desc limit 10;  --6036139
 select * from grievance_master gm order by gm.grievance_id desc;
 select * from public.grievance_master gm where gm.grievance_id = 6066383;
-select * from public.grievance_lifecycle gl where gl.grievance_id = 6066106 order by gl.assigned_on desc;
-select * from public.grievance_master gm where gm.grievance_no = 'CMO41972931';
+select * from public.grievance_lifecycle gl where gl.grievance_id = 6072327 order by gl.assigned_on desc;
+select * from public.grievance_master gm where gm.grievance_no = 'SSM2222222';
 select * from public.admin_position_master apm where apm.position_id = 10140;               -- assigned_to_postion = position_id      admin_postion_master
 select * from public.admin_user_position_mapping aupm where aupm.position_id = 11360;       --12745 (6) --10140 --12708 (7) --
 select * from public.admin_user au where au.admin_user_id = 10920;

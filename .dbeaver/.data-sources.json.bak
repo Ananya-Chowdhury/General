@@ -57,8 +57,7 @@
 			"custom-properties": {
 				"resultset.confirm.beforeSave": "false",
 				"resultset.datetime.editor": "false",
-				"transaction.auto.close.ttl": "3600",
-				"transaction.smart.commit": "true"
+				"transaction.auto.close.ttl": "3600"
 			}
 		},
 		"postgres-jdbc-1987392a41c-43085f701e3c8ee6": {
