@@ -2,7 +2,7 @@
 with grievances_recieved as (
             SELECT COUNT(1) as grievances_recieved_cnt
             FROM forwarded_latest_3_bh_mat_2 as bh
-            where 1 = 1  and bh.assigned_to_office_id = 35
+            where 1 = 1  and bh.assigned_to_office_id =75
     ), atr_sent as (
         SELECT COUNT(1) as atr_sent_cnt,
         coalesce(sum(case when bm.current_status = 15 then 1 else 0 end), 0) as disposed_cnt,
@@ -12,7 +12,7 @@ with grievances_recieved as (
         coalesce(sum(case when bm.current_status = 15 and bm.grievance_master_closure_reason_id = 2 then 1 else 0 end), 0) as pending_for_policy_decision
         FROM atr_latest_14_bh_mat_2 as bh
         inner join forwarded_latest_3_bh_mat_2 as bm ON bm.grievance_id = bh.grievance_id
-        where bm.current_status in (14,15)   and bh.assigned_by_office_id = 35
+        where bm.current_status in (14,15)   and bh.assigned_by_office_id = 75
     ), atr_pending as (
         SELECT COUNT(1) as atr_pending_cnt
         FROM forwarded_latest_3_bh_mat_2 as bh
@@ -21,7 +21,7 @@ with grievances_recieved as (
     ), grievance_received_other_hod as (
             select count(1) as griev_recv_cnt_other_hod
             from forwarded_latest_5_bh_mat_2 as bh
-            where 1 = 1  and bh.assigned_to_office_id = 35
+            where 1 = 1  and bh.assigned_to_office_id = 75
     ),
     /*, atr_sent_other_hod as (
             select
@@ -32,10 +32,10 @@ with grievances_recieved as (
                 coalesce(sum(case when bm.current_status = 15 and bm.grievance_master_closure_reason_id not in (1, 5, 9) then 1 else 0 end), 0) as not_elgbl_other_hod
             FROM atr_latest_13_bh_mat_2 as bh
         inner join forwarded_latest_5_bh_mat_2 as bm ON bm.grievance_id = bh.grievance_id
-        where 1 = 1   and bh.assigned_by_office_id = 35
+        where 1 = 1   and bh.assigned_by_office_id = 75
     )*/
     atr_sent_other_hod as (
-        select count(1) as atr_sent_cnt_other_hod  from atr_latest_13_bh_mat_2 as bh where 1 = 1   and bh.assigned_by_office_id = 35
+        select count(1) as atr_sent_cnt_other_hod  from atr_latest_13_bh_mat_2 as bh where 1 = 1   and bh.assigned_by_office_id = 75
     ), close_other_hod as (
             select  count(1) as disposed_cnt_other_hod,
                     coalesce(sum(case when bm.closure_reason_id = 1 then 1 else 0 end), 0) as bnft_prvd_other_hod,
@@ -44,14 +44,14 @@ with grievances_recieved as (
                     coalesce(sum(case when bm.closure_reason_id = 2 then 1  else 0 end), 0) as pending_for_policy_deci_other_hod
                 FROM forwarded_latest_5_bh_mat_2 as bh
             inner join grievance_master_bh_mat_2 as bm ON bm.grievance_id = bh.grievance_id  
-            where bm.status = 15  and bh.assigned_to_office_id = 35
+            where bm.status = 15  and bh.assigned_to_office_id = 75
     ), atr_pending_other_hod as (
         SELECT
             COUNT(1) as atr_pending_cnt_other_hod
             FROM forwarded_latest_5_bh_mat_2 as bh
             left join pending_for_other_hod_wise_mat_2 as bm on bh.grievance_id = bm.grievance_id
-                WHERE NOT EXISTS ( SELECT 1 FROM atr_latest_13_bh_mat_2 as bm WHERE bh.grievance_id = bm.grievance_id) /*and bm.current_status in (14,15)*/)
-          and bh.assigned_to_office_id = 35
+                WHERE NOT EXISTS ( SELECT 1 FROM atr_latest_13_bh_mat_2 as bm WHERE bh.grievance_id = bm.grievance_id /*and bm.current_status in (14,15)*/
+          and bh.assigned_to_office_id = 75)
     )
     select * ,
         '2025-08-07 16:30:01.559409+00:00'::timestamp as refresh_time_utc
@@ -188,8 +188,8 @@ select
 from union_part
 
 
-
------- District Wise Grievance ------
+---------------------------------------------------------
+----------------- District Wise Grievance ------
 with grievances_recieved as (
         SELECT COUNT(1) as grievances_recieved_cnt, bh.district_id
         FROM forwarded_latest_3_bh_mat_2 as bh
@@ -2793,3 +2793,267 @@ from grievance_lifecycle gl where gl.grievance_id = 4342932 order by assigned_on
 select * from cmo_designation_master cdm ;
 select * from office_category_type_mapping octm ;
 select * from cmo_domain_lookup_master cdlm ;
+
+
+-- ==============================================================================================================================================================================================================================
+-- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ====================================================================================================== FINAL =================================================================================================================
+-- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ==============================================================================================================================================================================================================================
+
+
+
+
+
+-- ======================================================================================================================================================================
+-- --------------------------------------- HOD Dashboard ------------>>>>>> Monthly & Weekly Grievance Status --------- Final ------>>>> -------------------------------
+-- ======================================================================================================================================================================
+
+
+
+
+with grievances_recieved as (
+            SELECT COUNT(1) as grievances_recieved_cnt
+            FROM forwarded_latest_3_bh_mat_2 as bh
+            where 1 = 1  and bh.assigned_to_office_id =75
+--            union
+--            select count(1) as griev_recv_cnt_other_hod
+--            from forwarded_latest_5_bh_mat_2 as bh
+--            where 1 = 1  and bh.assigned_to_office_id = 75
+    ), atr_sent as (
+        SELECT COUNT(1) as atr_sent_cnt
+        FROM atr_latest_14_bh_mat_2 as bh
+        inner join forwarded_latest_3_bh_mat_2 as bm ON bm.grievance_id = bh.grievance_id
+        where bm.current_status in (14,15) and bh.assigned_by_office_id = 75
+    ), grievance_received_other_hod as (
+            select count(1) as griev_recv_cnt_other_hod
+            from forwarded_latest_5_bh_mat_2 as bh
+            where 1 = 1  and bh.assigned_to_office_id = 75
+    ), atr_pending_other_hod as (
+        SELECT
+            COUNT(1) as atr_pending_cnt_other_hod
+            FROM forwarded_latest_5_bh_mat_2 as bh
+            left join pending_for_other_hod_wise_mat_2 as bm on bh.grievance_id = bm.grievance_id
+                WHERE NOT EXISTS ( SELECT 1 FROM atr_latest_13_bh_mat_2 as bm WHERE bh.grievance_id = bm.grievance_id /*and bm.current_status in (14,15)*/
+          and bh.assigned_to_office_id = 75)
+    )
+    select * ,
+        '2025-08-07 16:30:01.559409+00:00'::timestamp as refresh_time_utc
+        from grievances_recieved
+        cross join atr_sent
+        cross join grievance_received_other_hod
+        cross join atr_pending_other_hod;
+
+
+
+
+--------- Perfect For MOnth WIse Breakup--------
+WITH month_range AS (
+    SELECT
+        date_trunc('month', current_date) - INTERVAL '1 month' AS end_month,
+        date_trunc('month', current_date) - INTERVAL '6 months' AS start_month
+),
+months AS (
+    SELECT generate_series(
+        (SELECT start_month FROM month_range), -- start range
+        (SELECT end_month FROM month_range),   -- end range
+        INTERVAL '1 month'                     -- step forwarding
+    ) AS month_start
+),
+grievances_recieved AS (
+    SELECT 
+        date_trunc('month', bh.assigned_on) AS month_start,
+        COUNT(*) AS grievances_recieved_cnt
+    FROM forwarded_latest_3_bh_mat_2 bh
+    WHERE bh.assigned_to_office_id = 75
+      AND bh.assigned_on >= (SELECT start_month FROM month_range) 
+      AND bh.assigned_on <  (SELECT end_month + INTERVAL '1 month' FROM month_range)
+    GROUP BY 1
+),
+atr_sent AS (
+    SELECT 
+        date_trunc('month', bh.assigned_on) AS month_start,
+        COUNT(*) AS atr_sent_cnt
+    FROM atr_latest_14_bh_mat_2 bh
+    INNER JOIN forwarded_latest_3_bh_mat_2 bm 
+       ON bm.grievance_id = bh.grievance_id
+    WHERE bm.current_status IN (14,15)
+      AND bh.assigned_by_office_id = 75
+      AND bh.assigned_on >= (SELECT start_month FROM month_range) 
+      AND bh.assigned_on <  (SELECT end_month + INTERVAL '1 month' FROM month_range)
+    GROUP BY 1
+),
+grievance_received_other_hod AS (
+    SELECT 
+        date_trunc('month', bh.assigned_on) AS month_start,
+        COUNT(*) AS griev_recv_cnt_other_hod
+    FROM forwarded_latest_5_bh_mat_2 bh
+    WHERE bh.assigned_to_office_id = 75
+      AND bh.assigned_on >= (SELECT start_month FROM month_range) 
+      AND bh.assigned_on <  (SELECT end_month + INTERVAL '1 month' FROM month_range)
+    GROUP BY 1
+),
+atr_pending_other_hod AS (
+    SELECT
+        date_trunc('month', bh.assigned_on) AS month_start,
+        COUNT(*) AS atr_pending_cnt_other_hod
+    FROM forwarded_latest_5_bh_mat_2 bh
+    LEFT JOIN pending_for_other_hod_wise_mat_2 bm 
+        ON bh.grievance_id = bm.grievance_id
+    WHERE NOT EXISTS (
+        SELECT 1 FROM atr_latest_13_bh_mat_2 bm2 
+        WHERE bm2.grievance_id = bh.grievance_id
+    )
+      AND bh.assigned_to_office_id = 75
+      AND bh.assigned_on >= (SELECT start_month FROM month_range) 
+      AND bh.assigned_on <  (SELECT end_month + INTERVAL '1 month' FROM month_range)
+    GROUP BY 1
+)
+SELECT 
+    to_char(m.month_start, 'YYYY-MM') AS month,
+    COALESCE(gr.grievances_recieved_cnt, 0) AS grievances_recieved_cnt,
+    COALESCE(at.atr_sent_cnt, 0) AS atr_sent_cnt,
+    COALESCE(oh.griev_recv_cnt_other_hod, 0) AS griev_recv_cnt_other_hod,
+    COALESCE(ap.atr_pending_cnt_other_hod, 0) AS atr_pending_cnt_other_hod
+FROM months m
+LEFT JOIN grievances_recieved gr ON gr.month_start = m.month_start
+LEFT JOIN atr_sent at ON at.month_start = m.month_start
+LEFT JOIN grievance_received_other_hod oh ON oh.month_start = m.month_start
+LEFT JOIN atr_pending_other_hod ap ON ap.month_start = m.month_start
+ORDER BY m.month_start DESC;
+
+
+
+
+
+------- ALL TOTAL LAST SIX MONTH GRIEVANCE REPORT ---------
+WITH grievances_recieved AS (
+    SELECT COUNT(1) AS grievances_recieved_cnt
+    FROM forwarded_latest_3_bh_mat_2 AS bh
+    WHERE bh.assigned_to_office_id = 75
+      AND bh.assigned_on >= date_trunc('month', current_date) - INTERVAL '6 months'
+      AND bh.assigned_on <  date_trunc('month', current_date)
+), 
+atr_sent AS (
+    SELECT COUNT(1) AS atr_sent_cnt
+    FROM atr_latest_14_bh_mat_2 AS bh
+    INNER JOIN forwarded_latest_3_bh_mat_2 AS bm 
+        ON bm.grievance_id = bh.grievance_id
+    WHERE bm.current_status IN (14,15)
+      AND bh.assigned_by_office_id = 75
+      AND bh.assigned_on >= date_trunc('month', current_date) - INTERVAL '6 months'
+      AND bh.assigned_on <  date_trunc('month', current_date)
+),
+grievance_received_other_hod AS (
+    SELECT COUNT(1) AS griev_recv_cnt_other_hod
+    FROM forwarded_latest_5_bh_mat_2 AS bh
+    WHERE bh.assigned_to_office_id = 75
+      AND bh.assigned_on >= date_trunc('month', current_date) - INTERVAL '6 months'
+      AND bh.assigned_on <  date_trunc('month', current_date)
+),
+atr_pending_other_hod AS (
+    SELECT COUNT(1) AS atr_pending_cnt_other_hod
+    FROM forwarded_latest_5_bh_mat_2 AS bh
+    LEFT JOIN pending_for_other_hod_wise_mat_2 AS bm 
+           ON bh.grievance_id = bm.grievance_id
+    WHERE NOT EXISTS (
+        SELECT 1 FROM atr_latest_13_bh_mat_2 AS bm2
+        WHERE bh.grievance_id = bm2.grievance_id
+    )
+      AND bh.assigned_to_office_id = 75
+      AND bh.assigned_on >= date_trunc('month', current_date) - INTERVAL '6 months'
+      AND bh.assigned_on <  date_trunc('month', current_date)
+)
+SELECT *,
+       now() AT TIME ZONE 'UTC' AS refresh_time_utc
+FROM grievances_recieved
+CROSS JOIN atr_sent
+CROSS JOIN grievance_received_other_hod
+CROSS JOIN atr_pending_other_hod;
+
+
+
+
+--------------- Last 7 Days wise Breakdown -----------------
+WITH date_range AS (
+    SELECT 
+        current_date - INTERVAL '1 day' AS end_date,
+        current_date - INTERVAL '7 days' AS start_date
+),
+days AS (
+    SELECT generate_series(
+        (SELECT start_date FROM date_range),
+        (SELECT end_date FROM date_range),
+        INTERVAL '1 day'
+    )::date AS day_date
+),
+grievances_recieved AS (
+    SELECT 
+        bh.assigned_on::date AS day_date,
+        COUNT(*) AS grievances_recieved_cnt
+    FROM forwarded_latest_3_bh_mat_2 bh
+    WHERE bh.assigned_to_office_id = 75
+      AND bh.assigned_on::date >= (SELECT start_date FROM date_range)
+      AND bh.assigned_on::date <= (SELECT end_date FROM date_range)
+    GROUP BY 1
+),
+atr_sent AS (
+    SELECT 
+        bh.assigned_on::date AS day_date,
+        COUNT(*) AS atr_sent_cnt
+    FROM atr_latest_14_bh_mat_2 bh
+    INNER JOIN forwarded_latest_3_bh_mat_2 bm 
+        ON bm.grievance_id = bh.grievance_id
+    WHERE bm.current_status IN (14,15)
+      AND bh.assigned_by_office_id = 75
+      AND bh.assigned_on::date >= (SELECT start_date FROM date_range)
+      AND bh.assigned_on::date <= (SELECT end_date FROM date_range)
+    GROUP BY 1
+),
+grievance_received_other_hod AS (
+    SELECT 
+        bh.assigned_on::date AS day_date,
+        COUNT(*) AS griev_recv_cnt_other_hod
+    FROM forwarded_latest_5_bh_mat_2 bh
+    WHERE bh.assigned_to_office_id = 75
+      AND bh.assigned_on::date >= (SELECT start_date FROM date_range)
+      AND bh.assigned_on::date <= (SELECT end_date FROM date_range)
+    GROUP BY 1
+),
+atr_pending_other_hod AS (
+    SELECT
+        bh.assigned_on::date AS day_date,
+        COUNT(*) AS atr_pending_cnt_other_hod
+    FROM forwarded_latest_5_bh_mat_2 bh
+    LEFT JOIN pending_for_other_hod_wise_mat_2 bm 
+        ON bh.grievance_id = bm.grievance_id
+    WHERE NOT EXISTS (
+        SELECT 1 FROM atr_latest_13_bh_mat_2 bm2
+        WHERE bm2.grievance_id = bh.grievance_id
+    )
+      AND bh.assigned_to_office_id = 75
+      AND bh.assigned_on::date >= (SELECT start_date FROM date_range)
+      AND bh.assigned_on::date <= (SELECT end_date FROM date_range)
+    GROUP BY 1
+)
+SELECT 
+    d.day_date,
+    COALESCE(gr.grievances_recieved_cnt, 0) AS grievances_recieved_cnt,
+    COALESCE(at.atr_sent_cnt, 0) AS atr_sent_cnt,
+    COALESCE(oh.griev_recv_cnt_other_hod, 0) AS griev_recv_cnt_other_hod,
+    COALESCE(ap.atr_pending_cnt_other_hod, 0) AS atr_pending_cnt_other_hod
+FROM days d
+LEFT JOIN grievances_recieved gr ON gr.day_date = d.day_date
+LEFT JOIN atr_sent at ON at.day_date = d.day_date
+LEFT JOIN grievance_received_other_hod oh ON oh.day_date = d.day_date
+LEFT JOIN atr_pending_other_hod ap ON ap.day_date = d.day_date
+ORDER BY d.day_date DESC;
+
+
+
+
+-- ==============================================================================================================================================================================================================================
+-- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ====================================================================================================== FINAL =================================================================================================================
+-- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ==============================================================================================================================================================================================================================
