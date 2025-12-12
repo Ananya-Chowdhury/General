@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-12-09'  -- 43119
+WHERE batch_date::date = '2025-12-11'  -- 43119
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -39,7 +39,7 @@ inner join cmo_batch_grievance_line_item cbgli on cbgli.griev_id = gm.grievance_
 where gm.grievance_no = 'SSM5403074'
 
 
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5405493'
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM5470603'
 
 select * from cmo_batch_grievance_line_item cbgli 
 inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id 
@@ -675,6 +675,7 @@ group by spdf.batch_date,spdf.error,spdf.from_time,spdf.to_time, spdf.griev_id, 
 order by spdf.batch_date desc;
 
 
+
 WITH ssm_pull_data_failed AS (
 	SELECT
 		cbrd.batch_date,
@@ -734,7 +735,7 @@ select * from cmo_emp_batch_run_details order by cmo_emp_batch_run_details_id de
 --===============================================================================
 
 ---- SSM Batches 
-select * from cmo_batch_grievance_line_item cbgli where /*cbgli.status = 3 and*/ cbgli.griev_id = 'SSM5386733';  -- FAILURE >> |Police Station not found in grievance number SSM4295850
+select * from cmo_batch_grievance_line_item cbgli where /*cbgli.status = 3 and*/ cbgli.griev_id = 'SSM5471146';  -- FAILURE >> |Police Station not found in grievance number SSM4295850
 select * from cmo_batch_run_details cbrd where cbrd.cmo_batch_run_details_id = 14975;
 select cbgli.ps_code, cbgli.griev_id, cbgli.error from cmo_batch_grievance_line_item cbgli 
 where cbgli.griev_id in ('SSM4352563','SSM4352782','SSM4352712','SSM4352641','SSM4344439','SSM4344321','SSM4343619','SSM4343494','SSM4343116','SSM4342890','SSM4342859',
@@ -756,7 +757,7 @@ where cbgli.griev_id in ('SSM4352563','SSM4352782','SSM4352712','SSM4352641','SS
 select cbrd.cmo_batch_run_details_id from cmo_batch_run_details cbrd where cbrd.status = 'S' and cbrd.batch_date::date between '2025-11-07'::date and '2025-12-01' and cbrd.processed = true order by cbrd.batch_id asc
 
 select * from cmo_batch_grievance_line_item limit 1;
-select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM4292981';
+select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id = 'SSM4314269';
 select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_date::date = '2025-01-16';
 select * from cmo_batch_run_details cbrd order by cmo_batch_run_details_id desc limit 1;
 
@@ -768,7 +769,7 @@ select * from grievance_master gm where gm.applicant_address = 'Landmark: Kotalp
 
 
 ---- District Master 
-select * from cmo_districts_master cdm where cdm.district_code = '22';
+select * from cmo_districts_master cdm where cdm.district_code = '03';
 select * from cmo_districts_master cdm;
 select * from cmo_districts_master cdm where cdm.district_name = 'Birbhum';
 
@@ -791,7 +792,7 @@ select * from cmo_police_station_master cpsm where cpsm.ps_name = 'Nalhati';
 select * from cmo_police_station_master cpsm where cpsm.sub_district_id = 8 ; -- ps_id = 1 for not known 
 --
 ---- Gram Panchayet 
-select * from cmo_gram_panchayat_master cgpm where cgpm.gp_code = '007195';
+select * from cmo_gram_panchayat_master cgpm where cgpm.gp_code = '006321';
 select * from cmo_gram_panchayat_master cgpm ;
 select * from cmo_gram_panchayat_master cgpm where cgpm.gp_name = 'BANIOR';
 
@@ -807,7 +808,7 @@ select * from cmo_wards_master cwm where cwm.ward_code ='007069'
 select * from cmo_municipality_master cmm where cmm.municipality_code = '517';
 
 ---- Post Office
-select * from cmo_post_office_master cpom where cpom.po_code = '0351' and cpom.district_id = 4;
+select * from cmo_post_office_master cpom where cpom.po_code = '0287' and cpom.district_id = 4;
 select * from cmo_post_office_master cpom where cpom.po_name = 'Sagrai B.O';
 
 ---- Skills Master 
@@ -823,7 +824,7 @@ select * from cmo_educational_qualification_master ceqm ;
 
 
 ----- Assembly Constitution -----
-select * from cmo_assembly_master cam where cam.assembly_code = '234' and cam.district_id = 10;
+select * from cmo_assembly_master cam where cam.assembly_code = '000' and cam.district_id = 20;
 select * from cmo_assembly_master cam where cam.assembly_name = 'Nalhati';
 
 
@@ -1700,4 +1701,212 @@ order by cbrd.batch_date asc;
 --where cmo_batch_run_details_id = 14975 and griev_id = 'SSM4292981' and status = 3;
 
 
+
+
+
+
+select cbrd.cmo_batch_run_details_id , cbrd.batch_id, cbrd.processed  from cmo_batch_grievance_line_item cbgli 
+inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = cbgli.cmo_batch_run_details_id 
+where cbgli.griev_id  in ('SSM5466330'
+,'SSM5465774'
+,'SSM5465203'
+,'SSM5465598'
+,'SSM5466194'
+,'SSM5466631'
+,'SSM5466696'
+,'SSM5466804'
+,'SSM5466873'
+,'SSM5466851'
+,'SSM5466842'
+,'SSM5466829'
+,'SSM5466757'
+,'SSM5466980'
+,'SSM5467627'
+,'SSM5467243'
+,'SSM5467227'
+,'SSM5466718'
+,'SSM5466888'
+,'SSM5466900'
+,'SSM5467070'
+,'SSM5467139'
+,'SSM5466768'
+,'SSM5467054'
+,'SSM5467215'
+,'SSM5467233'
+,'SSM5467431'
+,'SSM5467468'
+,'SSM5467501'
+,'SSM5467641'
+,'SSM5467709'
+,'SSM5467757'
+,'SSM5467853'
+,'SSM5467862'
+,'SSM5467111'
+,'SSM5467664'
+,'SSM5467791'
+,'SSM5467816'
+,'SSM5467850'
+,'SSM5468032'
+,'SSM5467916'
+,'SSM5467355'
+,'SSM5468206'
+,'SSM5468342'
+,'SSM5468476'
+,'SSM5468534'
+,'SSM5466692'
+,'SSM5467424'
+,'SSM5467666'
+,'SSM5467730'
+,'SSM5468244'
+,'SSM5467704'
+,'SSM5466954'
+,'SSM5466940'
+,'SSM5466876'
+,'SSM5466785'
+,'SSM5466762'
+,'SSM5468078'
+,'SSM5467519'
+,'SSM5467303'
+,'SSM5465398'
+,'SSM5467843'
+,'SSM5465458'
+,'SSM5465464'
+,'SSM5465540'
+,'SSM5466761'
+,'SSM5467011'
+,'SSM5468217'
+,'SSM5468536'
+,'SSM5468555'
+,'SSM5468632'
+,'SSM5468614'
+,'SSM5468482'
+,'SSM5467505'
+,'SSM5467734'
+,'SSM5467832'
+,'SSM5468402'
+,'SSM5468379'
+,'SSM5468359'
+,'SSM5467970'
+,'SSM5468752'
+,'SSM5468187'
+,'SSM5465941'
+,'SSM5466351'
+,'SSM5467244'
+,'SSM5468623'
+,'SSM5468994'
+,'SSM5469018'
+,'SSM5466874'
+,'SSM5468928'
+,'SSM5467268'
+,'SSM5467985'
+,'SSM5468508'
+,'SSM5468732'
+,'SSM5468577'
+,'SSM5468609'
+,'SSM5468708'
+,'SSM5468756'
+,'SSM5468776'
+,'SSM5468886'
+,'SSM5468952'
+,'SSM5469011'
+,'SSM5469132'
+,'SSM5469185'
+,'SSM5469201'
+,'SSM5468340'
+,'SSM5468509'
+,'SSM5468692'
+,'SSM5468765'
+,'SSM5468889'
+,'SSM5468919'
+,'SSM5465512'
+,'SSM5469019'
+,'SSM5469159'
+,'SSM5469357'
+,'SSM5469391'
+,'SSM5469520'
+,'SSM5466979'
+,'SSM5468151'
+,'SSM5468175'
+,'SSM5468829'
+,'SSM5468839'
+,'SSM5468887'
+,'SSM5468942'
+,'SSM5469576'
+,'SSM5468899'
+,'SSM5467356'
+,'SSM5469608'
+,'SSM5469662'
+,'SSM5469679'
+,'SSM5469860'
+,'SSM5467131'
+,'SSM5467415'
+,'SSM5467463'
+,'SSM5469675'
+,'SSM5469819'
+,'SSM5469824'
+,'SSM5469868'
+,'SSM5469884'
+,'SSM5469984'
+,'SSM5469994'
+,'SSM5470015'
+,'SSM5467983'
+,'SSM5469292'
+,'SSM5469312'
+,'SSM5469507'
+,'SSM5469600'
+,'SSM5469818'
+,'SSM5469912'
+,'SSM5470106'
+,'SSM5470212'
+,'SSM5468514'
+,'SSM5469423'
+,'SSM5469905'
+,'SSM5470227'
+,'SSM5470237'
+,'SSM5470281'
+,'SSM5469255'
+,'SSM5469455'
+,'SSM5470132'
+,'SSM5470236'
+,'SSM5470304'
+,'SSM5470465'
+,'SSM5470326'
+,'SSM5470612'
+,'SSM5467306'
+,'SSM5468545'
+,'SSM5469232'
+,'SSM5469240'
+,'SSM5469344'
+,'SSM5469552'
+,'SSM5470052'
+,'SSM5470190'
+,'SSM5470327'
+,'SSM5470494'
+,'SSM5470498'
+,'SSM5469220'
+,'SSM5469850'
+,'SSM5470619'
+,'SSM5468425'
+,'SSM5469082'
+,'SSM5470691'
+,'SSM5465518'
+,'SSM5465520'
+,'SSM5467073'
+,'SSM5467170'
+,'SSM5467230'
+,'SSM5470173'
+,'SSM5466778'
+,'SSM5470495'
+,'SSM5470550'
+,'SSM5465496'
+,'SSM5465562'
+,'SSM5468355'
+,'SSM5469916'
+,'SSM5465354'
+,'SSM5465418'
+,'SSM5465516'
+,'SSM5469055'
+,'SSM5470261'
+)
+group by cbrd.cmo_batch_run_details_id, cbrd.batch_id, cbrd.processed
 

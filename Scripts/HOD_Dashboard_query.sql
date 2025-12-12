@@ -1266,6 +1266,19 @@ select forwarded_latest_5_bh_mat.assigned_by_office_id, forwarded_latest_5_bh_ma
 		 gl.assigned_by_office_cat,
 		 gl.assigned_to_office_cat
 	 from grievance_lifecycle gl where gl.grievance_id = 3293586 order by gl.assigned_on desc;
+	 
+	 
+	 
+----------------- Unassigned Grievance ---------------
+ select 
+        count(*) as unassigned_grievances
+    from forwarded_latest_3_4_bh_mat_2 as bh
+    where bh.current_status = 5 and bh.assigned_to_office_id in (75)
+    --  and (next_status is distinct from 4) 
+    and (bh.next_status is NULL or bh.next_status not in (4, 3, 11, 14, 7))
+	 
+	 
+	 
 -- ==============================================================================================================================================================================================================================
 -- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- ====================================================================================================== FINAL =================================================================================================================
