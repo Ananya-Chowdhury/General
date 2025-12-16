@@ -297,7 +297,12 @@ where /*admin_position_master.office_id = 35 and */ admin_position_master.office
 
 
 select admin_user_details.official_name, admin_user_details.official_phone, admin_user_details.official_email, admin_position_master.office_id, aurm.role_master_name, 
-admin_position_master.position_id, com.office_name, admin_position_master.record_status, admin_user_position_mapping.status as mapping_status, admin_user_details.admin_user_id
+admin_position_master.position_id, 
+com.office_name, 
+au.status as user_status,
+admin_position_master.record_status as position_status, 
+admin_user_position_mapping.status as position_mapping_status, 
+admin_user_details.admin_user_id
 from admin_user_details
 inner join admin_user_position_mapping on admin_user_position_mapping.admin_user_id = admin_user_details.admin_user_id 
 inner join admin_position_master on admin_position_master.position_id = admin_user_position_mapping.position_id
@@ -306,9 +311,9 @@ inner join cmo_office_master com on com.office_id = admin_position_master.office
 inner join admin_user au on au.admin_user_id = admin_user_details.admin_user_id 
 where /*admin_position_master.office_id = 35 and */ admin_position_master.office_id is not null /*and admin_position_master.role_master_id in (4,5)*/ 
 	 /*and admin_user_position_mapping.status = 1*/  /*and admin_position_master.record_status= 1*/ /*and au.u_phone in ('9999999900','9999999999','8918939197','8777729301','9775761810','7719357638','7001322965','6292222444',
-'8334822522','9874263537','9432331563','9434495405','9559000099','9874263537')*/ /*and au.admin_user_id in (8571)*/ and admin_position_master.position_id = 8571
+'8334822522','9874263537','9432331563','9434495405','9559000099','9874263537')*/ /*and au.admin_user_id in (8571)*/ and admin_position_master.position_id = 11773
 	 group by admin_user_details.official_name, admin_user_details.official_phone, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name, admin_user_details.official_email, 
-	 admin_position_master.record_status, admin_position_master.record_status, admin_user_position_mapping.status, admin_user_details.admin_user_id
+	 admin_position_master.record_status, admin_position_master.record_status, admin_user_position_mapping.status, admin_user_details.admin_user_id, au.status
 	order by admin_user_details.official_name asc;
 
 
@@ -450,7 +455,7 @@ select * from public.cmo_closure_reason_master ccrm;
 -- Get OTP Query --  
 SELECT * 
 FROM public.user_otp uo  
-WHERE uo.u_phone = '9647570010'   --9147888180
+WHERE uo.u_phone = '8335877077'   --9147888180
 ORDER BY created_on desc limit 5;
 
 SELECT * 

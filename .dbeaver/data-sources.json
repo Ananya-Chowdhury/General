@@ -57,7 +57,6 @@
 			"custom-properties": {
 				"resultset.confirm.beforeSave": "false",
 				"resultset.datetime.editor": "false",
-				"resultset.maxrows": "100000",
 				"transaction.auto.close.ttl": "3600"
 			}
 		},
@@ -287,7 +286,7 @@
 		},
 		"prod": {
 			"name": "Production",
-			"color": "128,0,0",
+			"color": "255,0,0",
 			"description": "Production database",
 			"auto-commit": false,
 			"confirm-execute": true,
