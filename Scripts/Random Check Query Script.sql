@@ -4140,3 +4140,161 @@ WITH age_gender_counts AS (
 	left join cmo_religion_master crm ON crm.religion_id = COALESCE(total_rece_other_hod.applicant_reigion, total_rece_cmo.applicant_reigion)
 GROUP BY total_rece_cmo.applicant_reigion, crm.religion_name;
    		
+
+
+
+
+
+
+
+
+WITH date_range AS (
+        SELECT 
+            current_date - INTERVAL '1 day' AS end_date,
+            current_date - INTERVAL '7 days' AS start_date
+        ),
+        days AS (
+            SELECT generate_series(
+                (SELECT start_date FROM date_range),
+                (SELECT end_date FROM date_range),
+                INTERVAL '1 day'
+            )::date AS month
+        ),
+        grievances_recieved AS (
+            SELECT 
+                bh.assigned_on::date AS month,
+                COUNT(*) AS grievances_recieved_cnt
+            FROM forwarded_latest_3_bh_mat_2 as bh
+            WHERE bh.assigned_to_office_id in (75)  /* SSM CALL CENTER */ 
+            AND bh.assigned_on::date >= (SELECT start_date FROM date_range)
+            AND bh.assigned_on::date <= (SELECT end_date FROM date_range)
+            GROUP BY 1
+        ),
+        atr_sent AS (
+            SELECT 
+                bh.assigned_on::date AS month,
+                COUNT(*) AS atr_sent_cnt
+            FROM atr_latest_14_bh_mat_2 bh
+            INNER JOIN forwarded_latest_3_bh_mat_2 as bm 
+                ON bm.grievance_id = bh.grievance_id
+            WHERE bm.current_status IN (14,15)
+            AND bh.assigned_by_office_id in (75)  /* SSM CALL CENTER */ 
+            AND bh.assigned_on::date >= (SELECT start_date FROM date_range)
+            AND bh.assigned_on::date <= (SELECT end_date FROM date_range)
+            GROUP BY 1
+        ),
+        grievance_received_other_hod AS (
+            SELECT 
+                bh.assigned_on::date AS month,
+                COUNT(*) AS griev_recv_cnt_other_hod
+            FROM forwarded_latest_5_bh_mat_2 as bh
+            WHERE bh.assigned_to_office_id in (75)  /* SSM CALL CENTER */ 
+            AND bh.assigned_on::date >= (SELECT start_date FROM date_range)
+            AND bh.assigned_on::date <= (SELECT end_date FROM date_range)
+            GROUP BY 1
+        ),
+        atr_pending_other_hod AS (
+            SELECT
+                bh.assigned_on::date AS month,
+                COUNT(*) AS atr_pending_cnt_other_hod
+            FROM forwarded_latest_5_bh_mat_2 as bh
+            LEFT JOIN pending_for_other_hod_wise_mat_2 bm 
+                ON bh.grievance_id = bm.grievance_id
+            WHERE NOT EXISTS (
+                SELECT 1 FROM atr_latest_13_bh_mat_2 as bm2
+                WHERE bm2.grievance_id = bh.grievance_id
+            )
+            AND bh.assigned_to_office_id in (75)  /* SSM CALL CENTER */ 
+            AND bh.assigned_on::date >= (SELECT start_date FROM date_range)
+            AND bh.assigned_on::date <= (SELECT end_date FROM date_range)
+            GROUP BY 1
+        )
+        SELECT 
+            '2025-12-16 16:30:02.006500+00:00'::timestamp as refresh_time_utc,
+            to_char(d.month, 'DD-MM-YYYY') as month,
+            SUM(COALESCE(gr.grievances_recieved_cnt, 0) + COALESCE(oh.griev_recv_cnt_other_hod, 0)) AS grievances_recieved_cnt,
+            SUM(COALESCE(at.atr_sent_cnt, 0) + COALESCE(ap.atr_pending_cnt_other_hod, 0)) AS atr_sent_cnt
+        FROM days d
+        LEFT JOIN grievances_recieved gr ON gr.month = d.month
+        LEFT JOIN atr_sent at ON at.month = d.month
+        LEFT JOIN grievance_received_other_hod oh ON oh.month = d.month
+        LEFT JOIN atr_pending_other_hod ap ON ap.month = d.month
+        group by d.month
+        ORDER BY d.month desc
+        
+        
+        
+        WITH date_range AS (
+                    SELECT 
+                        current_date - INTERVAL '1 day' AS end_date,
+                        current_date - INTERVAL '7 days' AS start_date
+                    ),
+                    days AS (
+                        SELECT generate_series(
+                            (SELECT start_date FROM date_range),
+                            (SELECT end_date FROM date_range),
+                            INTERVAL '1 day'
+                        )::date AS month
+                    ),
+                    grievances_recieved AS (
+                        SELECT 
+                            bh.assigned_on::date AS month,
+                            COUNT(*) AS grievances_recieved_cnt
+                        FROM forwarded_latest_3_bh_mat_2 as bh
+                        WHERE bh.assigned_to_office_id in (75)  /* SSM CALL CENTER */ 
+                        AND bh.assigned_on::date >= (SELECT start_date FROM date_range)
+                        AND bh.assigned_on::date <= (SELECT end_date FROM date_range)
+                        GROUP BY 1
+                    ),
+                    atr_sent AS (
+                        SELECT 
+                            bh.assigned_on::date AS month,
+                            COUNT(*) AS atr_sent_cnt
+                        FROM atr_latest_14_bh_mat_2 bh
+                        INNER JOIN forwarded_latest_3_bh_mat_2 as bm 
+                            ON bm.grievance_id = bh.grievance_id
+                        WHERE bm.current_status IN (14,15)
+                        AND bh.assigned_by_office_id in (75)  /* SSM CALL CENTER */ 
+                        AND bh.assigned_on::date >= (SELECT start_date FROM date_range)
+                        AND bh.assigned_on::date <= (SELECT end_date FROM date_range)
+                        GROUP BY 1
+                    ),
+                    grievance_received_other_hod AS (
+                        SELECT 
+                            bh.assigned_on::date AS month,
+                            COUNT(*) AS griev_recv_cnt_other_hod
+                        FROM forwarded_latest_5_bh_mat_2 as bh
+                        WHERE bh.assigned_to_office_id in (75)  /* SSM CALL CENTER */ 
+                        AND bh.assigned_on::date >= (SELECT start_date FROM date_range)
+                        AND bh.assigned_on::date <= (SELECT end_date FROM date_range)
+                        GROUP BY 1
+                    ),
+                    atr_pending_other_hod AS (
+                        SELECT
+                            bh.assigned_on::date AS month,
+                            COUNT(*) AS atr_pending_cnt_other_hod
+                        FROM forwarded_latest_5_bh_mat_2 as bh
+                        LEFT JOIN pending_for_other_hod_wise_mat_2 bm 
+                            ON bh.grievance_id = bm.grievance_id
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM atr_latest_13_bh_mat_2 as bm2
+                            WHERE bm2.grievance_id = bh.grievance_id
+                        )
+                        AND bh.assigned_to_office_id in (75)  /* SSM CALL CENTER */ 
+                        AND bh.assigned_on::date >= (SELECT start_date FROM date_range)
+                        AND bh.assigned_on::date <= (SELECT end_date FROM date_range)
+                        GROUP BY 1
+                    )
+                    SELECT 
+                        '2025-12-16 16:30:02.006500+00:00'::timestamp as refresh_time_utc,
+                        to_char(d.month, 'DD-MM-YYYY') as month,
+                        COALESCE(gr.grievances_recieved_cnt, 0) AS grievances_recieved_cnt,
+                        COALESCE(at.atr_sent_cnt, 0) AS atr_sent_cnt,
+                        COALESCE(oh.griev_recv_cnt_other_hod, 0) AS griev_recv_cnt_other_hod,
+                        COALESCE(ap.atr_pending_cnt_other_hod, 0) AS atr_pending_cnt_other_hod
+                    FROM days d
+                    LEFT JOIN grievances_recieved gr ON gr.month = d.month
+                    LEFT JOIN atr_sent at ON at.month = d.month
+                    LEFT JOIN grievance_received_other_hod oh ON oh.month = d.month
+                    LEFT JOIN atr_pending_other_hod ap ON ap.month = d.month
+                    ORDER BY d.month DESC;
