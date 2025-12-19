@@ -4298,3 +4298,378 @@ WITH date_range AS (
                     LEFT JOIN grievance_received_other_hod oh ON oh.month = d.month
                     LEFT JOIN atr_pending_other_hod ap ON ap.month = d.month
                     ORDER BY d.month DESC;
+        
+        
+        
+        
+        
+   ------------------------------------------------------------------------------------------------------------
+select
+	'2025-12-17 16:30:01.787016+00:00'::timestamp as refresh_time_utc,
+    g2.total_count,
+    g2.grievances_recieved_male,
+    (g2.grievances_recieved_male/g2.total_count::float)* 100 as grievances_recieved_male_percentage,
+    g2.grievances_recieved_female,
+    (g2.grievances_recieved_female/g2.total_count::float)* 100 as grievances_recieved_female_percentage,
+    g2.grievances_recieved_others,
+    (g2.grievances_recieved_others/g2.total_count::float)* 100 as grievances_recieved_others_percentage,
+    g2.grievances_recived_no_gender,
+    (g2.grievances_recived_no_gender/g2.total_count::float)* 100 as grievances_recived_no_gender_percentage
+from
+    (select
+        SUM(g1.gender_wise_count)::bigint as total_count,
+--        MAX(CASE WHEN g1.applicant_gender = 1  THEN g1.gender_wise_count END) AS grievances_recieved_male,
+        MAX(CASE WHEN g1.applicant_gender = 1  THEN SUM(g1.gender_wise_count)::bigint END) AS grievances_recieved_male,
+        MAX(CASE WHEN g1.applicant_gender = 2  THEN SUM(g1.gender_wise_count)::bigint END) AS grievances_recieved_female,
+        MAX(CASE WHEN g1.applicant_gender = 3  THEN SUM(g1.gender_wise_count)::bigint END) AS grievances_recieved_others,
+        MAX(CASE WHEN g1.applicant_gender is null  THEN SUM(g1.gender_wise_count)::bigint END) AS grievances_recived_no_gender
+    from (select
+            /* Received From CMO */
+        count(1) as gender_wise_count,
+        gm.applicant_gender,
+        cdlm.domain_value as gender_name
+    from forwarded_latest_3_bh_mat_2 as gm
+    left join cmo_domain_lookup_master cdlm on cdlm.domain_code = gm.applicant_gender and cdlm.domain_type = 'gender'
+    where gm.grievance_generate_date >= '2023-06-08' 
+     and gm.grievance_source = 5  and gm.assigned_to_office_id = 75 
+    group by gm.applicant_gender, cdlm.domain_value
+    union all 
+    select
+        /* Received From Other HOD */
+        count(1) as gender_wise_count,
+        gm.applicant_gender,
+        cdlm.domain_value as gender_name
+    from forwarded_latest_5_bh_mat_2 as gm
+    left join cmo_domain_lookup_master cdlm on cdlm.domain_code = gm.applicant_gender and cdlm.domain_type = 'gender'
+    where gm.grievance_generate_date >= '2023-06-08'
+         and gm.grievance_source = 5  and gm.assigned_to_office_id = 75 
+        group by gm.applicant_gender, cdlm.domain_value) 
+    g1) 
+g2
+
+
+
+
+select
+	'2025-12-17 16:30:01.787016+00:00'::timestamp as refresh_time_utc,
+    g2.total_count,
+    g2.grievances_recieved_male,
+    round((g2.grievances_recieved_male::numeric/g2.total_count)* 100, 0) as grievances_recieved_male_percentage,
+    g2.grievances_recieved_female,
+    round((g2.grievances_recieved_female::numeric/g2.total_count)* 100, 0) as grievances_recieved_female_percentage,
+    g2.grievances_recieved_others,
+    round((g2.grievances_recieved_others::numeric/g2.total_count)* 100, 0) as grievances_recieved_others_percentage,
+    g2.grievances_recived_no_gender,
+    round((g2.grievances_recived_no_gender::numeric/g2.total_count)* 100, 0) as grievances_recived_no_gender_percentage
+from
+    (select
+        SUM(g1.gender_wise_count)::bigint as total_count,
+        SUM(g1.grievances_recieved_male)::bigint as grievances_recieved_male,
+        SUM(g1.grievances_recieved_female)::bigint as grievances_recieved_female,
+        SUM(g1.grievances_recieved_others)::bigint as grievances_recieved_others,
+        SUM(g1.grievances_recived_no_gender)::bigint as grievances_recived_no_gender
+    from (select
+            /* Received From CMO */
+	        COUNT(*) AS gender_wise_count,
+		    COUNT(*) FILTER (WHERE gm.applicant_gender = 1) AS grievances_recieved_male,
+		    COUNT(*) FILTER (WHERE gm.applicant_gender = 2) AS grievances_recieved_female,
+		    COUNT(*) FILTER (WHERE gm.applicant_gender = 3) AS grievances_recieved_others,
+		    COUNT(*) FILTER (WHERE gm.applicant_gender IS NULL) AS grievances_recived_no_gender,
+		    gm.applicant_gender,
+		    cdlm.domain_value as gender_name
+		FROM forwarded_latest_3_bh_mat_2 gm
+		left join cmo_domain_lookup_master cdlm on cdlm.domain_code = gm.applicant_gender and cdlm.domain_type = 'gender'
+		WHERE gm.grievance_generate_date >= '2023-06-08'
+		  AND gm.grievance_source = 5 AND gm.assigned_to_office_id = 75
+		  group by gm.applicant_gender, cdlm.domain_value
+    union all 
+    select
+        /* Received From Other HOD */
+        count(*) as gender_wise_count,
+        COUNT(*) FILTER (WHERE gm.applicant_gender = 1) AS grievances_recieved_male,
+	    COUNT(*) FILTER (WHERE gm.applicant_gender = 2) AS grievances_recieved_female,
+	    COUNT(*) FILTER (WHERE gm.applicant_gender = 3) AS grievances_recieved_others,
+	    COUNT(*) FILTER (WHERE gm.applicant_gender IS NULL) AS grievances_recived_no_gender,
+        gm.applicant_gender,
+        cdlm.domain_value as gender_name
+    from forwarded_latest_5_bh_mat_2 as gm
+    left join cmo_domain_lookup_master cdlm on cdlm.domain_code = gm.applicant_gender and cdlm.domain_type = 'gender'
+    where gm.grievance_generate_date >= '2023-06-08'
+         and gm.grievance_source = 5  and gm.assigned_to_office_id = 75 
+        group by gm.applicant_gender, cdlm.domain_value) 
+    g1) 
+g2
+
+
+
+
+
+---------------------------------------------------------------------
+
+with griev_forwarded as (
+    select 
+        forwarded_latest_3_bh_mat.assigned_to_position,
+        forwarded_latest_3_bh_mat.assigned_to_id,
+        apm.role_master_id,
+        count(1) as assigned
+    from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
+    inner join admin_position_master apm on apm.position_id = forwarded_latest_3_bh_mat.assigned_to_position 
+    where forwarded_latest_3_bh_mat.assigned_to_office_id in (75) and apm.role_master_id in (4,5) /* SSM CALL CENTER */  and forwarded_latest_3_bh_mat.grievance_source in (5) 
+    group by forwarded_latest_3_bh_mat.assigned_to_position, forwarded_latest_3_bh_mat.assigned_to_id, apm.role_master_id
+    union all
+    select
+        bh.next_status_assigned_to_position as assigned_to_position,
+        bh.next_status_assigned_to_id as assigned_to_id,
+        apm.role_master_id,
+        count(distinct forwarded_latest_3_bh_mat.grievance_id) as total_assigned
+    from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat 
+    inner join forwarded_latest_3_4_bh_mat_2 as bh on forwarded_latest_3_bh_mat.grievance_id = bh.grievance_id 
+    inner join admin_position_master apm on apm.position_id = bh.assigned_to_position 
+    where forwarded_latest_3_bh_mat.assigned_to_office_id in (75) /*and apm.role_master_id in (5,6)*/ /* SSM CALL CENTER */  and forwarded_latest_3_bh_mat.grievance_source in (5) 
+    and bh.previous_status = 3 
+    and bh.next_status IN (4, 7) 
+    and forwarded_latest_3_bh_mat.assigned_to_office_id  = bh.next_status_assigned_to_office
+    group by bh.next_status_assigned_to_position, bh.next_status_assigned_to_id, apm.role_master_id
+), griev_yet_to_assigned as (
+        select 
+            md.assigned_to_position,
+            md.assigned_to_id,
+            count(1) as yet_to_assigned
+        from master_district_block_grv md
+        where md.grievance_id > 0
+        and md.status in (4) 
+        and md.assigned_to_office_id = 75 /* SSM CALL CENTER */  and md.grievance_source in (5) 
+        group by md.assigned_to_position, md.assigned_to_id
+), atr_sent as (
+        select 
+            /*'Admin & Nodal' as role,*/
+            albm.assigned_by_id,
+            albm.assigned_by_position,
+            albm.assigned_by_office_id,
+            count(1) as atr_submitted
+        from atr_latest_14_bh_mat_2 as albm
+        inner join forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat on forwarded_latest_3_bh_mat.grievance_id = albm.grievance_id 
+        inner join admin_position_master apm on apm.position_id = albm.assigned_by_position 
+        where apm.role_master_id in (4,5) and forwarded_latest_3_bh_mat.current_status in (14,15) and albm.assigned_by_office_id in (75) /* SSM CALL CENTER */  and forwarded_latest_3_bh_mat.grievance_source in (5) 
+        group by apm.role_master_id, albm.assigned_by_position, albm.assigned_by_id, albm.assigned_by_office_id	
+        /*union all
+        select 
+            /*'Restricted' as role,*/
+            flbm.assigned_by_position,
+            flbm.assigned_by_id,
+            flbm.assigned_by_office_id,
+            flbm.role_master_id,
+            count(*) as atr_submitted
+        from atr_latest_4_11_bh_mat_2 as flbm  
+        where flbm.assigned_to_office_id in (75) /* SSM CALL CENTER */  and flbm.grievance_source in (5) 
+        group by flbm.assigned_by_position, flbm.assigned_by_id, flbm.assigned_by_office_id, flbm.role_master_id*/
+), atr_sent_restrict as (
+        select 
+            /*'Restricted' as role,*/
+            flbm.assigned_by_id,
+            flbm.assigned_by_position,
+            flbm.assigned_by_office_id,
+            count(*) as atr_submitted
+        from atr_latest_4_11_bh_mat_2 as flbm  
+        where flbm.assigned_to_office_id in (75) /* SSM CALL CENTER */  and flbm.grievance_source in (5) 
+        group by flbm.assigned_by_position, flbm.assigned_by_id, flbm.assigned_by_office_id
+), atr_yet_to_sent as (
+        select 
+            md.assigned_to_position,
+            md.assigned_to_id,
+            md.assigned_to_office_id,
+            apm2.role_master_id,
+            count(1) as yet_atr_not_submitted
+        from master_district_block_grv md
+        left join admin_position_master apm on apm.position_id = md.updated_by_position
+        left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
+        where md.status in (6,11,13)
+        and md.assigned_to_office_id in (75) /* SSM CALL CENTER */  and md.grievance_source in (5) 
+        group by md.assigned_to_position, md.assigned_to_id, md.assigned_to_office_id, apm2.role_master_id
+    )	
+    select 
+        '2025-12-18 16:30:01.947310+00:00'::timestamp as refresh_time_utc,
+        admin_position_master.record_status,
+        case when admin_user_details.official_name is not null then concat(admin_user_details.official_name, ' - (', cmo_designation_master.designation_name ,' )')
+            else null
+        end as name_and_designation_of_the_user,
+        case when admin_position_master.office_id in (75) then admin_user_role_master.role_master_name
+            else concat(admin_user_role_master.role_master_name, ' (Other HOD)')
+        end as user_role,
+        case
+            when cmo_sub_office_master.suboffice_name is not null
+                then concat(cmo_office_master.office_name, ' - ( ', cmo_sub_office_master.suboffice_name, ' )')
+            else cmo_office_master.office_name
+        end as office_of_the_user,
+        coalesce(griev_forwarded.assigned, 0) as grievance_asssigned,
+        coalesce(griev_yet_to_assigned.yet_to_assigned, 0) as grievance_yet_to_assigned,
+        sum(coalesce(griev_forwarded.assigned::int, 0) + coalesce(griev_yet_to_assigned.yet_to_assigned::int, 0)) as grievance_total,
+        case 
+            when admin_position_master.role_master_id in (4,5) then coalesce(atr_sent.atr_submitted, 0)
+            when admin_position_master.role_master_id in (6) then coalesce(atr_sent_restrict.atr_submitted, 0)
+            else 0
+        end as atr_sent,
+        coalesce(atr_yet_to_sent.yet_atr_not_submitted, 0) as atr_not_submitted,
+        case 
+            when admin_position_master.role_master_id in (4,5) then sum(coalesce(atr_sent.atr_submitted::int, 0) + coalesce(atr_yet_to_sent.yet_atr_not_submitted::int, 0))
+            when admin_position_master.role_master_id in (6) then sum(coalesce(atr_sent_restrict.atr_submitted::int, 0) + coalesce(atr_yet_to_sent.yet_atr_not_submitted::int, 0))
+            else 0
+        end as atr_total
+--        coalesce(atr_sent.atr_submitted, 0) as atr_sent,
+--        coalesce(atr_sent_restrict.atr_submitted, 0) as atr_sent,
+--        sum(coalesce(atr_sent.atr_submitted::int, 0) + coalesce(atr_yet_to_sent.yet_atr_not_submitted::int, 0)) as atr_total
+    from griev_forwarded
+        left join griev_yet_to_assigned on griev_yet_to_assigned.assigned_to_id = griev_forwarded.assigned_to_id 
+        left join atr_yet_to_sent on atr_yet_to_sent.assigned_to_id = griev_forwarded.assigned_to_id 
+        left join atr_sent on atr_sent.assigned_by_id = griev_forwarded.assigned_to_id
+        left join atr_sent_restrict on atr_sent_restrict.assigned_by_id = griev_forwarded.assigned_to_id
+        left join admin_user_details on griev_forwarded.assigned_to_id = admin_user_details.admin_user_id
+        left join admin_position_master on griev_forwarded.assigned_to_position = admin_position_master.position_id
+        left join cmo_office_master on cmo_office_master.office_id = admin_position_master.office_id
+        left join admin_user_role_master on admin_position_master.role_master_id = admin_user_role_master.role_master_id
+        left join cmo_designation_master on cmo_designation_master.designation_id = admin_position_master.designation_id
+        left join cmo_sub_office_master on cmo_sub_office_master.suboffice_id = admin_position_master.sub_office_id
+    group by admin_user_details.official_name, cmo_designation_master.designation_name,admin_position_master.office_id, admin_user_role_master.role_master_name,
+        cmo_sub_office_master.suboffice_name, cmo_office_master.office_name, griev_forwarded.assigned, griev_yet_to_assigned.yet_to_assigned,atr_sent.atr_submitted,
+        atr_yet_to_sent.yet_atr_not_submitted,admin_position_master.record_status,admin_position_master.role_master_id, admin_position_master.position_id, 
+        admin_position_master.role_master_id, atr_sent_restrict.atr_submitted
+    order by
+        case
+            when admin_position_master.role_master_id = 4 then 1
+            when admin_position_master.role_master_id = 5 then 2
+            when admin_position_master.role_master_id = 6 then 3
+            else 4
+        end   
+ 
+        
+        -------- TETSING --------
+with griev_forwarded as (
+    select 
+        forwarded_latest_3_bh_mat.assigned_to_position,
+        forwarded_latest_3_bh_mat.assigned_to_id,
+        apm.role_master_id,
+        count(1) as assigned
+    from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
+    inner join admin_position_master apm on apm.position_id = forwarded_latest_3_bh_mat.assigned_to_position 
+    where forwarded_latest_3_bh_mat.assigned_to_office_id in (75) and apm.role_master_id in (4,5) /* SSM CALL CENTER */  and forwarded_latest_3_bh_mat.grievance_source in (5) 
+    group by forwarded_latest_3_bh_mat.assigned_to_position, forwarded_latest_3_bh_mat.assigned_to_id, apm.role_master_id
+    union all
+    select
+        bh.next_status_assigned_to_position as assigned_to_position,
+        bh.next_status_assigned_to_id as assigned_to_id,
+        apm.role_master_id,
+        count(distinct forwarded_latest_3_bh_mat.grievance_id) as total_assigned
+    from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat 
+    inner join forwarded_latest_3_4_bh_mat_2 as bh on forwarded_latest_3_bh_mat.grievance_id = bh.grievance_id 
+    inner join admin_position_master apm on apm.position_id = bh.assigned_to_position 
+    where forwarded_latest_3_bh_mat.assigned_to_office_id in (75) /*and apm.role_master_id in (5,6)*/ /* SSM CALL CENTER */  and forwarded_latest_3_bh_mat.grievance_source in (5) 
+    and bh.previous_status = 3 
+    and bh.next_status IN (4, 7) 
+    and forwarded_latest_3_bh_mat.assigned_to_office_id  = bh.next_status_assigned_to_office
+    group by bh.next_status_assigned_to_position, bh.next_status_assigned_to_id, apm.role_master_id
+), griev_yet_to_assigned as (
+        select 
+            md.assigned_to_position,
+            md.assigned_to_id,
+            count(1) as yet_to_assigned,
+            count(1) filter (where (CURRENT_DATE - md.updated_on::date) > 7) as is_more_than_7_days
+--            case 
+--            	when (CURRENT_DATE - md.updated_on::date) > 7 then 1 
+--            	else 0
+--            end as is_more_than_7_days
+        from master_district_block_grv md
+        where md.grievance_id > 0
+        and md.status in (4) 
+        and md.assigned_to_office_id = 75
+        /* SSM CALL CENTER */  and md.grievance_source in (5) 
+        group by md.assigned_to_position, md.assigned_to_id
+), atr_sent as (
+        select 
+            /*'Admin & Nodal' as role,*/
+            albm.assigned_by_id,
+            albm.assigned_by_position,
+            albm.assigned_by_office_id,
+            count(1) as atr_submitted
+        from atr_latest_14_bh_mat_2 as albm
+        inner join forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat on forwarded_latest_3_bh_mat.grievance_id = albm.grievance_id 
+        inner join admin_position_master apm on apm.position_id = albm.assigned_by_position 
+        where apm.role_master_id in (4,5) and forwarded_latest_3_bh_mat.current_status in (14,15) and albm.assigned_by_office_id in (75) /* SSM CALL CENTER */  and forwarded_latest_3_bh_mat.grievance_source in (5) 
+        group by apm.role_master_id, albm.assigned_by_position, albm.assigned_by_id, albm.assigned_by_office_id
+), atr_sent_restrict as (
+        select 
+            /*'Restricted' as role,*/
+            flbm.assigned_by_id,
+            flbm.assigned_by_position,
+            flbm.assigned_by_office_id,
+            count(*) as atr_submitted
+        from atr_latest_4_11_bh_mat_2 as flbm  
+        where flbm.assigned_to_office_id in (75) /* SSM CALL CENTER */  and flbm.grievance_source in (5) 
+        group by flbm.assigned_by_position, flbm.assigned_by_id, flbm.assigned_by_office_id
+), atr_yet_to_sent as (
+        select 
+            md.assigned_to_position,
+            md.assigned_to_id,
+            md.assigned_to_office_id,
+            apm2.role_master_id,
+            count(1) as yet_atr_not_submitted,
+            count(1) filter (where (CURRENT_DATE - md.updated_on::date) > 7) as atr_more_than_7_days
+        from master_district_block_grv md
+        left join admin_position_master apm on apm.position_id = md.updated_by_position
+        left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
+        where md.status in (6,11,13)
+        and md.assigned_to_office_id in (75) /* SSM CALL CENTER */  and md.grievance_source in (5) 
+        group by md.assigned_to_position, md.assigned_to_id, md.assigned_to_office_id, apm2.role_master_id
+    )	
+    select 
+        '2025-12-18 16:30:01.947310+00:00'::timestamp as refresh_time_utc,
+        admin_position_master.record_status,
+        case when admin_user_details.official_name is not null then concat(admin_user_details.official_name, ' - (', cmo_designation_master.designation_name ,' )')
+            else null
+        end as name_and_designation_of_the_user,
+        case when admin_position_master.office_id in (75) then admin_user_role_master.role_master_name
+            else concat(admin_user_role_master.role_master_name, ' (Other HOD)')
+        end as user_role,
+        case
+            when cmo_sub_office_master.suboffice_name is not null
+                then concat(cmo_office_master.office_name, ' - ( ', cmo_sub_office_master.suboffice_name, ' )')
+            else cmo_office_master.office_name
+        end as office_of_the_user,
+        coalesce(griev_forwarded.assigned, 0) as grievance_asssigned,
+        coalesce(griev_yet_to_assigned.yet_to_assigned, 0) as grievance_yet_to_assigned,
+        coalesce(griev_yet_to_assigned.is_more_than_7_days, 0) as grievance_more_than_7_days,
+        sum(coalesce(griev_forwarded.assigned::int, 0) + coalesce(griev_yet_to_assigned.yet_to_assigned::int, 0)) as grievance_total,
+        case 
+            when admin_position_master.role_master_id in (4,5) then coalesce(atr_sent.atr_submitted, 0)
+            when admin_position_master.role_master_id in (6) then coalesce(atr_sent_restrict.atr_submitted, 0)
+            else 0
+        end as atr_sent,
+        coalesce(atr_yet_to_sent.yet_atr_not_submitted, 0) as atr_not_submitted,
+        coalesce(atr_yet_to_sent.atr_more_than_7_days, 0) as atr_more_than_7_days,
+        case 
+            when admin_position_master.role_master_id in (4,5) then sum(coalesce(atr_sent.atr_submitted::int, 0) + coalesce(atr_yet_to_sent.yet_atr_not_submitted::int, 0))
+            when admin_position_master.role_master_id in (6) then sum(coalesce(atr_sent_restrict.atr_submitted::int, 0) + coalesce(atr_yet_to_sent.yet_atr_not_submitted::int, 0))
+            else 0
+        end as atr_total
+    from griev_forwarded
+        left join griev_yet_to_assigned on griev_yet_to_assigned.assigned_to_id = griev_forwarded.assigned_to_id 
+        left join atr_yet_to_sent on atr_yet_to_sent.assigned_to_id = griev_forwarded.assigned_to_id 
+        left join atr_sent on atr_sent.assigned_by_id = griev_forwarded.assigned_to_id
+        left join atr_sent_restrict on atr_sent_restrict.assigned_by_id = griev_forwarded.assigned_to_id
+        left join admin_user_details on griev_forwarded.assigned_to_id = admin_user_details.admin_user_id
+        left join admin_position_master on griev_forwarded.assigned_to_position = admin_position_master.position_id
+        left join cmo_office_master on cmo_office_master.office_id = admin_position_master.office_id
+        left join admin_user_role_master on admin_position_master.role_master_id = admin_user_role_master.role_master_id
+        left join cmo_designation_master on cmo_designation_master.designation_id = admin_position_master.designation_id
+        left join cmo_sub_office_master on cmo_sub_office_master.suboffice_id = admin_position_master.sub_office_id
+    group by admin_user_details.official_name, cmo_designation_master.designation_name,admin_position_master.office_id, admin_user_role_master.role_master_name,
+        cmo_sub_office_master.suboffice_name, cmo_office_master.office_name, griev_forwarded.assigned, griev_yet_to_assigned.yet_to_assigned,atr_sent.atr_submitted,
+        atr_yet_to_sent.yet_atr_not_submitted,admin_position_master.record_status,admin_position_master.role_master_id, admin_position_master.position_id, 
+        admin_position_master.role_master_id, atr_sent_restrict.atr_submitted, griev_yet_to_assigned.is_more_than_7_days, atr_yet_to_sent.atr_more_than_7_days
+    order by
+        case
+            when admin_position_master.role_master_id = 4 then 1
+            when admin_position_master.role_master_id = 5 then 2
+            when admin_position_master.role_master_id = 6 then 3
+            else 4
+        end   
+        
