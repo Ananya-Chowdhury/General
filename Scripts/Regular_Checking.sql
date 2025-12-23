@@ -210,9 +210,9 @@ select * from cmo_domain_lookup_master cdlm where cdlm.domain_type = ''
 select * from public.grievance_master gm where grievance_no in ('SSM1111111', 'SSM2222222');
 select * from grievance_master gm where gm.grievance_no like '%SSM%' order by gm.grievance_id desc limit 10;  --6036139
 select * from grievance_master gm order by gm.grievance_id desc;
-select * from public.grievance_master gm where gm.grievance_id = 6066383;
+select * from public.grievance_master gm where gm.grievance_id = 6084365;
 select * from public.grievance_lifecycle gl where gl.grievance_id = 6072327 order by gl.assigned_on desc;
-select * from public.grievance_master gm where gm.grievance_no = 'SSM2222222';
+select * from public.grievance_master gm where gm.grievance_no = 'SSM5042301';
 select * from public.admin_position_master apm where apm.position_id = 10140;               -- assigned_to_postion = position_id      admin_postion_master
 select * from public.admin_user_position_mapping aupm where aupm.position_id = 11360;       --12745 (6) --10140 --12708 (7) --
 select * from public.admin_user au where au.admin_user_id = 10920;
@@ -402,9 +402,9 @@ ORDER BY cebrd.batch_id desc;
 select * from cmo_batch_grievance_line_item cbgli order by cbgli.cmo_batch_run_details_id desc;
 
 
-select * from public.grievance_master gm where grievance_no = 'SSM112233'; 
+select * from public.grievance_master gm where grievance_no = 'SSM1111111'; 
 select * from public.cmo_batch_grievance_line_item cbgli where griev_id = 'SSM2962283';
-select * from public.grievance_lifecycle gl where gl.grievance_id = 6071989 order by assigned_on ;
+select * from public.grievance_lifecycle gl where gl.grievance_id = 6082327 order by assigned_on ;
 select * from public.admin_user_details aud where admin_user_id = 3186; -- Md. Ashif Ikbal
 
 SELECT * FROM public.bulk_griev_status_assign bgsa WHERE 4216861 = ANY (SELECT jsonb_array_elements_text(bgsa.request_grievance_ids)::int);

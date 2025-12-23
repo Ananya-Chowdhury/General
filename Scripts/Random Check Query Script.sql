@@ -4671,5 +4671,365 @@ with griev_forwarded as (
             when admin_position_master.role_master_id = 5 then 2
             when admin_position_master.role_master_id = 6 then 3
             else 4
-        end   
-        
+        end  ; 
+     ----------------------------------------------------------------------------
+     with griev_forwarded as (
+        select
+        	/*'Admin & Nodal' as role,*/
+            forwarded_latest_3_bh_mat.assigned_to_position,
+            forwarded_latest_3_bh_mat.assigned_to_id,
+            apm.role_master_id,
+            count(1) as assigned
+        from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
+        inner join admin_position_master apm on apm.position_id = forwarded_latest_3_bh_mat.assigned_to_position
+        where forwarded_latest_3_bh_mat.assigned_to_office_id in (2) and apm.role_master_id in (4,5) /* SSM CALL CENTER */
+        group by forwarded_latest_3_bh_mat.assigned_to_position, forwarded_latest_3_bh_mat.assigned_to_id, apm.role_master_id
+        union all
+        select
+        	/*'Restricted' as role,*/
+            bh.next_status_assigned_to_position as assigned_to_position,
+            bh.next_status_assigned_to_id as assigned_to_id,
+            apm.role_master_id,
+            count(distinct forwarded_latest_3_bh_mat.grievance_id) as assigned
+        from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
+        inner join forwarded_latest_3_4_bh_mat_2 as bh on forwarded_latest_3_bh_mat.grievance_id = bh.grievance_id
+        inner join admin_position_master apm on apm.position_id = bh.assigned_to_position
+        where forwarded_latest_3_bh_mat.assigned_to_office_id in (2) /*and apm.role_master_id in (5,6)*/ /* SSM CALL CENTER */
+        and bh.previous_status = 3
+        and bh.next_status IN (4, 7)
+        and forwarded_latest_3_bh_mat.assigned_to_office_id  = bh.next_status_assigned_to_office
+        group by bh.next_status_assigned_to_position, bh.next_status_assigned_to_id, apm.role_master_id
+      ), griev_forwarded_restrict as (
+        select
+        	/*'Restricted' as role,*/
+            bh.next_status_assigned_to_position as assigned_to_position,
+            bh.next_status_assigned_to_id as assigned_to_id,
+            apm.role_master_id,
+            count(distinct forwarded_latest_3_bh_mat.grievance_id) as assigned
+        from forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat
+        inner join forwarded_latest_3_4_bh_mat_2 as bh on forwarded_latest_3_bh_mat.grievance_id = bh.grievance_id
+        inner join admin_position_master apm on apm.position_id = bh.assigned_to_position
+        where forwarded_latest_3_bh_mat.assigned_to_office_id in (2) /*and apm.role_master_id in (5,6)*/ /* SSM CALL CENTER */
+        and bh.previous_status = 3
+        and bh.next_status IN (4, 7)
+        and forwarded_latest_3_bh_mat.assigned_to_office_id  = bh.next_status_assigned_to_office
+        group by bh.next_status_assigned_to_position, bh.next_status_assigned_to_id, apm.role_master_id
+    ), griev_yet_to_assigned as (
+            select
+                md.assigned_to_position,
+                md.assigned_to_id,
+                count(1) as yet_to_assigned,
+                count(1) filter (where (CURRENT_DATE - md.updated_on::date) > 7) as is_more_than_7_days
+            from master_district_block_grv md
+            where md.grievance_id > 0
+            and md.status in (4)
+            and md.assigned_to_office_id = 2 /* SSM CALL CENTER */
+            group by md.assigned_to_position, md.assigned_to_id
+    ), atr_sent as (
+            select
+                /*'Admin & Nodal' as role,*/
+                albm.assigned_by_id,
+                albm.assigned_by_position,
+                albm.assigned_by_office_id,
+                count(1) as atr_submitted
+            from atr_latest_14_bh_mat_2 as albm
+            inner join forwarded_latest_3_bh_mat_2 as forwarded_latest_3_bh_mat on forwarded_latest_3_bh_mat.grievance_id = albm.grievance_id
+            inner join admin_position_master apm on apm.position_id = albm.assigned_by_position
+            where apm.role_master_id in (4,5) and forwarded_latest_3_bh_mat.current_status in (14,15) and albm.assigned_by_office_id in (2) /* SSM CALL CENTER */
+            group by apm.role_master_id, albm.assigned_by_position, albm.assigned_by_id, albm.assigned_by_office_id
+            /*union all
+            select
+                /*'Restricted' as role,*/
+                flbm.assigned_by_position,
+                flbm.assigned_by_id,
+                flbm.assigned_by_office_id,
+                flbm.role_master_id,
+                count(*) as atr_submitted
+            from atr_latest_4_11_bh_mat_2 as flbm
+            where flbm.assigned_to_office_id in (2) /* SSM CALL CENTER */
+            group by flbm.assigned_by_position, flbm.assigned_by_id, flbm.assigned_by_office_id, flbm.role_master_id*/
+    ), atr_sent_restrict as (
+            select
+                /*'Restricted' as role,*/
+                flbm.assigned_by_id,
+                flbm.assigned_by_position,
+                flbm.assigned_by_office_id,
+                count(*) as atr_submitted
+            from atr_latest_4_11_bh_mat_2 as flbm
+            where flbm.assigned_to_office_id in (2) /* SSM CALL CENTER */
+            group by flbm.assigned_by_position, flbm.assigned_by_id, flbm.assigned_by_office_id
+    ), atr_yet_to_sent as (
+            select
+                md.assigned_to_position,
+                md.assigned_to_id,
+                md.assigned_to_office_id,
+                apm2.role_master_id,
+                count(1) as yet_atr_not_submitted,
+                count(1) filter (where (CURRENT_DATE - md.updated_on::date) > 7) as atr_more_than_7_days
+            from master_district_block_grv md
+            left join admin_position_master apm on apm.position_id = md.updated_by_position
+            left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
+            where md.status in (6,11,13)
+            and md.assigned_to_office_id in (2) /* SSM CALL CENTER */
+            group by md.assigned_to_position, md.assigned_to_id, md.assigned_to_office_id, apm2.role_master_id
+        )
+        select
+            '2025-12-22 16:30:01.846703+00:00'::timestamp as refresh_time_utc,
+            admin_position_master.record_status,
+            case when admin_user_details.official_name is not null then concat(admin_user_details.official_name, ' - (', cmo_designation_master.designation_name ,' )')
+                else null
+            end as name_and_designation_of_the_user,
+            case when admin_position_master.office_id in (2) then admin_user_role_master.role_master_name
+                else concat(admin_user_role_master.role_master_name, ' (Other HOD)')
+            end as user_role,
+            case
+                when cmo_sub_office_master.suboffice_name is not null
+                    then concat(cmo_office_master.office_name, ' - ( ', cmo_sub_office_master.suboffice_name, ' )')
+                else cmo_office_master.office_name
+            end as office_of_the_user,
+            coalesce(griev_forwarded.assigned, 0) as grievance_asssigned,
+            coalesce(griev_yet_to_assigned.yet_to_assigned, 0) as grievance_yet_to_assigned,
+            coalesce(griev_yet_to_assigned.is_more_than_7_days, 0) as grievance_more_than_7_days,
+            sum(coalesce(griev_forwarded.assigned::int, 0) + coalesce(griev_yet_to_assigned.yet_to_assigned::int, 0)) as grievance_total,
+            case
+                when admin_position_master.role_master_id in (4,5) then coalesce(atr_sent.atr_submitted, 0)
+                when admin_position_master.role_master_id in (6) then coalesce(atr_sent_restrict.atr_submitted, 0)
+                else 0
+            end as atr_sent,
+            coalesce(atr_yet_to_sent.yet_atr_not_submitted, 0) as atr_not_submitted,
+            coalesce(atr_yet_to_sent.atr_more_than_7_days, 0) as atr_more_than_7_days,
+            case
+                when admin_position_master.role_master_id in (4,5) then sum(coalesce(atr_sent.atr_submitted::int, 0) + coalesce(atr_yet_to_sent.yet_atr_not_submitted::int, 0))
+                when admin_position_master.role_master_id in (6) then sum(coalesce(atr_sent_restrict.atr_submitted::int, 0) + coalesce(atr_yet_to_sent.yet_atr_not_submitted::int, 0))
+                else 0
+            end as atr_total
+    --        coalesce(atr_sent.atr_submitted, 0) as atr_sent,
+    --        coalesce(atr_sent_restrict.atr_submitted, 0) as atr_sent,
+    --        sum(coalesce(atr_sent.atr_submitted::int, 0) + coalesce(atr_yet_to_sent.yet_atr_not_submitted::int, 0)) as atr_total
+        from griev_forwarded
+            left join griev_yet_to_assigned on griev_yet_to_assigned.assigned_to_id = griev_forwarded.assigned_to_id
+            left join atr_yet_to_sent on atr_yet_to_sent.assigned_to_id = griev_forwarded.assigned_to_id
+            left join atr_sent on atr_sent.assigned_by_id = griev_forwarded.assigned_to_id
+            left join atr_sent_restrict on atr_sent_restrict.assigned_by_id = griev_forwarded.assigned_to_id
+            left join admin_user_details on griev_forwarded.assigned_to_id = admin_user_details.admin_user_id
+            left join admin_position_master on griev_forwarded.assigned_to_position = admin_position_master.position_id
+            left join cmo_office_master on cmo_office_master.office_id = admin_position_master.office_id
+            left join admin_user_role_master on admin_position_master.role_master_id = admin_user_role_master.role_master_id
+            left join cmo_designation_master on cmo_designation_master.designation_id = admin_position_master.designation_id
+            left join cmo_sub_office_master on cmo_sub_office_master.suboffice_id = admin_position_master.sub_office_id
+        group by admin_user_details.official_name, cmo_designation_master.designation_name,admin_position_master.office_id, admin_user_role_master.role_master_name,
+            cmo_sub_office_master.suboffice_name, cmo_office_master.office_name, griev_forwarded.assigned, griev_yet_to_assigned.yet_to_assigned,atr_sent.atr_submitted,
+            atr_yet_to_sent.yet_atr_not_submitted,admin_position_master.record_status,admin_position_master.role_master_id, admin_position_master.position_id,
+            admin_position_master.role_master_id, atr_sent_restrict.atr_submitted, griev_yet_to_assigned.is_more_than_7_days, atr_yet_to_sent.atr_more_than_7_days
+        order by
+            case
+                when admin_position_master.role_master_id = 4 then 1
+                when admin_position_master.role_master_id = 5 then 2
+                when admin_position_master.role_master_id = 6 then 3
+                else 4
+            end
+   
+            
+            
+            
+            
+            
+      ------------------------------------------------------------------------------
+            
+            WITH age_gender_counts AS (
+                select
+                    COUNT(1) AS total_count,
+                    COUNT(CASE WHEN gm.applicant_gender = 1 THEN 1 END) AS total_male_count,
+                    COUNT(CASE WHEN gm.applicant_gender = 2 THEN 1 END) AS total_female_count,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 0 AND 17 THEN 1 END) AS age_below_18,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 18 AND 30 THEN 1 END) AS age_18_30,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 31 AND 45 THEN 1 END) AS age_31_45,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 46 AND 60 THEN 1 END) AS age_46_60,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 61 AND 120 THEN 1 END) AS age_above_60,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 0 AND 17 AND gm.applicant_gender = 1 THEN 1 END) AS age_below_18_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 18 AND 30 AND gm.applicant_gender = 1 THEN 1 END) AS age_18_30_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 31 AND 45 AND gm.applicant_gender = 1 THEN 1 END) AS age_31_45_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 46 AND 60 AND gm.applicant_gender = 1 THEN 1 END) AS age_46_60_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 61 AND 120 AND gm.applicant_gender = 1 THEN 1 END) AS age_above_60_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 0 AND 17 AND gm.applicant_gender = 2 THEN 1 END) AS age_below_18_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 18 AND 30 AND gm.applicant_gender = 2 THEN 1 END) AS age_18_30_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 31 AND 45 AND gm.applicant_gender = 2 THEN 1 END) AS age_31_45_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 46 AND 60 AND gm.applicant_gender = 2 THEN 1 END) AS age_46_60_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 61 AND 120 AND gm.applicant_gender = 2 THEN 1 END) AS age_above_60_female
+                FROM forwarded_latest_3_bh_mat_2 as gm
+                LEFT JOIN cmo_domain_lookup_master cdlm ON cdlm.domain_code = gm.applicant_gender AND cdlm.domain_type = 'gender'
+                WHERE gm.applicant_age IS NOT NULL   and gm.assigned_to_office_id = 75 and gm.grievance_source = 5
+                union all
+                select
+                    COUNT(1) AS total_count,
+                    COUNT(CASE WHEN gm.applicant_gender = 1 THEN 1 END) AS total_male_count,
+                    COUNT(CASE WHEN gm.applicant_gender = 2 THEN 1 END) AS total_female_count,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 0 AND 17 THEN 1 END) AS age_below_18,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 18 AND 30 THEN 1 END) AS age_18_30,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 31 AND 45 THEN 1 END) AS age_31_45,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 46 AND 60 THEN 1 END) AS age_46_60,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 61 AND 120 THEN 1 END) AS age_above_60,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 0 AND 17 AND gm.applicant_gender = 1 THEN 1 END) AS age_below_18_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 18 AND 30 AND gm.applicant_gender = 1 THEN 1 END) AS age_18_30_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 31 AND 45 AND gm.applicant_gender = 1 THEN 1 END) AS age_31_45_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 46 AND 60 AND gm.applicant_gender = 1 THEN 1 END) AS age_46_60_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 61 AND 120 AND gm.applicant_gender = 1 THEN 1 END) AS age_above_60_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 0 AND 17 AND gm.applicant_gender = 2 THEN 1 END) AS age_below_18_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 18 AND 30 AND gm.applicant_gender = 2 THEN 1 END) AS age_18_30_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 31 AND 45 AND gm.applicant_gender = 2 THEN 1 END) AS age_31_45_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 46 AND 60 AND gm.applicant_gender = 2 THEN 1 END) AS age_46_60_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 61 AND 120 AND gm.applicant_gender = 2 THEN 1 END) AS age_above_60_female
+                FROM forwarded_latest_5_bh_mat_2 as gm
+                LEFT JOIN cmo_domain_lookup_master cdlm ON cdlm.domain_code = gm.applicant_gender AND cdlm.domain_type = 'gender'
+                WHERE gm.applicant_age IS NOT NULL   and gm.assigned_to_office_id = 75 and gm.grievance_source = 5
+                )
+                SELECT
+                    '2025-12-22 16:30:01.846703+00:00'::timestamp as refresh_time_utc,
+                    SUM(total_count)::bigint as total_count,
+                    SUM(total_male_count)::bigint as total_male_count,
+                    SUM(total_female_count)::bigint as total_female_count,
+                    SUM(age_below_18)::bigint as age_below_18,
+                    SUM(age_18_30)::bigint as age_18_30,
+                    SUM(age_31_45)::bigint as age_31_45,
+                    SUM(age_46_60)::bigint as age_46_60,
+                    SUM(age_above_60)::bigint as age_above_60,
+                    SUM(age_below_18_male)::bigint as age_below_18_male,
+                    SUM(age_18_30_male)::bigint as age_18_30_male,
+                    SUM(age_46_60_female)::bigint as age_46_60_female,
+                    SUM(age_18_30_female)::bigint as age_18_30_female,
+                    SUM(age_above_60_female)::bigint as age_above_60_female,
+                    SUM(age_below_18_female)::bigint as age_below_18_female,
+                    SUM(age_above_60_male)::bigint as age_above_60_male,
+                    SUM(age_46_60_male)::bigint as age_46_60_male,
+                    SUM(age_31_45_female)::bigint as age_31_45_female,
+                    SUM(age_31_45_male)::bigint as age_31_45_male,
+                    CASE WHEN total_count > 0 THEN (age_below_18 / total_count::float) * 100 ELSE 0 END AS age_below_18_percentage,
+                    CASE WHEN total_count > 0 THEN (age_18_30 / total_count::float) * 100 ELSE 0 END AS age_18_30_percentage,
+                    CASE WHEN total_count > 0 THEN (age_31_45 / total_count::float) * 100 ELSE 0 END AS age_31_45_percentage,
+                    CASE WHEN total_count > 0 THEN (age_46_60 / total_count::float) * 100 ELSE 0 END AS age_46_60_percentage,
+                    CASE WHEN total_count > 0 THEN (age_above_60 / total_count::float) * 100 ELSE 0 END AS age_above_60_percentage,
+                    CASE WHEN total_male_count > 0 THEN (age_below_18_male / total_male_count::float) * 100 ELSE 0 END AS age_below_18_male_percentage,
+                    CASE WHEN total_male_count > 0 THEN (age_18_30_male / total_male_count::float) * 100 ELSE 0 END AS age_18_30_male_percentage,
+                    CASE WHEN total_male_count > 0 THEN (age_31_45_male / total_male_count::float) * 100 ELSE 0 END AS age_31_45_male_percentage,
+                    CASE WHEN total_male_count > 0 THEN (age_46_60_male / total_male_count::float) * 100 ELSE 0 END AS age_46_60_male_percentage,
+                    CASE WHEN total_male_count > 0 THEN (age_above_60_male / total_male_count::float) * 100 ELSE 0 END AS age_above_60_male_percentage,
+                    CASE WHEN total_female_count > 0 THEN (age_below_18_female / total_female_count::float) * 100 ELSE 0 END AS age_below_18_female_percentage,
+                    CASE WHEN total_female_count > 0 THEN (age_18_30_female / total_female_count::float) * 100 ELSE 0 END AS age_18_30_female_percentage,
+                    CASE WHEN total_female_count > 0 THEN (age_31_45_female / total_female_count::float) * 100 ELSE 0 END AS age_31_45_female_percentage,
+                    CASE WHEN total_female_count > 0 THEN (age_46_60_female / total_female_count::float) * 100 ELSE 0 END AS age_46_60_female_percentage,
+                    CASE WHEN total_female_count > 0 THEN (age_above_60_female / total_female_count::float) * 100 ELSE 0 END AS age_above_60_female_percentage
+                FROM age_gender_counts
+                group by total_count, age_below_18, age_18_30, age_31_45, age_46_60,age_above_60, age_below_18_male, age_18_30_male,
+                age_31_45_male, age_46_60_male, age_above_60_male, age_below_18_female, age_18_30_female, age_31_45_female, age_46_60_female, age_above_60_female, total_male_count, total_female_count
+                
+                
+                
+                
+                
+     -------------------------------------------------------------------
+               SELECT 
+                    '2025-12-22 16:30:01.846703+00:00'::timestamp as refresh_time_utc,
+                    SUM(t.total_count)::bigint as total_count,
+                    SUM(t.total_male_count)::bigint as total_male_count,
+                    SUM(t.total_female_count)::bigint as total_female_count,
+                    SUM(t.age_below_18)::bigint as age_below_18,
+                    SUM(t.age_18_30)::bigint as age_18_30,
+                    SUM(t.age_31_45)::bigint as age_31_45,
+                    SUM(t.age_46_60)::bigint as age_46_60,
+                    SUM(t.age_below_18_male)::bigint as age_below_18_male,
+                    SUM(t.age_above_60)::bigint as age_above_60,
+                    SUM(t.age_18_30_male)::bigint as age_18_30_male,
+                    SUM(t.age_46_60_female)::bigint as age_46_60_female,
+                    SUM(t.age_18_30_female)::bigint as age_18_30_female,
+                    SUM(t.age_above_60_female)::bigint as age_above_60_female,
+                    SUM(t.age_below_18_female)::bigint as age_below_18_female,
+                    SUM(t.age_above_60_male)::bigint as age_above_60_male,
+                    SUM(t.age_46_60_male)::bigint as age_46_60_male,
+                    SUM(t.age_31_45_female)::bigint as age_31_45_female,
+                    SUM(t.age_31_45_male)::bigint as age_31_45_male,
+                    CASE WHEN total_count > 0 THEN (age_below_18 / total_count::float) * 100 ELSE 0 END AS age_below_18_percentage,
+                    CASE WHEN total_count > 0 THEN (age_18_30 / total_count::float) * 100 ELSE 0 END AS age_18_30_percentage,
+                    CASE WHEN total_count > 0 THEN (age_31_45 / total_count::float) * 100 ELSE 0 END AS age_31_45_percentage,
+                    CASE WHEN total_count > 0 THEN (age_46_60 / total_count::float) * 100 ELSE 0 END AS age_46_60_percentage,
+                    CASE WHEN total_count > 0 THEN (age_above_60 / total_count::float) * 100 ELSE 0 END AS age_above_60_percentage,
+                    CASE WHEN total_male_count > 0 THEN (age_below_18_male / total_male_count::float) * 100 ELSE 0 END AS age_below_18_male_percentage,
+                    CASE WHEN total_male_count > 0 THEN (age_18_30_male / total_male_count::float) * 100 ELSE 0 END AS age_18_30_male_percentage,
+                    CASE WHEN total_male_count > 0 THEN (age_31_45_male / total_male_count::float) * 100 ELSE 0 END AS age_31_45_male_percentage,
+                    CASE WHEN total_male_count > 0 THEN (age_46_60_male / total_male_count::float) * 100 ELSE 0 END AS age_46_60_male_percentage,
+                    CASE WHEN total_male_count > 0 THEN (age_above_60_male / total_male_count::float) * 100 ELSE 0 END AS age_above_60_male_percentage,
+                    CASE WHEN total_female_count > 0 THEN (age_below_18_female / total_female_count::float) * 100 ELSE 0 END AS age_below_18_female_percentage,
+                    CASE WHEN total_female_count > 0 THEN (age_18_30_female / total_female_count::float) * 100 ELSE 0 END AS age_18_30_female_percentage,
+                    CASE WHEN total_female_count > 0 THEN (age_31_45_female / total_female_count::float) * 100 ELSE 0 END AS age_31_45_female_percentage,
+                    CASE WHEN total_female_count > 0 THEN (age_46_60_female / total_female_count::float) * 100 ELSE 0 END AS age_46_60_female_percentage,
+                    CASE WHEN total_female_count > 0 THEN (age_above_60_female / total_female_count::float) * 100 ELSE 0 END AS age_above_60_female_percentage 
+	      		from (
+                select
+                    COUNT(1) AS total_count,
+                    COUNT(CASE WHEN gm.applicant_gender = 1 THEN 1 END) AS total_male_count,
+                    COUNT(CASE WHEN gm.applicant_gender = 2 THEN 1 END) AS total_female_count,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 0 AND 17 THEN 1 END) AS age_below_18,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 18 AND 30 THEN 1 END) AS age_18_30,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 31 AND 45 THEN 1 END) AS age_31_45,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 46 AND 60 THEN 1 END) AS age_46_60,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 61 AND 120 THEN 1 END) AS age_above_60,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 0 AND 17 AND gm.applicant_gender = 1 THEN 1 END) AS age_below_18_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 18 AND 30 AND gm.applicant_gender = 1 THEN 1 END) AS age_18_30_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 31 AND 45 AND gm.applicant_gender = 1 THEN 1 END) AS age_31_45_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 46 AND 60 AND gm.applicant_gender = 1 THEN 1 END) AS age_46_60_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 61 AND 120 AND gm.applicant_gender = 1 THEN 1 END) AS age_above_60_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 0 AND 17 AND gm.applicant_gender = 2 THEN 1 END) AS age_below_18_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 18 AND 30 AND gm.applicant_gender = 2 THEN 1 END) AS age_18_30_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 31 AND 45 AND gm.applicant_gender = 2 THEN 1 END) AS age_31_45_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 46 AND 60 AND gm.applicant_gender = 2 THEN 1 END) AS age_46_60_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 61 AND 120 AND gm.applicant_gender = 2 THEN 1 END) AS age_above_60_female
+                FROM forwarded_latest_3_bh_mat_2 as gm
+                LEFT JOIN cmo_domain_lookup_master cdlm ON cdlm.domain_code = gm.applicant_gender AND cdlm.domain_type = 'gender'
+                WHERE gm.applicant_age IS NOT NULL  and gm.grievance_source = 5   and gm.assigned_to_office_id = 75 
+                union all
+                select
+                    COUNT(1) AS total_count,
+                    COUNT(*) filter (where gm.applicant_gender = 1) AS total_male_count,
+                    COUNT(*) filter (where gm.applicant_gender = 2) AS total_female_count,
+                    COUNT(*) filter (where gm.applicant_age BETWEEN 0 AND 17) AS age_below_18,
+                    COUNT(*) filter (where gm.applicant_age BETWEEN 18 AND 30) AS age_18_30,
+                    COUNT(*) filter (where gm.applicant_age BETWEEN 31 AND 45) AS age_31_45,
+                    COUNT(*) filter (where gm.applicant_age BETWEEN 46 AND 60) AS age_46_60,
+                    COUNT(*) filter (where gm.applicant_age BETWEEN 61 AND 120) AS age_above_60,
+                    COUNT(*) filter (where gm.applicant_age BETWEEN 0 AND 17 AND gm.applicant_gender = 1) AS age_below_18_male,
+                    COUNT(*) filter (where gm.applicant_age BETWEEN 18 AND 30 AND gm.applicant_gender = 1) AS age_18_30_male,
+                    COUNT(*) filter () AS age_31_45_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 31 AND 45 AND gm.applicant_gender = 1 THEN 1 END) AS age_31_45_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 46 AND 60 AND gm.applicant_gender = 1 THEN 1 END) AS age_46_60_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 61 AND 120 AND gm.applicant_gender = 1 THEN 1 END) AS age_above_60_male,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 0 AND 17 AND gm.applicant_gender = 2 THEN 1 END) AS age_below_18_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 18 AND 30 AND gm.applicant_gender = 2 THEN 1 END) AS age_18_30_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 31 AND 45 AND gm.applicant_gender = 2 THEN 1 END) AS age_31_45_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 46 AND 60 AND gm.applicant_gender = 2 THEN 1 END) AS age_46_60_female,
+                    COUNT(CASE WHEN gm.applicant_age BETWEEN 61 AND 120 AND gm.applicant_gender = 2 THEN 1 END) AS age_above_60_female
+                FROM forwarded_latest_5_bh_mat_2 as gm
+                LEFT JOIN cmo_domain_lookup_master cdlm ON cdlm.domain_code = gm.applicant_gender AND cdlm.domain_type = 'gender'
+                WHERE gm.applicant_age IS NOT NULL  and gm.grievance_source = 5   and gm.assigned_to_office_id = 75 
+                ) as t
+                group by total_count, age_below_18, age_18_30, age_31_45, age_46_60,age_above_60, age_below_18_male, age_18_30_male, 
+                age_31_45_male, age_46_60_male, age_above_60_male, age_below_18_female, age_18_30_female, age_31_45_female, age_46_60_female, age_above_60_female, total_male_count, total_female_count
+                
+                
+                COUNT(*) AS gender_wise_count,
+		    COUNT(*) FILTER (WHERE gm.applicant_gender = 1) AS grievances_recieved_male,
+		    COUNT(*) FILTER (WHERE gm.applicant_gender = 2) AS grievances_recieved_female,
+		    COUNT(*) FILTER (WHERE gm.applicant_gender = 3) AS grievances_recieved_others,
+		    COUNT(*) FILTER (WHERE gm.applicant_gender IS NULL) AS grievances_recived_no_gender,
+		    
+		    
+		    
+		    
+		    
+		    
+SELECT grievance_no, COUNT(*) AS cnt
+FROM grievance_master
+WHERE created_on >= DATE '2025-12-23'
+  AND created_on <  DATE '2025-12-24'
+  AND grievance_source = 5
+GROUP BY grievance_no
+HAVING COUNT(*) > 1
+ORDER BY grievance_no;

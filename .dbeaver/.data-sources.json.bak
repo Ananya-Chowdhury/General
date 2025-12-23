@@ -57,7 +57,7 @@
 			"custom-properties": {
 				"resultset.confirm.beforeSave": "false",
 				"resultset.datetime.editor": "false",
-				"resultset.maxrows": "1",
+				"resultset.maxrows": "2",
 				"transaction.auto.close.ttl": "3600"
 			}
 		},
@@ -254,6 +254,35 @@
 				"closeIdleConnection": true,
 				"provider-properties": {
 					"@dbeaver-show-non-default-db@": "true",
+					"@dbeaver-chosen-role@": "",
+					"@dbeaver-show-template-db@": "false",
+					"@dbeaver-show-unavailable-db@": "false",
+					"show-database-statistics": "false",
+					"@dbeaver-read-all-data-types-db@": "false",
+					"read-keys-with-columns": "false",
+					"replace-legacy-timezone": "false",
+					"@dbeaver-use-prepared-statements-db@": "false",
+					"postgresql.dd.plain.string": "false",
+					"postgresql.dd.tag.string": "false"
+				},
+				"auth-model": "native"
+			}
+		},
+		"postgres-jdbc-19b451fc3b0-5b601277ccfaa3a3": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "CBT-Registration-DEV",
+			"save-password": true,
+			"configuration": {
+				"host": "192.168.0.2",
+				"port": "5444",
+				"database": "cbt_registration",
+				"url": "jdbc:postgresql://192.168.0.2:5444/cbt_registration",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false",
 					"@dbeaver-chosen-role@": "",
 					"@dbeaver-show-template-db@": "false",
 					"@dbeaver-show-unavailable-db@": "false",

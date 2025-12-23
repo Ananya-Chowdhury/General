@@ -57,6 +57,7 @@
 			"custom-properties": {
 				"resultset.confirm.beforeSave": "false",
 				"resultset.datetime.editor": "false",
+				"resultset.maxrows": "20000000",
 				"transaction.auto.close.ttl": "3600"
 			}
 		},
@@ -266,6 +267,35 @@
 				},
 				"auth-model": "native"
 			}
+		},
+		"postgres-jdbc-19b451fc3b0-5b601277ccfaa3a3": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "CBT-Registration-DEV",
+			"save-password": true,
+			"configuration": {
+				"host": "192.168.0.2",
+				"port": "5444",
+				"database": "cbt_registration",
+				"url": "jdbc:postgresql://192.168.0.2:5444/cbt_registration",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false",
+					"@dbeaver-chosen-role@": "",
+					"@dbeaver-show-template-db@": "false",
+					"@dbeaver-show-unavailable-db@": "false",
+					"show-database-statistics": "false",
+					"@dbeaver-read-all-data-types-db@": "false",
+					"read-keys-with-columns": "false",
+					"replace-legacy-timezone": "false",
+					"@dbeaver-use-prepared-statements-db@": "false",
+					"postgresql.dd.plain.string": "false",
+					"postgresql.dd.tag.string": "false"
+				},
+				"auth-model": "native"
+			}
 		}
 	},
 	"virtual-models": {"postgres-jdbc-198738c5c23-3a4863b3e2f006b6":{"cmo_grievance_portal_prod":{"public":{":griev_ids_pnrd_p3":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}},":griev_ids_pnrd_e_p2_road":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}},":cmo_ssm_push_details":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}}}}}},
@@ -286,7 +316,7 @@
 		},
 		"prod": {
 			"name": "Production",
-			"color": "255,0,0",
+			"color": "128,0,0",
 			"description": "Production database",
 			"auto-commit": false,
 			"confirm-execute": true,
