@@ -7621,3 +7621,10 @@ select * from cmo_batch_grievance_line_item cbgli where cbgli.griev_id in ('SSM1
 ,'SSM5316743'
 ,'SSM5316891'
 ,'SSM5316892');
+
+
+
+select grievance_no, count(1)
+from grievance_master
+group by grievance_no 
+having count(1) > 1;

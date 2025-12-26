@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-12-22'  -- 43119
+WHERE batch_date::date = '2025-12-25'  -- 43119
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -24,7 +24,7 @@ WHERE batch_date::date = '2025-04-04'
 and status = 'S'
 ORDER by batch_id desc;
 
-
+ 
 select * from cmo_batch_grievance_line_item cbgli where cbgli.cmo_batch_run_details_id = 43119; --SSM5439798, SSM5439927 ====== SSM12345, SSM67890
 select * from em;
 select * from cmo_batch_run_details cbrd where cbrd.batch_date::date = '2025-11-06' and cbrd.status = 'S' order by batch_id asc;
