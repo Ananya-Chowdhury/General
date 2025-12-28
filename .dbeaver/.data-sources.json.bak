@@ -57,7 +57,6 @@
 			"custom-properties": {
 				"resultset.confirm.beforeSave": "false",
 				"resultset.datetime.editor": "false",
-				"resultset.maxrows": "20000000",
 				"transaction.auto.close.ttl": "3600"
 			}
 		},
@@ -296,6 +295,27 @@
 				},
 				"auth-model": "native"
 			}
+		},
+		"postgres-jdbc-19b5e8d01b6-2e1e512c84264f64": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "asrlm_dev",
+			"save-password": true,
+			"configuration": {
+				"host": "45.114.178.184",
+				"port": "5444",
+				"database": "asrlm_dev",
+				"url": "jdbc:postgresql://45.114.178.184:5444/asrlm_dev",
+				"configurationType": "MANUAL",
+				"home": "postgresql_client",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false",
+					"@dbeaver-chosen-role@": ""
+				},
+				"auth-model": "native"
+			}
 		}
 	},
 	"virtual-models": {"postgres-jdbc-198738c5c23-3a4863b3e2f006b6":{"cmo_grievance_portal_prod":{"public":{":griev_ids_pnrd_p3":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}},":griev_ids_pnrd_e_p2_road":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}},":cmo_ssm_push_details":{"constraints":{"VIRTUAL_PK":{"type":"vpk","useAllColumns":true}}}}}}},
@@ -316,10 +336,10 @@
 		},
 		"prod": {
 			"name": "Production",
-			"color": "128,0,0",
+			"color": "255,0,0",
 			"description": "Production database",
 			"auto-commit": false,
-			"confirm-execute": true,
+			"confirm-execute": false,
 			"confirm-data-change": true,
 			"smart-commit": false,
 			"smart-commit-recover": false,
