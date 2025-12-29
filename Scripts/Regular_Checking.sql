@@ -311,7 +311,7 @@ inner join cmo_office_master com on com.office_id = admin_position_master.office
 inner join admin_user au on au.admin_user_id = admin_user_details.admin_user_id 
 where /*admin_position_master.office_id = 35 and */ admin_position_master.office_id is not null /*and admin_position_master.role_master_id in (4,5)*/ 
 	 /*and admin_user_position_mapping.status = 1*/  /*and admin_position_master.record_status= 1*/ /*and au.u_phone in ('9999999900','9999999999','8918939197','8777729301','9775761810','7719357638','7001322965','6292222444',
-'8334822522','9874263537','9432331563','9434495405','9559000099','9874263537')*/ /*and au.admin_user_id in (8571)*/ and admin_position_master.position_id = 11773
+'8334822522','9874263537','9432331563','9434495405','9559000099','9874263537')*/ /*and au.admin_user_id in (8571)*/ and admin_position_master.position_id = 10667
 	 group by admin_user_details.official_name, admin_user_details.official_phone, admin_position_master.office_id, aurm.role_master_name, admin_position_master.position_id, com.office_name, admin_user_details.official_email, 
 	 admin_position_master.record_status, admin_position_master.record_status, admin_user_position_mapping.status, admin_user_details.admin_user_id, au.status
 	order by admin_user_details.official_name asc;
@@ -321,13 +321,14 @@ where /*admin_position_master.office_id = 35 and */ admin_position_master.office
 select * from public.admin_user au where au.u_phone in ('9999999900','9999999999','8918939197','8777729301','9775761810','7719357638','7001322965','6292222444',
 '8334822522','9874263537','9432331563','9434495405','9559000099','9874263537') and au.status = 1;
 select * from admin_user_position_mapping aupm where aupm.admin_user_id = 10920;
-select * from admin_position_master apm where apm.position_id = 8571;
-select * from admin_user_details aud where aud.admin_user_id  = 10920;
+select * from admin_user_position_mapping aupm where aupm.position_id = 10667;
+select * from admin_position_master apm where apm.position_id = 10667;
+select * from admin_user_details aud where aud.admin_user_id  = 2988;
 select * from public.admin_user au where au.u_phone in ('8101859077');  --9163479418 9999999999  shovanhalder9@gmail.com  ananyachowdhury002@gmail.com
 select * from public.admin_user_details aud where aud.official_phone  in ('8101859077');  --9163479418 9999999999  shovanhalder9@gmail.com  ananyachowdhury002@gmail.com  -- 8101859077
 
 
-select * from admin_user_details aud where aud.official_name ='Samir Biswas';
+select * from admin_user_details aud where aud.official_name ='ACHINTYA KUMAR HAJRA';
 select * from admin_user au where au.admin_user_id = 432;
 select * from user_token ut where ut.user_type = 2 limit 100;
 
