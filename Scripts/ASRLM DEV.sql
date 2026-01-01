@@ -239,64 +239,64 @@ where c.block_id = 1;
 
 --------- Candidate Details by Id --------
 select 
-	c.id as candidate_id,
-	c.candidate_code,
-	c.kaushal_panjee_id,
-	C.sanction_order,
-	C.kb_project_id,
-	C.village_address,
-	C.mpr_project_id,
-	C.pincode,
-	C.email,
-	C.qualification,
-	C.father_name,
-	C.mpr_id,
-	CONCAT_WS(' ', c.first_name, c.last_name) as full_name,
-	C.gender as gender_id,
-	dl.domain_value as cadre_gender,
-	C.category as category_id,
-	dl2.domain_value as category_name,
-	C.pwd as pwd_id,
-	dl3.domain_value as pwd_name,
-	C.minority,
-	dl4.domain_value as minority_name,
-	C.religion as religion_id,
-	dl5.domain_value as religion_name,
-	C.dob as date_of_birth,
-	C.mobile_no,
-	C.nature_of_training,
-	C.aadhar,
-	C.bank_account,
-	C.house_no,
-	C.permanent_address,
-	C.created_on,
-	C.updated_on,
---	C.created_by,
---	C.updated_by,
---	coalesce(C.status) as status_id,
-	C.status as status_id,
-	dl6.domain_value as status,
-	C.batch_id,
-	C.block_id,
-	bm.block_name,
-	C.constituency_id,
-	ac.constituency_name,
-	C.employer_id,
-	C.district_id,
-	dm.district_name,
-	C.sector_id,
-	sm.sector_name,
-	C.state_id,
-	sm2.state_name,
-	C.training_center_id,
-	tc.training_center_name,
-	C.workplace_postoffice,
-	C.available_days,
-	C.available_time,
-	C.location_pref,
-	C.skill_id,
-	sm3.skill_code,
-	sm3.skill_name 
+    c.id as candidate_id,
+    c.candidate_code,
+    c.kaushal_panjee_id,
+    c.sanction_order,
+    c.kb_project_id,
+    c.village_address,
+    c.mpr_project_id,
+    c.pincode,
+    c.email,
+    c.qualification,
+    c.father_name,
+    c.mpr_id,
+    CONCAT_WS(' ', c.first_name, c.last_name) as full_name,
+    c.gender as gender_id,
+    dl.domain_value as gender_name,
+    c.category as category_id,
+    dl2.domain_value as category_name,
+    c.pwd as pwd_id,
+    dl3.domain_value as pwd_name,
+    c.minority,
+    dl4.domain_value as minority_name,
+    c.religion as religion_id,
+    dl5.domain_value as religion_name,
+    c.dob as date_of_birth,
+    c.mobile_no,
+    c.nature_of_training,
+    c.aadhar,
+    c.bank_account,
+    c.house_no,
+    c.permanent_address,
+    c.created_on,
+    c.updated_on,
+--	c.created_by,
+--	c.updated_by,
+--	coalesce(c.status) as status_id,
+    c.status as status_id,
+    dl6.domain_value as status,
+    c.batch_id,
+    c.block_id,
+    bm.block_name,
+    avd.block as is_block_verified,
+    c.constituency_id,
+    ac.constituency_name,
+    c.employer_id,
+    c.district_id,
+    dm.district_name,
+    avd.district as is_dist_verified,
+    c.sector_id,
+    sm.sector_name,
+    c.state_id,
+    sm2.state_name,
+    c.training_center_id,
+    tc.training_center_name,
+    c.available_days,
+    c.available_time,
+    c.skill_id,
+    sm3.skill_code,
+    sm3.skill_name 
 from candidates c 
 left join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
 left join domain_lookup dl2 on dl2.domain_code = c.category::integer and dl2.domain_type = 'category'
@@ -311,7 +311,8 @@ left join state_master sm2 on sm2.id = c.state_id
 left join training_center tc on tc.id = c.training_center_id 
 left join skill_master sm3 on sm3.id = c.skill_id 
 left join assembly_constituency ac on ac.id = c.constituency_id 
-where c.id = 14773;
+left join candidate_verification_details avd on avd.candidate_id = c.id 
+where c.id = 14773 
 
 
 -------- District MAster ------
@@ -321,78 +322,78 @@ where 1=1 and dm.id = 41
 ----------------------
 
 select 
-            c.id as candidate_id,
-            c.candidate_code,
-            c.kaushal_panjee_id,
-            c.sanction_order,
-            c.kb_project_id,
-            c.village_address,
-            c.mpr_project_id,
-            c.pincode,
-            c.email,
-            c.qualification,
-            c.father_name,
-            c.mpr_id,
-            CONCAT_WS(' ', c.first_name, c.last_name) as full_name,
-            c.gender as gender_id,
-            dl.domain_value as gender_name,
-            c.category as category_id,
-            dl2.domain_value as category_name,
-            c.pwd as pwd_id,
-            dl3.domain_value as pwd_name,
-            c.minority,
-            dl4.domain_value as minority_name,
-            c.religion as religion_id,
-            dl5.domain_value as religion_name,
-            c.dob as date_of_birth,
-            c.mobile_no,
-            c.nature_of_training,
-            c.aadhar,
-            c.bank_account,
-            c.house_no,
-            c.permanent_address,
-            c.created_on,
-            c.updated_on,
-        --	c.created_by,
-        --	c.updated_by,
-        --	coalesce(C.status) as status_id,
-            c.status as status_id,
-            dl6.domain_value as status,
-            c.batch_id,
-            c.block_id,
-            bm.block_name,
-            c.constituency_id,
-            c.constituency_id,
-	        ac.constituency_name,
-            c.employer_id,
-            c.district_id,
-            dm.district_name,
-            c.sector_id,
-            sm.sector_name,
-            c.state_id,
-            sm2.state_name,
-            c.training_center_id,
-            tc.training_center_name,
-            c.available_days,
-            c.available_time,
-            c.skill_id,
-            sm3.skill_code,
-            sm3.skill_name 
-        from candidates c 
-        left join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
-        left join domain_lookup dl2 on dl2.domain_code = c.category::integer and dl2.domain_type = 'category'
-        left join domain_lookup dl3 on dl3.domain_code = c.pwd::integer and dl3.domain_type = 'pwd'
-        left join domain_lookup dl4 on dl4.domain_code = c.minority::integer and dl4.domain_type = 'minority'
-        left join domain_lookup dl5 on dl5.domain_code = c.religion::integer and dl5.domain_type = 'religion'
-        left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
-        left join district_master dm on dm.id = c.district_id 
-        left join block_master bm on bm.id = c.block_id 
-        left join sector_master sm on sm.id = c.sector_id 
-        left join state_master sm2 on sm2.id = c.state_id 
-        left join training_center tc on tc.id = c.training_center_id 
-        left join skill_master sm3 on sm3.id = c.skill_id 
-        left join assembly_constituency ac on ac.id = c.constituency_id 
-        where c.block_id = 7  limit 10 offset 1 * 10
+        c.id as candidate_id,
+        c.candidate_code,
+        c.kaushal_panjee_id,
+        c.sanction_order,
+        c.kb_project_id,
+        c.village_address,
+        c.mpr_project_id,
+        c.pincode,
+        c.email,
+        c.qualification,
+        c.father_name,
+        c.mpr_id,
+        CONCAT_WS(' ', c.first_name, c.last_name) as full_name,
+        c.gender as gender_id,
+        dl.domain_value as gender_name,
+        c.category as category_id,
+        dl2.domain_value as category_name,
+        c.pwd as pwd_id,
+        dl3.domain_value as pwd_name,
+        c.minority,
+        dl4.domain_value as minority_name,
+        c.religion as religion_id,
+        dl5.domain_value as religion_name,
+        c.dob as date_of_birth,
+        c.mobile_no,
+        c.nature_of_training,
+        c.aadhar,
+        c.bank_account,
+        c.house_no,
+        c.permanent_address,
+        c.created_on,
+        c.updated_on,
+    --	c.created_by,
+    --	c.updated_by,
+    --	coalesce(C.status) as status_id,
+        c.status as status_id,
+        dl6.domain_value as status,
+        c.batch_id,
+        c.block_id,
+        bm.block_name,
+        c.constituency_id,
+        c.constituency_id,
+        ac.constituency_name,
+        c.employer_id,
+        c.district_id,
+        dm.district_name,
+        c.sector_id,
+        sm.sector_name,
+        c.state_id,
+        sm2.state_name,
+        c.training_center_id,
+        tc.training_center_name,
+        c.available_days,
+        c.available_time,
+        c.skill_id,
+        sm3.skill_code,
+        sm3.skill_name 
+    from candidates c 
+    left join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
+    left join domain_lookup dl2 on dl2.domain_code = c.category::integer and dl2.domain_type = 'category'
+    left join domain_lookup dl3 on dl3.domain_code = c.pwd::integer and dl3.domain_type = 'pwd'
+    left join domain_lookup dl4 on dl4.domain_code = c.minority::integer and dl4.domain_type = 'minority'
+    left join domain_lookup dl5 on dl5.domain_code = c.religion::integer and dl5.domain_type = 'religion'
+    left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+    left join district_master dm on dm.id = c.district_id 
+    left join block_master bm on bm.id = c.block_id 
+    left join sector_master sm on sm.id = c.sector_id 
+    left join state_master sm2 on sm2.id = c.state_id 
+    left join training_center tc on tc.id = c.training_center_id 
+    left join skill_master sm3 on sm3.id = c.skill_id 
+    left join assembly_constituency ac on ac.id = c.constituency_id 
+    where c.block_id = 7  limit 10 offset 1 * 10
 
         
         
@@ -407,12 +408,16 @@ select
             c.mpr_project_id,
             c.pincode,
             c.email,
+            cvd.email as is_email_verified,
             c.qualification,
             c.father_name,
             c.mpr_id,
             CONCAT_WS(' ', c.first_name, c.last_name) as full_name,
+            cvd.first_name as is_firstname_verified,
+            cvd.last_name as is_lastname_verified,
             c.gender as gender_id,
             dl.domain_value as gender_name,
+            cvd.gender as is_gender_verified,
             c.category as category_id,
             dl2.domain_value as category_name,
             c.pwd as pwd_id,
@@ -421,8 +426,10 @@ select
             dl4.domain_value as minority_name,
             c.religion as religion_id,
             dl5.domain_value as religion_name,
+            cvd.religion as is_religion_verified,
             c.dob as date_of_birth,
             c.mobile_no,
+            cvd.mobile_no as is_mobile_verified,
             c.nature_of_training,
             c.aadhar,
             c.bank_account,
@@ -438,13 +445,16 @@ select
             c.batch_id,
             c.block_id,
             bm.block_name,
+            cvd.block as is_block_verified,
             c.constituency_id,
 	        ac.constituency_name,
             c.employer_id,
             c.district_id,
             dm.district_name,
+            cvd.district as is_district_verified,
             c.sector_id,
             sm.sector_name,
+            cvd.trained_sector as is_sector_verified,
             c.state_id,
             sm2.state_name,
             c.training_center_id,
@@ -453,7 +463,9 @@ select
             c.available_time,
             c.skill_id,
             sm3.skill_code,
-            sm3.skill_name 
+            sm3.skill_name,
+            cvd.trained_skill as is_skill_verified,
+            cvd.updated_by as updated_cadres_id
         from candidates c 
         left join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
         left join domain_lookup dl2 on dl2.domain_code = c.category::integer and dl2.domain_type = 'category'
@@ -468,4 +480,12 @@ select
         left join training_center tc on tc.id = c.training_center_id 
         left join skill_master sm3 on sm3.id = c.skill_id 
         left join assembly_constituency ac on ac.id = c.constituency_id 
-        where c.id = 14773
+        left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+        where c.id = 14773;
+        
+        
+----- available time ------        
+select c.id,
+	c.available_start_time,
+	c.available_end_time
+from candidates c where c.id  = 2;
