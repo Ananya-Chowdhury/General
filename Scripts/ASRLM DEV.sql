@@ -489,3 +489,27 @@ select c.id,
 	c.available_start_time,
 	c.available_end_time
 from candidates c where c.id  = 2;
+
+
+---
+select
+    cps.id,
+    sm.id as sector_id,
+    sm.sector_name,
+    sm2.id as skill_id,
+    sm2.skill_name,
+    cps.candidate_id 
+from candidate_preferred_services cps
+left join sector_master sm on sm.id = cps.sector_id 
+left join skill_master sm2 on sm2.sector_id = sm.id 
+        where cps.candidate_id = 2
+        
+        
+        select 
+            cpd.id, 
+            cpd.day_id,
+            dl.domain_value as days_name,
+            cpd.candidate_id   
+        from candidate_preferred_days cpd
+        left join domain_lookup dl on dl.domain_code = cpd.day_id::integer and dl.domain_type = 'preferred_days'
+        where cpd.candidate_id  = 2
