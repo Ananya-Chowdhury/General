@@ -513,3 +513,122 @@ left join skill_master sm2 on sm2.sector_id = sm.id
         from candidate_preferred_days cpd
         left join domain_lookup dl on dl.domain_code = cpd.day_id::integer and dl.domain_type = 'preferred_days'
         where cpd.candidate_id  = 2
+        
+        
+select
+    cps.id,
+    sm.id as sector_id,
+    sm.sector_name,
+    sm2.id as skill_id,
+    sm2.skill_name,
+    cps.candidate_id 
+from candidate_preferred_services cps
+left join sector_master sm on sm.id = cps.sector_id 
+left join skill_master sm2 on sm2.sector_id = sm.id 
+where cps.candidate_id = 98134
+
+
+
+
+
+select 
+    c.id as candidate_id,
+    c.candidate_code,
+    c.kaushal_panjee_id,
+    c.sanction_order,
+    c.kb_project_id,
+    c.village_address,
+    c.mpr_project_id,
+    c.pincode,
+    c.email,
+    cvd.email as is_email_verified,
+    c.qualification,
+    c.father_name,
+    c.mpr_id,
+    CONCAT_WS(' ', c.first_name, c.last_name) as full_name,
+    c.first_name as firstname,
+    c.last_name as lastname,
+    cvd.first_name as is_firstname_verified,
+    cvd.last_name as is_lastname_verified,
+    c.gender as gender_id,
+    dl.domain_value as gender_name,
+    cvd.gender as is_gender_verified,
+    c.category as category_id,
+    dl2.domain_value as category_name,
+    c.pwd as pwd_id,
+    dl3.domain_value as pwd_name,
+    c.minority,
+    dl4.domain_value as minority_name,
+    c.religion as religion_id,
+    dl5.domain_value as religion_name,
+    cvd.religion as is_religion_verified,
+    c.dob as date_of_birth,
+    c.mobile_no,
+    cvd.mobile_no as is_mobile_verified,
+    c.nature_of_training,
+    c.aadhar,
+    c.bank_account,
+    c.house_no,
+    c.permanent_address,
+    c.created_on,
+    c.updated_on,
+--	c.created_by,
+--	c.updated_by,
+--	coalesce(c.status) as status_id,
+    c.status as status_id,
+    dl6.domain_value as status,
+    c.batch_id,
+    c.block_id,
+    bm.block_name,
+    cvd.block as is_block_verified,
+    c.constituency_id,
+    ac.constituency_name,
+    c.employer_id,
+    c.district_id,
+    dm.district_name,
+    cvd.district as is_district_verified,
+    c.sector_id,
+    sm.sector_name,
+    cvd.trained_sector as is_sector_verified,
+    c.state_id,
+    sm2.state_name,
+    c.training_center_id,
+    tc.training_center_name,
+    c.available_days,
+    c.skill_id,
+    sm3.skill_code,
+    sm3.skill_name,
+    cvd.trained_skill as is_skill_verified,
+    cvd.updated_by as updated_cadres_id,
+    c.available_start_time,
+    c.available_end_time,
+    c.interest_freelancer as is_gig_worker,
+    c.is_verified,
+    c.remarks
+from candidates c 
+left join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
+left join domain_lookup dl2 on dl2.domain_code = c.category::integer and dl2.domain_type = 'category'
+left join domain_lookup dl3 on dl3.domain_code = c.pwd::integer and dl3.domain_type = 'pwd'
+left join domain_lookup dl4 on dl4.domain_code = c.minority::integer and dl4.domain_type = 'minority'
+left join domain_lookup dl5 on dl5.domain_code = c.religion::integer and dl5.domain_type = 'religion'
+left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+left join district_master dm on dm.id = c.district_id and dm.status = 1
+left join block_master bm on bm.id = c.block_id and bm.status = 1
+left join sector_master sm on sm.id = c.sector_id and sm.status = 1
+left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+left join training_center tc on tc.id = c.training_center_id and tc.status = 1
+left join skill_master sm3 on sm3.id = c.skill_id and sm3.status = 1
+left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+left join candidate_verification_details cvd on cvd.candidate_id = c.id
+where c.status = 1 and c.id = 126678        --98296
+        
+
+---         
+select
+    cpl.id as candidate_preferred_id,
+    dm.district_name,
+    dm.id as district_id,
+    cpl.candidate_id 
+from candidate_preferred_location cpl
+left join district_master dm on dm.id = cpl.district_id 
+where cpl.status = 1 and cpl.candidate_id = 98296

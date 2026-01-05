@@ -5585,3 +5585,165 @@ where /*admin_position_master.office_id = 35 and */ admin_position_master.office
 	 admin_position_master.record_status, admin_position_master.record_status, admin_user_position_mapping.status, admin_user_details.admin_user_id, au.status
 	order by admin_user_details.official_name asc;
             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------- HOD Grievance Register ------------------
+with uinion_part as (
+                    select grievance_id, grievance_status, assigned_on from forwarded_latest_5_bh_mat_2 where assigned_to_office_id = 75
+
+                    union
+                    select grievance_id, grievance_status, assigned_on from forwarded_latest_3_bh_mat_2 where assigned_to_office_id = 75
+
+            )
+           SELECT distinct
+                    md.grievance_id,
+                    /*
+                    CASE
+                        -- WHEN (lu.grievance_status = 3 OR glsubq.grievance_status = 14) THEN 0
+                        -- WHEN (lu.grievance_status = 5 OR glsubq.grievance_status = 13) THEN 1
+                        when (lu.grievance_status = 3 or (select glsubq.grievance_status from grievance_lifecycle glsubq where glsubq.grievance_id = md.grievance_id and glsubq.grievance_status in (14,13) order by glsubq.assigned_on desc limit 1) = 14) then 0
+                        when (lu.grievance_status = 5 or (select glsubq.grievance_status from grievance_lifecycle glsubq where glsubq.grievance_id = md.grievance_id and glsubq.grievance_status in (14,13) order by glsubq.assigned_on desc limit 1) = 13) then 1
+                        ELSE NULL
+                    END AS received_from_other_hod_flag,
+                    lu.grievance_status AS last_grievance_status,
+                    lu.assigned_on AS last_assigned_on,
+                    lu.assigned_to_office_id AS last_assigned_to_office_id,
+                    lu.assigned_by_office_id AS last_assigned_by_office_id,
+                    lu.assigned_by_position AS last_assigned_by_position,
+                    lu.assigned_to_position AS last_assigned_to_position,
+                    */
+                    NULL AS received_from_other_hod_flag,
+                    NULL AS last_grievance_status,
+                    NULL AS last_assigned_on,
+                    NULL AS last_assigned_to_office_id,
+                    NULL AS last_assigned_by_office_id,
+                    NULL AS last_assigned_by_position,
+                    NULL AS last_assigned_to_position,
+                    case
+                        when lu.grievance_status = 3 then lu.assigned_on
+                        when lu.grievance_status = 5 then lu.assigned_on
+                        else null
+                    end as grievance_generate_date,
+                    md.grievance_no,
+                    md.grievance_description,
+                    md.grievance_source,
+                    NULL AS grievance_source_name,
+                    md.applicant_name,
+                    md.pri_cont_no,
+                    md.grievance_generate_date as grievance_generate_date_gm,
+                    md.grievance_category,
+                    cgcm.grievance_category_desc,
+                    md.assigned_to_office_id,
+                    com.office_name,
+                    md.district_id,
+                    cdm2.district_name,
+                    md.block_id,
+                    cbm.block_name,
+                    md.municipality_id,
+                    cmm.municipality_name,
+                    CASE
+                        WHEN md.address_type = 2 THEN CONCAT(cmm.municipality_name, ' ', '(M)')
+                        WHEN md.address_type = 1 THEN CONCAT(cbm.block_name, ' ', '(B)')
+                        ELSE NULL
+                    END AS block_or_municipalty_name,
+                    md.gp_id,
+                    cgpm.gp_name,
+                    md.ward_id,
+                    cwm.ward_name,
+                    CASE
+                        WHEN md.municipality_id IS NOT NULL THEN CONCAT(cwm.ward_name, ' ', '(W)')
+                        WHEN md.block_id IS NOT NULL THEN CONCAT(cgpm.gp_name, ' ', '(GP)')
+                        ELSE NULL
+                    END AS gp_or_ward_name,
+                    md.atn_id,
+                    COALESCE(catnm.atn_desc, 'N/A') AS atn_desc,
+                    COALESCE(md.action_taken_note, 'N/A') AS action_taken_note,
+                    COALESCE(md.current_atr_date, NULL) AS current_atr_date,
+                    md.assigned_to_position,
+                    CASE
+                        WHEN md.assigned_to_office_id IS NULL THEN 'N/A'
+                        WHEN md.assigned_to_office_id = 5 THEN 'Pending At CMO'
+                        -- ELSE CONCAT(ad.official_name, ' [', cdm.designation_name, ' (', com2.office_name, ') - ', aurm.role_master_name, '] ')
+                        -- ELSE CONCAT(ad.official_name, ' [', cdm.designation_name, ' (', com2.office_name, ') - ', aurm.role_master_name, ' - ', csom.suboffice_name, ') ]')
+                        when csom.suboffice_name is not null then CONCAT(ad.official_name, ' [', cdm.designation_name, ' (', com2.office_name, ') - ', aurm.role_master_name, ' - ', csom.suboffice_name, ') ]')
+                        when csom.suboffice_name is null then CONCAT(ad.official_name, ' [', cdm.designation_name, ' (', com2.office_name, ') - ', aurm.role_master_name, ') ]')
+                    END AS assigned_to_office_name,
+                    md.assigned_to_id,
+                    CASE
+                        WHEN md.status = 1 THEN md.grievance_generate_date
+                        ELSE md.updated_on -- + interval '5 hour 30 Minutes'
+                    END AS updated_on,
+                    md.status,
+                    cdlm.domain_value AS status_name,
+                    cdlm.domain_abbr AS grievance_status_code,
+                    md.emergency_flag,
+                    md.police_station_id,
+                    cpsm.ps_name,
+                    case
+                        when pa.pending_days is not null then pa.pending_days
+                        else 0
+                    end as pending_days_at_hod,
+                    case
+                        when po.pending_days is not null then po.pending_days
+                    when ph.pending_days is not null then ph.pending_days
+                    else 0
+                end as pending_days_at_hoso
+                from grievance_master md
+                inner join uinion_part as lu ON lu.grievance_id = md.grievance_id
+                left join cmo_grievance_category_master cgcm ON cgcm.grievance_cat_id = md.grievance_category
+                left join cmo_office_master com ON com.office_id = md.assigned_to_office_id
+                left join cmo_action_taken_note_master catnm ON catnm.atn_id = md.atn_id
+                left join cmo_domain_lookup_master cdlm ON cdlm.domain_type = 'grievance_status' AND cdlm.domain_code = md.status
+                left join admin_user_position_mapping aupm ON aupm.position_id = md.assigned_to_position AND aupm.status = 1
+                left join admin_user_details ad ON ad.admin_user_id = aupm.admin_user_id
+                left join cmo_police_station_master cpsm ON cpsm.ps_id = md.police_station_id
+                left join admin_position_master apm ON apm.position_id = md.updated_by_position
+                left join admin_position_master apm2 ON apm2.position_id = md.assigned_to_position
+                left join cmo_designation_master cdm ON cdm.designation_id = apm2.designation_id
+                left join cmo_office_master com2 ON com2.office_id = apm2.office_id
+                left join admin_user_role_master aurm ON aurm.role_master_id = apm2.role_master_id
+                left join cmo_districts_master cdm2 ON cdm2.district_id = md.district_id
+                left join cmo_blocks_master cbm ON cbm.block_id = md.block_id
+                left join cmo_municipality_master cmm ON cmm.municipality_id = md.municipality_id
+                left join cmo_gram_panchayat_master cgpm ON cgpm.gp_id = md.gp_id
+                left join cmo_wards_master cwm ON cwm.ward_id = md.ward_id
+                left join cmo_sub_office_master csom on csom.suboffice_id = apm2.sub_office_id
+                left join pending_at_hod_mat_2 pa on pa.grievance_id = md.grievance_id
+                left join pending_at_hoso_mat_2 ph on ph.grievance_id = md.grievance_id
+                left join pending_at_other_hod_mat_2 po on po.grievance_id = md.grievance_id
+              order by (case when md.status = 1 then md.grievance_generate_date else md.updated_on end) asc  offset 0 limit 10
