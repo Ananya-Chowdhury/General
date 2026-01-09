@@ -662,3 +662,23 @@ select
         left join document_master dm on dm.ref_id = c.id 
         left join domain_lookup dl on dl.domain_code = dm.upload_doc_type and dl.domain_type = 'doc_type'
         where dl.domain_code = 2
+        
+        
+        
+        
+select
+    cps.id,
+    sm.id as sector_id,
+    sm.sector_name,
+    sm2.id as skill_id,
+    sm2.skill_name,
+    s.id as service_id,
+    s.service_name ,
+    s.service_code ,
+    cps.candidate_id,
+    cps.others_service_name 
+from candidate_preferred_services cps
+left join sector_master sm on sm.id = cps.sector_id 
+left join skill_master sm2 on sm2.id = cps.skill_id
+left join services s on s.id = cps.service_id
+where cps.status = 1 and cps.candidate_id = 93327;
