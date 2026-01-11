@@ -1,19 +1,10 @@
-CREATE TABLE user_token (
-    token_id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    user_type INTEGER,
-    token TEXT NOT NULL,
-    created_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expiry_time TIMESTAMP WITH TIME ZONE,
-    updated_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    is_valid BOOLEAN NOT NULL DEFAULT TRUE,
-    CONSTRAINT user_token_user_id_fk
-        FOREIGN KEY (user_id)
-        REFERENCES auth_user (id)
-        ON DELETE CASCADE
-);
+select * from candidates c where c.is_verified = false;
+select * from candidates c where c.id = 61730;
 
-
+SELECT *
+FROM services
+WHERE id = 999
+   OR service_code = 999;
 
 -- DB LOCK QUERY --
 SELECT pid, state, query
@@ -632,3 +623,121 @@ select
 from candidate_preferred_location cpl
 left join district_master dm on dm.id = cpl.district_id 
 where cpl.status = 1 and cpl.candidate_id = 98296
+
+--387354
+select * from candidate_preferred_services cps where cps.candidate_id  = 98212;
+
+
+SELECT
+    dmst.doc_id,
+    dl.domain_value AS doc_type_name,
+    dl.domain_code AS doc_type_id,
+    dmst.doc_path,
+    dmst.doc_file_type,
+    dmst.doc_name
+FROM document_master dmst
+JOIN domain_lookup dl
+    ON dl.domain_code = dmst.upload_doc_type
+AND dl.domain_type = 'doc_type'
+WHERE dmst.ref_id =98212
+AND dmst.status = 1
+AND dl.status = 1
+ORDER BY dl.domain_code asc
+
+
+select
+        ce.id as candidate_experience_id,
+        ce.candidate_id,
+        sm.id as sector_id,
+        sm.sector_name,
+        sk.id as skill_id,
+        sk.skill_name,
+        ce.experience_duration,
+        ce.self_employed as self_employed,
+        ce.organization_name as organization_name,
+        ce.job_role
+    from candidate_experience ce
+    left join sector_master sm on sm.id = ce.sector_id
+    left join skill_master sk on sk.id = ce.skill_id
+    where ce.status = 1 and ce.candidate_id = 97158
+    
+    
+    select 
+            c.id as candidate_id,
+            tc.training_center_name,
+            bm.start_date as training_start_date,
+            bm.end_date as training_end_date,
+            sm.id as training_state_id,
+            sm.state_name as training_state_name,
+            dm.id as training_distict_id,
+            dm.district_name as training_district_name,
+            sm2.id as training_sector_id,
+            sm2.sector_name as training_sector_name,
+            ct.sector_others as training_sector_others,
+            sm3.id as training_skill_id,
+            sm3.skill_name as training_skill_name,
+            ct.skill_others as training_skill_others
+        from candidates c
+        left join candidate_training ct on ct.candidate_id  = c.id 
+        left join training_center tc on tc.id  = ct.training_id  and tc.status = 1
+        left join batch_master bm on bm.id = c.batch_id and bm.status = 1
+        left join state_master sm on sm.id = tc.state_id and sm.status = 1
+        left join district_master dm on dm.id = tc.district_id and dm.status = 1
+        left join sector_master sm2 on sm2.id = ct.sector_id and sm2.status = 1
+        left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+        where c.status = 1 and c.id = 61730
+        
+        
+        select 
+            cpd.id, 
+            cpd.day_id,
+            dl.domain_value as days_name,
+            cpd.candidate_id   
+        from candidate_preferred_days cpd
+        left join domain_lookup dl on dl.domain_code = cpd.day_id::integer and dl.domain_type = 'preferred_days'
+        where cpd.status = 1 and cpd.candidate_id  = 97158
+        
+        
+         select
+            cps.id,
+            sm.id as sector_id,
+            sm.sector_name,
+            sm2.id as skill_id,
+            sm2.skill_name,
+            s.id as service_id,
+            s.service_name,
+            s.service_code,
+            cps.candidate_id,
+            cps.others_service_name 
+        from candidate_preferred_services cps
+        left join sector_master sm on sm.id = cps.sector_id 
+        left join skill_master sm2 on sm2.id = cps.skill_id
+        left join services s on s.id = cps.service_id
+        where cps.status = 1 and cps.candidate_id = 97158
+        
+        
+        select
+            cpl.id as candidate_preferred_id,
+            dm.district_name,
+            dm.id as district_id,
+            cpl.candidate_id 
+        from candidate_preferred_location cpl
+        left join district_master dm on dm.id = cpl.district_id 
+        where cpl.status = 1 and cpl.candidate_id = 97158
+        
+        
+        select
+            ce.id as candidate_experience_id,
+            ce.candidate_id,
+            sm.id as sector_id,	
+            sm.sector_name,
+            sk.id as skill_id,
+            sk.skill_name,
+            ce.experience_duration,
+            ce.self_employed as self_employed,
+            ce.organization_name as organization_name,
+            ce.job_role
+        from candidate_experience ce
+        left join sector_master sm on sm.id = ce.sector_id
+        left join skill_master sk on sk.id = ce.skill_id
+        where ce.status = 1 and ce.candidate_id = 97158
