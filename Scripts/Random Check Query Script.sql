@@ -5494,7 +5494,18 @@ with fwd_count as (
         ) t
         group by assigned_to_position, assigned_to_id, role_master_id
         order by assigned desc
-    /*),  atr_sent as (
+ ), griev_yet_to_assigned as (
+        select
+            md.assigned_to_position,
+            md.assigned_to_id,
+            count(1) as yet_to_assigned,
+            count(1) filter (where (CURRENT_DATE - md.updated_on::date) > 7) as is_more_than_7_days
+        from master_district_block_grv md
+        where md.grievance_id > 0
+        and md.status in (4)
+        and md.assigned_to_office_id = 75 /* SSM CALL CENTER */
+        group by md.assigned_to_position, md.assigned_to_id
+   ),  atr_sent as (
 	    	select
 	            assigned_by_position,
 	            assigned_by_id,
@@ -5528,7 +5539,21 @@ with fwd_count as (
 	            group by flbm.assigned_by_position, flbm.assigned_by_id, flbm.assigned_by_office_id, apm.role_master_id
 	         ) t
 	        group by assigned_by_position, assigned_by_id, assigned_by_office_id, role_master_id
-	        order by atr_submitted desc*/
+	        order by atr_submitted desc
+	  ), atr_yet_to_sent as (
+            select
+                md.assigned_to_position,
+                md.assigned_to_id,
+                md.assigned_to_office_id,
+                apm2.role_master_id,
+                count(1) as yet_atr_not_submitted,
+                count(1) filter (where (CURRENT_DATE - md.updated_on::date) > 7) as atr_more_than_7_days
+            from master_district_block_grv md
+            left join admin_position_master apm on apm.position_id = md.updated_by_position
+            left join admin_position_master apm2 on apm2.position_id = md.assigned_to_position
+            where md.status in (6,11,13)
+            and md.assigned_to_office_id in (75) /* SSM CALL CENTER */
+            group by md.assigned_to_position, md.assigned_to_id, md.assigned_to_office_id, apm2.role_master_id
      )  select
 --            '2025-12-28 16:30:01.188689+00:00'::timestamp as refresh_time_utc,
             admin_position_master.record_status,
@@ -5546,13 +5571,21 @@ with fwd_count as (
                     then concat(cmo_office_master.office_name, ' - ( ', cmo_sub_office_master.suboffice_name, ' )')
                 else cmo_office_master.office_name
             end as office_of_the_user,
-            coalesce(griev_forwarded.assigned, 0) as grievance_asssigned
---            coalesce(atr_sent.atr_submitted, 0) as atr_sent
+            coalesce(griev_forwarded.assigned, 0) as grievance_asssigned,
+            coalesce(griev_yet_to_assigned.yet_to_assigned, 0) as grievance_yet_to_assigned,
+            coalesce(griev_yet_to_assigned.is_more_than_7_days, 0) as grievance_more_than_7_days,
+            sum(coalesce(griev_forwarded.assigned::int, 0) + coalesce(griev_yet_to_assigned.yet_to_assigned::int, 0)) as grievance_total,
+            coalesce(atr_sent.atr_submitted, 0) as atr_sent,
+	        coalesce(atr_yet_to_sent.yet_atr_not_submitted, 0) as atr_not_submitted,
+	        coalesce(atr_yet_to_sent.atr_more_than_7_days, 0) as atr_more_than_7_days,
+	        sum(coalesce(atr_sent.atr_submitted::int, 0) + coalesce(atr_yet_to_sent.yet_atr_not_submitted::int, 0)) as atr_total
 		from griev_forwarded
---            left join atr_sent on atr_sent.assigned_by_id = griev_forwarded.assigned_to_id
             inner join admin_user_details on griev_forwarded.assigned_to_id = admin_user_details.admin_user_id
             inner join admin_user_position_mapping on admin_user_position_mapping.admin_user_id = admin_user_details.admin_user_id 
 --            left join admin_position_master on griev_forwarded.assigned_to_position = admin_position_master.position_id
+            left join griev_yet_to_assigned on griev_yet_to_assigned.assigned_to_id = griev_forwarded.assigned_to_id
+            left join atr_sent on atr_sent.assigned_by_id = griev_forwarded.assigned_to_id
+            left join atr_yet_to_sent on atr_yet_to_sent.assigned_to_id = griev_forwarded.assigned_to_id
             left join admin_position_master on admin_user_position_mapping.position_id = admin_position_master.position_id
             left join admin_user_role_master on admin_position_master.role_master_id = admin_user_role_master.role_master_id
             left join cmo_office_master on cmo_office_master.office_id = admin_position_master.office_id
@@ -5560,9 +5593,9 @@ with fwd_count as (
             left join cmo_sub_office_master on cmo_sub_office_master.suboffice_id = admin_position_master.sub_office_id
             left join admin_user au on au.admin_user_id = admin_user_details.admin_user_id 
         group by admin_user_details.official_name, cmo_designation_master.designation_name,admin_position_master.office_id, admin_user_role_master.role_master_name,
-            cmo_sub_office_master.suboffice_name, cmo_office_master.office_name, griev_forwarded.assigned, /*griev_yet_to_assigned.yet_to_assigned,*//*atr_sent.atr_submitted,*/
-            /*atr_yet_to_sent.yet_atr_not_submitted,*/admin_position_master.record_status,admin_position_master.role_master_id, admin_position_master.position_id,
-            admin_position_master.role_master_id/*, atr_sent_restrict.atr_submitted, griev_yet_to_assigned.is_more_than_7_days, atr_yet_to_sent.atr_more_than_7_days*/, admin_user_role_master.role_master_id,
+            cmo_sub_office_master.suboffice_name, cmo_office_master.office_name, griev_forwarded.assigned, griev_yet_to_assigned.yet_to_assigned, atr_sent.atr_submitted,
+            atr_yet_to_sent.yet_atr_not_submitted, admin_position_master.record_status,admin_position_master.role_master_id, admin_position_master.position_id,
+            admin_position_master.role_master_id, griev_yet_to_assigned.is_more_than_7_days, atr_yet_to_sent.atr_more_than_7_days, admin_user_role_master.role_master_id,
             admin_user_details.admin_user_id, admin_position_master.position_id
         order by
             case
@@ -5572,6 +5605,9 @@ with fwd_count as (
                 else 4
             end
 
+            
+            
+            
 from admin_user_details
 inner join admin_user_position_mapping on admin_user_position_mapping.admin_user_id = admin_user_details.admin_user_id 
 inner join admin_position_master on admin_position_master.position_id = admin_user_position_mapping.position_id

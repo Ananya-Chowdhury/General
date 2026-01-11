@@ -622,7 +622,57 @@ select
     cpl.candidate_id 
 from candidate_preferred_location cpl
 left join district_master dm on dm.id = cpl.district_id 
-where cpl.status = 1 and cpl.candidate_id = 98296
+where cpl.status = 1 and cpl.candidate_id = 98296;
+
+
+
+select 
+	c.id,
+	dm.doc_id ,
+	dm.doc_location,  
+	dm.doc_name ,
+	dm.doc_path,
+	dm.doc_file_type,
+	dl.domain_value 
+from candidates c 
+left join document_master dm on dm.ref_id = c.id 
+left join domain_lookup dl on dl.domain_code = dm.upload_doc_type  
+where dl.domain_code = 2 and dl.domain_type  = 'doc_type'
+and c.id = 97210;
+
+
+select 
+            c.id,
+            dm.doc_id ,
+            dm.doc_location,  
+            dm.doc_name ,
+            dm.doc_path,
+            dm.doc_file_type,
+            dl.domain_value 
+        from candidates c 
+        left join document_master dm on dm.ref_id = c.id 
+        left join domain_lookup dl on dl.domain_code = dm.upload_doc_type and dl.domain_type = 'doc_type'
+        where dl.domain_code = 2
+        
+        
+        
+        
+select
+    cps.id,
+    sm.id as sector_id,
+    sm.sector_name,
+    sm2.id as skill_id,
+    sm2.skill_name,
+    s.id as service_id,
+    s.service_name ,
+    s.service_code ,
+    cps.candidate_id,
+    cps.others_service_name 
+from candidate_preferred_services cps
+left join sector_master sm on sm.id = cps.sector_id 
+left join skill_master sm2 on sm2.id = cps.skill_id
+left join services s on s.id = cps.service_id
+where cps.status = 1 and cps.candidate_id = 93327;
 
 --387354
 select * from candidate_preferred_services cps where cps.candidate_id  = 98212;

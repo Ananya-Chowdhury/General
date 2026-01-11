@@ -211,7 +211,7 @@ select * from public.grievance_master gm where grievance_no in ('SSM1111111', 'S
 select * from grievance_master gm where gm.grievance_no like '%SSM%' order by gm.grievance_id desc limit 10;  --6036139
 select * from grievance_master gm order by gm.grievance_id desc;
 select * from public.grievance_master gm where gm.grievance_id = 6084365;
-select * from public.grievance_lifecycle gl where gl.grievance_id = 6072327 order by gl.assigned_on desc;
+select * from public.grievance_lifecycle gl where gl.grievance_id = 3736931 order by gl.assigned_on desc;
 select * from public.grievance_master gm where gm.grievance_no = 'SSM5042301';
 select * from public.admin_position_master apm where apm.position_id = 10140;               -- assigned_to_postion = position_id      admin_postion_master
 select * from public.admin_user_position_mapping aupm where aupm.position_id = 11360;       --12745 (6) --10140 --12708 (7) --
