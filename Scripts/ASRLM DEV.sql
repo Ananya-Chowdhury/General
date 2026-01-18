@@ -791,3 +791,39 @@ select
         left join sector_master sm on sm.id = ce.sector_id
         left join skill_master sk on sk.id = ce.skill_id
         where ce.status = 1 and ce.candidate_id = 97158
+        
+        
+        
+        
+        
+        select * from services s where s.id = 21;
+ select * from candidates c where c.id = 100645;
+ 
+
+
+-- Citizen Booking List ---	
+select 
+	sr.id as service_request_id,
+	sr.status as service_request_status_id,
+	dl.domain_value as service_request_status,
+	sr.citizen_id,
+	concat(c.first_name,' ', c.middle_name,' ', c.last_name) as service_requested_by,
+	sr.created_on as service_request_created,
+	sr.district_id,
+	dm.district_name,
+	sr.sector_id,
+	sm.sector_name,
+	sr.service_id,
+	s.service_name,
+	sr.skill_id,
+	sm2.skill_name,
+	sr.service_code,
+	coalesce(sr.service_desc, 'N/A') as service_desc
+from service_request sr 
+left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+left join citizen c on c.id = sr.citizen_id
+left join district_master dm on dm.id = sr.district_id
+left join sector_master sm on sm.id = sr.sector_id 
+left join services s on s.id = sr.service_id 
+left join skill_master sm2 on sm2.id = sr.skill_id 
+where sr.citizen_id = 12;
