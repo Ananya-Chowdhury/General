@@ -5494,19 +5494,19 @@ with fwd_count as (
         ) t
         group by assigned_to_position, assigned_to_id, role_master_id
         order by assigned desc
- ), griev_yet_to_assigned as (
-        select
-            md.assigned_to_position,
-            md.assigned_to_id,
-            count(1) as yet_to_assigned,
-            count(1) filter (where (CURRENT_DATE - md.updated_on::date) > 7) as is_more_than_7_days
-        from master_district_block_grv md
-        where md.grievance_id > 0
-        and md.status in (4)
-        and md.assigned_to_office_id = 75 /* SSM CALL CENTER */
-        group by md.assigned_to_position, md.assigned_to_id
-   ),  atr_sent as (
-	    	select
+	 ), griev_yet_to_assigned as (
+	        select
+	            md.assigned_to_position,
+	            md.assigned_to_id,
+	            count(1) as yet_to_assigned,
+	            count(1) filter (where (CURRENT_DATE - md.updated_on::date) > 7) as is_more_than_7_days
+	        from master_district_block_grv md
+	        where md.grievance_id > 0
+	        and md.status in (4)
+	        and md.assigned_to_office_id = 75 /* SSM CALL CENTER */
+	        group by md.assigned_to_position, md.assigned_to_id
+	   ),  atr_sent as (
+		    	select
 	            assigned_by_position,
 	            assigned_by_id,
 	            assigned_by_office_id,
