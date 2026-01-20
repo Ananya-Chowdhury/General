@@ -949,3 +949,50 @@ SELECT
         left join block_master bm on bm.id = c.block_id and bm.status = 1    
         left join district_master dm on dm.id = c.district_id and dm.status = 1
         where c.id = 91061
+        
+        
+        
+        
+        select 
+            sr.id as service_request_id,
+            sr.service_code,
+            sr.status as service_request_status_id,
+            dl.domain_value as service_request_status,
+            sr.citizen_id,
+            concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+            sr.created_on as service_request_created,
+            CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+            (
+                select count(*)
+                from service_review sr
+                where sr.candidate_id = cc.id
+            ) as total_reviews,
+            (
+                select coalesce(round(AVG(sr.ratings), 1), 0)
+                from service_review sr
+                where sr.candidate_id = cc.id
+            ) as avg_rating,
+            sr.district_id,
+            dm.district_name,
+            sr.sector_id,
+            sm.sector_name,
+            sr.service_id,
+            s.service_name,
+            sr.skill_id,
+            sm2.skill_name,
+            coalesce(sr.service_desc, 'N/A') as service_desc,
+            ca.
+        from service_request sr 
+        left join candidates cc on cc.id = sr.assigned_to and sr.status = 1
+        left join citizen c on c.id = sr.citizen_id
+        left join citizen_address ca on ca.id = sr.address_id and sr.status = 1
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join district_master dm on dm.id = sr.district_id
+        left join sector_master sm on sm.id = sr.sector_id 
+        left join services s on s.id = sr.service_id 
+        left join skill_master sm2 on sm2.id = sr.skill_id 
+        where cc.id = 100645
+        order by sr.created_on desc
+        
+        
+        select * from service_request sr where sr.status = 1
