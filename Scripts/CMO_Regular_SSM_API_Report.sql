@@ -14,7 +14,7 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2026-01-18'  -- 43119
+WHERE batch_date::date = '2026-01-20'  -- 43119
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
@@ -1934,3 +1934,5 @@ inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = bl.cmo_
 --    and cbrd.batch_date::date between '{from_date}'::date and '{to_date}'::date 
 inner join cmo_emp_batch_run_details cebrd on cbrd.batch_date = cebrd.batch_date and cbrd.batch_id = cebrd.batch_id
         order by cbrd.batch_date asc;
+
+select distinct cbgli.cmo_batch_run_details_id from cmo_batch_grievance_line_item cbgli where cbgli.error = 'REPROCESS' order by cbgli.cmo_batch_run_details_id asc

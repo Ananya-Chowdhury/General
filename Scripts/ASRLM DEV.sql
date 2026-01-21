@@ -920,40 +920,64 @@ sr.citizen_id = 12;
 
 
 
-
-SELECT
-            c.id as candidate_id,
-            c.first_name,
-            c.last_name,
-            c.gender,
-            dl.domain_value as candidate_user_type,
-            c.date_of_birth,
-            c.mobile_number,
-            c.email,
-            c.status,
-            c.state_id,
-            sm.state_name,
-            c.district_id,
-            dm.district_name,
-            c.block_id,
-            bm.block_name,
-            c.created_by,
-            c.created_on,
-            c.updated_by,
-            c.updated_on
-        from candidates c
-        left join "user" u on u.ref_id = c.id
-        left join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
-        left join domain_lookup dl2 on dl2.domain_code = u.user_type::integer and dl2.domain_type = 'user_type'
-        left join state_master sm on sm.id = c.state_id and sm.status = 1
-        left join block_master bm on bm.id = c.block_id and bm.status = 1    
-        left join district_master dm on dm.id = c.district_id and dm.status = 1
-        where c.id = 91061
+select 
+        sr.id as service_request_id,
+        sr.service_code,
+        sr.status as service_request_status_id,
+        dl.domain_value as service_request_status,
+        sr.citizen_id,
+        concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+        sr.created_on as service_request_created,
+        CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+        (
+            select count(*)
+            from service_review sr
+            where sr.candidate_id = cc.id
+        ) as total_reviews,
+        (
+            select coalesce(round(AVG(sr.ratings), 1), 0)
+            from service_review sr
+            where sr.candidate_id = cc.id
+        ) as avg_rating,
+        sr.district_id,
+        dm.district_name,
+        sr.sector_id,
+        sm.sector_name,
+        sr.service_id,
+        s.service_name,
+        sr.skill_id,
+        sm2.skill_name,
+        coalesce(sr.service_desc, 'N/A') as service_desc,
+        sr.preferred_day as service_preferred_day,
+        sr.preferred_date as service_requested_date,
+        dm_profile.doc_path AS gig_profile_path,
+        dm_profile.doc_location  AS doc_location,
+        ca.address_line_1 as service_requested_address_line1,
+        ca.address_line_2 as service_requested_address_line2,
+        ca.city as service_requested_city,
+        ca.is_primary as is_primary_service_location,
+        ca.land_mark as service_requested_landmark,
+        ca.lattitude as service_lattitude,
+        ca.longitude as service_longtitude,
+        ca.pincode as service_pincode
+    from service_request sr 
+    left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+    left join citizen c on c.id = sr.citizen_id
+    left join citizen_address ca on ca.id = sr.address_id and ca.status = 1
+    left join candidates cc on cc.id = sr.assigned_to 
+    left join district_master dm on dm.id = sr.district_id
+    left join sector_master sm on sm.id = sr.sector_id 
+    left join services s on s.id = sr.service_id 
+    left join skill_master sm2 on sm2.id = sr.skill_id 
+    left join document_master dm_profile on dm_profile.ref_id = cc.id 
+        and exists (select 1 from domain_lookup dl where dl.domain_code = dm_profile.upload_doc_type and dl.domain_type = 'doc_type' and dl.domain_code = 2)
+    where sr.citizen_id = 12
+    order by sr.created_on desc
         
         
         
         
-        select 
+select 
             sr.id as service_request_id,
             sr.service_code,
             sr.status as service_request_status_id,
@@ -961,19 +985,14 @@ SELECT
             sr.citizen_id,
             concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
             sr.created_on as service_request_created,
+            sr.assigned_to as service_requested_to,
             CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
-            (
-                select count(*)
-                from service_review sr
-                where sr.candidate_id = cc.id
-            ) as total_reviews,
-            (
-                select coalesce(round(AVG(sr.ratings), 1), 0)
-                from service_review sr
-                where sr.candidate_id = cc.id
-            ) as avg_rating,
+            case 
+            	when sr.status = 2 then c.mobile_number
+            	else 'N/A'
+            end as citizen_mobile_number,
             sr.district_id,
-            dm.district_name,
+            dm.district_name as service_district,
             sr.sector_id,
             sm.sector_name,
             sr.service_id,
@@ -981,18 +1000,94 @@ SELECT
             sr.skill_id,
             sm2.skill_name,
             coalesce(sr.service_desc, 'N/A') as service_desc,
-            ca.
+            sr.address_id as citizen_service_address_id,
+            srl.remarks as service_remarks,
+            sr.preferred_day as service_preferred_day,
+            sr.preferred_date as service_requested_date,
+            dl2.domain_value as service_preferred_day_name,
+            ca.address_line_1 as service_address_line_1,
+            ca.address_line_2 as service_address_line_2,
+            ca.land_mark as service_land_mark,
+            ca.city as service_city,
+            ca.pincode as service_pincode,
+            ca.lattitude as service_lattitude,
+            ca.longitude as service_longitude,
+            ca.district_id,
+            ca.state as service_state,
+            ca.country as service_country,
+            ca.is_primary as service_is_primary,
+            (select count(*) from service_review srv where srv.candidate_id = cc.id) as total_reviews,
+            (select coalesce(round(AVG(srv.ratings), 1), 0) from service_review srv where srv.candidate_id = cc.id) as avg_rating
         from service_request sr 
-        left join candidates cc on cc.id = sr.assigned_to and sr.status = 1
-        left join citizen c on c.id = sr.citizen_id
-        left join citizen_address ca on ca.id = sr.address_id and sr.status = 1
+        inner join service_request_lifecycle srl on srl.service_request_id = sr.id
+        inner join candidates cc on cc.id = sr.assigned_to
+        inner join citizen c on c.id = sr.citizen_id
+        left join citizen_address ca on ca.id = sr.address_id 
         left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join domain_lookup dl2 on dl2.domain_code = sr.status and dl2.domain_type = 'preferred_days'
         left join district_master dm on dm.id = sr.district_id
         left join sector_master sm on sm.id = sr.sector_id 
         left join services s on s.id = sr.service_id 
         left join skill_master sm2 on sm2.id = sr.skill_id 
-        where cc.id = 100645
+        where sr.assigned_to = 91061 /*and srl.lifecycle_status = 1*/  and sr.status = 1
         order by sr.created_on desc
         
         
         select * from service_request sr where sr.status = 1
+        
+        
+        
+  select 
+            sr.id as service_request_id,
+            sr.service_code,
+            sr.status as service_request_status_id,
+            dl.domain_value as service_request_status,
+            sr.citizen_id,
+            concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+            sr.created_on as service_request_created,
+            sr.assigned_to as service_requested_to,
+            CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+            case 
+            	when sr.status = 2 then c.mobile_number
+            	else 'N/A'
+            end as citizen_mobile_number,
+            sr.district_id,
+            dm.district_name as service_district,
+            sr.sector_id,
+            sm.sector_name,
+            sr.service_id,
+            s.service_name,
+            sr.skill_id,
+            sm2.skill_name,
+            coalesce(sr.service_desc, 'N/A') as service_desc,
+            sr.address_id as citizen_service_address_id,
+--            srl.remarks as service_remarks,
+            sr.preferred_day as service_preferred_day,
+            sr.preferred_date as service_requested_date,
+            dl2.domain_value as service_preferred_day_name,
+            ca.address_line_1 as service_address_line_1,
+            ca.address_line_2 as service_address_line_2,
+            ca.land_mark as service_land_mark,
+            ca.city as service_city,
+            ca.pincode as service_pincode,
+            ca.lattitude as service_lattitude,
+            ca.longitude as service_longitude,
+            ca.district_id,
+            ca.state as service_state,
+            ca.country as service_country,
+            ca.is_primary as service_is_primary,
+            (select count(*) from service_review srv where srv.candidate_id = cc.id) as total_reviews,
+            (select coalesce(round(AVG(srv.ratings), 1), 0) from service_review srv where srv.candidate_id = cc.id) as avg_rating
+        from service_request sr 
+--        inner join service_request_lifecycle srl on srl.service_request_id = sr.id
+        inner join candidates cc on cc.id = sr.assigned_to
+        inner join citizen c on c.id = sr.citizen_id
+        left join citizen_address ca on ca.id = sr.address_id 
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join domain_lookup dl2 on dl2.domain_code = sr.status and dl2.domain_type = 'preferred_days'
+        left join district_master dm on dm.id = sr.district_id
+        left join sector_master sm on sm.id = sr.sector_id 
+        left join services s on s.id = sr.service_id 
+        left join skill_master sm2 on sm2.id = sr.skill_id 
+        where sr.assigned_to = 91061 
+        order by sr.created_on desc
