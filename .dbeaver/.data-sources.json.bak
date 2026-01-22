@@ -296,10 +296,10 @@
 				"auth-model": "native"
 			}
 		},
-		"postgres-jdbc-19b5e8d01b6-2e1e512c84264f64": {
+		"postgres-jdbc-19b689d9687-6e550e7ad755e828": {
 			"provider": "postgresql",
 			"driver": "postgres-jdbc",
-			"name": "asrlm_dev",
+			"name": "ASRLM-DEV-DB",
 			"save-password": true,
 			"configuration": {
 				"host": "45.114.178.184",
@@ -307,12 +307,10 @@
 				"database": "asrlm_dev",
 				"url": "jdbc:postgresql://45.114.178.184:5444/asrlm_dev",
 				"configurationType": "MANUAL",
-				"home": "postgresql_client",
-				"type": "dev",
+				"type": "mjqqcp70jwqpff",
 				"closeIdleConnection": true,
 				"provider-properties": {
-					"@dbeaver-show-non-default-db@": "false",
-					"@dbeaver-chosen-role@": ""
+					"@dbeaver-show-non-default-db@": "false"
 				},
 				"auth-model": "native"
 			}
@@ -336,10 +334,10 @@
 		},
 		"prod": {
 			"name": "Production",
-			"color": "255,0,0",
+			"color": "128,0,0",
 			"description": "Production database",
 			"auto-commit": false,
-			"confirm-execute": false,
+			"confirm-execute": true,
 			"confirm-data-change": true,
 			"smart-commit": false,
 			"smart-commit-recover": false,
@@ -394,6 +392,20 @@
 			"name": "WBIDC-Production",
 			"color": "128,0,128",
 			"description": "Production Database",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": false,
+			"smart-commit": false,
+			"smart-commit-recover": true,
+			"auto-close-transactions": true,
+			"close-transactions-period": 1800,
+			"auto-close-connections": true,
+			"close-connections-period": 14400
+		},
+		"mjqqcp70jwqpff": {
+			"name": "ASRLM-Development",
+			"color": "0,64,0",
+			"description": "Regular Development Database",
 			"auto-commit": true,
 			"confirm-execute": false,
 			"confirm-data-change": false,

@@ -1091,3 +1091,69 @@ select
         left join skill_master sm2 on sm2.id = sr.skill_id 
         where sr.assigned_to = 91061 
         order by sr.created_on desc
+        
+        
+        
+        select * from service_request sr where sr.id =3;
+        select * from service_request_lifecycle srl where srl.service_request_id = 3;
+        
+        
+        
+        select
+            sr.id as service_request_id,
+            sr.service_code,
+            sr.status as service_request_status_id,
+            dl.domain_value as service_request_status,
+            sr.citizen_id,
+            concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+            sr.created_on as service_request_created,
+            sr.assigned_to as service_requested_to,
+            CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+            case
+                when sr.status = 2 then c.mobile_number
+                else 'N/A'
+            end as citizen_mobile_number,
+            sr.district_id,
+            dm.district_name as service_district,
+            sr.sector_id,
+            sm.sector_name,
+            sr.service_id,
+            s.service_name,
+            sr.skill_id,
+            sm2.skill_name,
+            coalesce(sr.service_desc, 'N/A') as service_desc,
+            sr.address_id as citizen_service_address_id,
+         --   srl.remarks as service_remarks,
+            sr.preferred_day as service_preferred_day,
+            sr.preferred_date as service_requested_date,
+            dl2.domain_value as service_preferred_day_name,
+            ca.address_line_1 as service_address_line_1,
+            ca.address_line_2 as service_address_line_2,
+            ca.land_mark as service_land_mark,
+            ca.city as service_city,
+            ca.pincode as service_pincode,
+            ca.lattitude as service_lattitude,
+            ca.longitude as service_longitude,
+            ca.district_id,
+            ca.state as service_state,
+            ca.country as service_country,
+            ca.is_primary as service_is_primary,
+            (select count(*) from service_review srv where srv.candidate_id = cc.id) as total_reviews,
+            (select coalesce(round(AVG(srv.ratings), 1), 0) from service_review srv where srv.candidate_id = cc.id) as avg_rating
+        from service_request sr
+    --    inner join service_request_lifecycle srl on srl.service_request_id = sr.id
+        inner join candidates cc on cc.id = sr.assigned_to
+        inner join citizen c on c.id = sr.citizen_id
+        left join citizen_address ca on ca.id = sr.address_id
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join domain_lookup dl2 on dl2.domain_code = sr.status and dl2.domain_type = 'preferred_days'
+        left join district_master dm on dm.id = sr.district_id
+        left join sector_master sm on sm.id = sr.sector_id
+        left join services s on s.id = sr.service_id
+        left join skill_master sm2 on sm2.id = sr.skill_id
+        where sr.assigned_to = 91061
+        order by sr.created_on desc
+        
+        
+        
+        select ft."token" from fcm_token ft where ft.user_id = 19 and ft.user_type = 3 and ft.is_active = true;
