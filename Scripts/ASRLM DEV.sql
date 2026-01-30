@@ -1157,3 +1157,358 @@ select
         
         
         select ft."token" from fcm_token ft where ft.user_id = 19 and ft.user_type = 3 and ft.is_active = true;
+        
+        
+        
+        select s.service_name from services s where lower(s.service_name) like '%ma%'
+        
+        
+        select 
+            s.service_name 
+        from services s 
+        where lower(s.service_name) like '%home guard%'
+        
+        
+       select 
+            dk.keyword 
+        from device_keyword dk
+        where dk.device_uid = 'c8XVywidQjq3X22GAmeGar'
+        order by dk.created_on desc
+        limit 6
+        
+        
+        
+        SELECT 
+        	dm.doc_id,	
+        	dm.doc_path
+                FROM document_master dm
+                WHERE dm.ref_id = 55
+                AND EXISTS (
+                    SELECT 1
+                    FROM domain_lookup dl
+                    WHERE dl.domain_code = dm.upload_doc_type
+                        AND dl.domain_type = 'display_image_type'
+                        AND dl.domain_code = 3
+                )
+                ORDER BY dm.doc_id DESC
+                LIMIT 1
+                
+                
+                
+         select 
+            dk.id as keyword_id,
+            dk.keyword,
+            dk.keyword_id as service_id
+        from device_keyword dk
+        where dk.device_uid = 'c8XVywidQjq3X22GAmeGar'
+        order by dk.created_on desc
+        limit 6
+        
+        
+        
+        select
+			cl.id,
+			cl.candidate_id,
+            c.candidate_code,
+			cl.ip_address as candidate_ip_address,
+			cl.is_active,
+			cl.latitude,
+			cl.longitude,
+			cl.mac_id as candidate_mac_id,
+			c.permanent_address,
+            c.house_no,
+            c.pincode,
+            c.block_id,
+            bm.block_name,
+            c.district_id,
+            dm.district_name,
+            c.state_id,
+            sm.state_name,
+            c.village_address_id,
+            vm.village_name 
+        from cadres_location cl 
+        inner join candidates c on cl.candidate_id = c.id  
+        left join block_master bm on bm.id = c.block_id 
+        left join district_master dm on dm.id = c.district_id 
+        left join state_master sm on sm.id = c.state_id 
+        left join village_master vm on vm.village_id = c.village_address_id 
+        where c.id = 91061;
+        
+        
+        select 
+        	c.id as preferred_loc_id,
+        	c.status,
+        	c.district_id,
+        	dm.district_name,
+        	c.candidate_id 
+        from candidate_preferred_location c
+        left join district_master dm on dm.id = c.district_id 
+        where c.candidate_id = 91061
+        
+        
+        
+        SELECT 
+            COALESCE(ROUND(AVG(sr.ratings), 1), 0)
+        FROM service_review sr
+        inner join candidates c on sr.candidate_id = c.id
+        WHERE c.id = 91061
+        
+        
+        
+        SELECT
+            CONCAT_WS(' ', c.first_name, c.last_name) AS full_name,
+            TO_CHAR(c.available_start_time AT TIME ZONE 'Asia/Kolkata', 'HH12:MI AM') || ' - ' ||
+            TO_CHAR(c.available_end_time AT TIME ZONE 'Asia/Kolkata', 'HH12:MI AM') AS available_time,
+            dmp.doc_path AS profile_path,
+            dmp.doc_location  AS doc_location,
+            (
+                SELECT COUNT(*)
+                FROM service_review sr
+                WHERE sr.candidate_id = c.id
+            ) AS total_reviews,
+            (
+                SELECT 
+                    COALESCE(ROUND(AVG(sr.ratings), 1), 0)
+                FROM service_review sr
+                WHERE sr.candidate_id = c.id
+            ) AS avg_rating_out_of_5,
+            (
+                SELECT sm.service_name
+                FROM services sm
+                WHERE sm.id = 55
+            ) AS service_name,
+            (
+                SELECT dm.doc_path
+                FROM document_master dm
+                WHERE dm.ref_id = 55
+                AND EXISTS (
+                    SELECT 1
+                    FROM domain_lookup dl
+                    WHERE dl.domain_code = dm.upload_doc_type
+                        AND dl.domain_type = 'display_image_type'
+                        AND dl.domain_code = 3
+                )
+                ORDER BY dm.doc_id DESC
+                LIMIT 1
+            ) AS service_doc_path,
+            c.available_start_time,
+            c.available_end_time
+        FROM candidates c
+        LEFT JOIN document_master dmp ON dmp.ref_id = c.id
+        AND EXISTS ( SELECT 1 FROM domain_lookup dl  WHERE dl.domain_code = dmp.upload_doc_type AND dl.domain_type = 'doc_type' AND dl.domain_code = 2)
+        WHERE c.id = 91061
+        
+        
+        
+        select * from candidates c where c.first_name like '%Sayan%'
+        
+        
+        SELECT
+            c.id AS candidate_id,
+            c.first_name,
+            c.last_name,
+            c.mobile_no,
+            c.available_start_time,
+            c.available_end_time,
+            ARRAY_REMOVE(ARRAY_AGG(DISTINCT cpd.day_id), NULL) AS day_ids,
+            ARRAY_REMOVE(ARRAY_AGG(DISTINCT dl.domain_value), NULL) AS days_work,
+            (
+                SELECT COUNT(*)
+                FROM service_review sr
+                WHERE sr.candidate_id = c.id
+            ) AS total_reviews,
+            (
+                SELECT 
+                    COALESCE(ROUND(AVG(sr.ratings), 1), 0)
+                FROM service_review sr
+                WHERE sr.candidate_id = c.id
+            ) AS avg_rating_out_of_5
+        FROM candidate_preferred_services cps
+        JOIN candidates c ON c.id = cps.candidate_id
+        JOIN candidate_preferred_location cpl ON cpl.candidate_id = c.id AND cpl.status = 1 AND cpl.district_id = 25
+        LEFT JOIN candidate_preferred_days cpd ON cpd.candidate_id = c.id AND cpd.status = 1
+        LEFT JOIN domain_lookup dl ON dl.domain_code = cpd.day_id AND dl.domain_type = 'preferred_days' AND dl.status = 1
+        where cps.status = 1 AND c.status = 1 AND cpl.status = 1 AND cps.service_id = 22
+            AND EXISTS ( SELECT 1 FROM candidate_preferred_days cpd2 WHERE cpd2.candidate_id = c.id AND cpd2.status = 1 AND cpd2.day_id = 7)
+        GROUP by c.id, c.first_name, c.last_name, c.mobile_no, c.available_start_time, c.available_end_time
+        ORDER BY c.first_name
+        
+        
+        select 
+        	sr.id as service_request_id,
+        	sr.citizen_id,
+        	concat_ws(' ', c.first_name, c.last_name) AS citizen_full_name,
+        	sr.status as service_status,
+        	dl.domain_value as service_status_name,
+        	sr.created_on as service_requested_date,
+        	sr.block_id as service_block_id,
+        	bm.block_name as service_block_name,
+        	sr.district_id as service_district_id,
+        	dm.district_name as service_district_name,
+        	sr.sector_id as service_sector_id,
+        	sm.sector_name as service_sector_name,
+        	sr.service_id,
+        	s.service_name,
+        	sr.skill_id,
+        	sm2.skill_name,
+        	sr.is_active as service_active,
+        	sr.assigned_to as candidate_id,
+        	concat_ws(' ', c2.first_name, c2.last_name) AS candidate_full_name,
+        	sr.service_code,
+        	sr.service_desc,
+        	sr.address_id,
+        	ca.address_line_1 as citizen_address_line1,
+        	ca.address_line_2 as citizen_address_line2,
+        	sr.preferred_day as service_preferred_day_id,
+        	dl2.domain_value as service_preferred_day,
+        	sr.preferred_date,
+        	concat_ws('-', sr.start_time, sr.end_time) AS service_preferred_time,
+        	sr.booking_code
+        from service_request sr 
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join block_master bm on bm.id = sr.block_id 
+        left join citizen c on c.id = sr.citizen_id 
+        left join district_master dm on dm.id = sr.district_id 
+        left join sector_master sm on sm.id = sr.sector_id 
+        left join services s on s.id = sr.service_id 
+        left join skill_master sm2 on sm2.id = sr.skill_id
+        left join candidates c2 on c2.id = sr.assigned_to
+        left join citizen_address ca on ca.id = sr.address_id
+        left join domain_lookup dl2 on dl2. domain_code = sr.preferred_day and dl2.domain_type = 'preferred_days'
+        where sr.status = 2 and sr.assigned_on::date = '2026-01-29' and sr.assigned_to = 91061 
+        
+        
+        
+       select 
+        	sr.id as service_request_id,
+        	sr.citizen_id,
+        	concat_ws(' ', c.first_name, c.last_name) AS citizen_full_name,
+        	sr.status as service_status,
+        	dl.domain_value as service_status_name,
+        	sr.created_on as service_requested_date,
+        	sr.block_id as service_block_id,
+        	bm.block_name as service_block_name,
+        	sr.district_id as service_district_id,
+        	dm.district_name as service_district_name,
+        	sr.sector_id as service_sector_id,
+        	sm.sector_name as service_sector_name,
+        	sr.service_id,
+        	s.service_name,
+        	sr.skill_id,
+        	sm2.skill_name,
+        	sr.is_active as service_active,
+        	sr.assigned_to as candidate_id,
+        	concat_ws(' ', c2.first_name, c2.last_name) AS candidate_full_name,
+        	sr.service_code,
+        	sr.service_desc,
+        	sr.address_id,
+        	ca.address_line_1 as citizen_address_line1,
+        	ca.address_line_2 as citizen_address_line2,
+        	sr.preferred_day as service_preferred_day_id,
+        	dl2.domain_value as service_preferred_day,
+        	sr.preferred_date,
+        	concat_ws('-', sr.start_time, sr.end_time) AS service_preferred_time,
+        	sr.booking_code
+        from service_request sr 
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join block_master bm on bm.id = sr.block_id 
+        left join citizen c on c.id = sr.citizen_id 
+        left join district_master dm on dm.id = sr.district_id 
+        left join sector_master sm on sm.id = sr.sector_id 
+        left join services s on s.id = sr.service_id 
+        left join skill_master sm2 on sm2.id = sr.skill_id
+        left join candidates c2 on c2.id = sr.assigned_to
+        left join citizen_address ca on ca.id = sr.address_id
+        left join domain_lookup dl2 on dl2. domain_code = sr.preferred_day and dl2.domain_type = 'preferred_days'
+        where sr.status = 2 and sr.assigned_on::date = '2021-01-29' and sr.assigned_to = 91061 
+        
+        
+        
+        
+        select
+            sr.id as service_request_id,
+            sr.service_code,
+            sr.status as service_request_status_id,
+            dl.domain_value as service_request_status,
+            sr.citizen_id,
+            concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+            sr.created_on as service_request_created,
+            cc.id as gigworker_id,
+            CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+            case
+                when sr.status = 2 then cc.mobile_no
+                else 'N/A'
+            end as gigworker_mobile_number,
+            (
+                select count(*)
+                from service_review sr
+                where sr.candidate_id = cc.id
+            ) as total_reviews,
+            (
+                select coalesce(round(AVG(sr.ratings), 1), 0)
+                from service_review sr
+                where sr.candidate_id = cc.id
+            ) as avg_rating,
+            sr.district_id,
+            dm.district_name,
+            sr.sector_id,
+            sm.sector_name,
+            sr.service_id,
+            s.service_name,
+            sr.skill_id,
+            sm2.skill_name,
+            coalesce(sr.service_desc, 'N/A') as service_desc,
+            sr.preferred_day as service_preferred_day,
+            sr.preferred_date as service_requested_date,
+            dm_profile.doc_path AS gig_profile_path,
+            dm_profile.doc_location  AS doc_location,
+            ca.id as service_requested_address_id,
+            ca.address_line_1 as service_requested_address_line1,
+            ca.address_line_2 as service_requested_address_line2,
+            ca.city as service_requested_city,
+            ca.is_primary as is_primary_service_location,
+            ca.land_mark as service_requested_landmark,
+            ca.lattitude as service_lattitude,
+            ca.longitude as service_longtitude,
+            ca.pincode as service_pincode,
+            sr.booking_code as booking_code
+        from service_request sr
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join citizen c on c.id = sr.citizen_id
+        left join citizen_address ca on ca.id = sr.address_id and ca.status = 1
+        left join candidates cc on cc.id = sr.assigned_to
+        left join district_master dm on dm.id = sr.district_id
+        left join sector_master sm on sm.id = sr.sector_id
+        left join services s on s.id = sr.service_id
+        left join skill_master sm2 on sm2.id = sr.skill_id
+        left join document_master dm_profile on dm_profile.ref_id = cc.id
+            and exists (select 1 from domain_lookup dl where dl.domain_code = dm_profile.upload_doc_type and dl.domain_type = 'doc_type' and dl.domain_code = 2)
+        where sr.citizen_id = 33
+        order by sr.created_on desc
+
+        
+        select 
+                s.id as service__request_id,
+                s.service_code,
+                s.status,
+                s.district_id,
+                s.sector_id,
+                sm.sector_name,
+                s.skill_id,
+                sm2.skill_name,
+                s.service_id,
+                ss.service_name,
+                s.candidate_id,
+                s.is_active,
+                s.service_desc,
+                s.booking_code,
+                s.created_on as service_request_created
+            from service_request s
+            left join sector_master sm on sm.id = s.sector_id 
+            left join skill_master sm2 on sm2.id = s.skill_id
+            left join services ss on s.id = s.service_id
+            where s.assigned_to = 91061 and s.status = 2 and s.citizen_id = 12 and s.service_id = 38;
+        
+        
+        select *
+        from decline_question_master dqm
