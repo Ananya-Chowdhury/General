@@ -1981,3 +1981,109 @@ and sr.created_on::date < CURRENT_DATE - INTERVAL '3 days'
         from service_review sr 
         left join citizen c on c.id = sr.citizen_id 
         where sr.is_citizen_ratted = true and sr.candidate_id = 61729
+        
+        
+        
+    select
+        ce.id as candidate_experience_id,
+        ce.candidate_id,
+        sm.id as sector_id,
+        sm.sector_name,
+        sk.id as skill_id,
+        sk.skill_name,
+        ce.experience_duration,
+        ce.self_employed as self_employed,
+        ce.organization_name as organization_name,
+        ce.job_role
+    from candidate_experience ce
+    inner join candidates c on c.id = ce.candidate_id 
+    left join sector_master sm on sm.id = ce.sector_id
+    left join skill_master sk on sk.id = ce.skill_id
+    where ce.status = 1 and c.id = 97560
+    
+    
+    select
+        cpl.id as candidate_preferred_id,
+        dm.district_name,
+        dm.id as district_id,
+        cpl.candidate_id 
+    from candidate_preferred_location cpl
+    inner join candidates c on c.id = cpl.candidate_id 
+    left join district_master dm on dm.id = cpl.district_id 
+    where cpl.status = 1 and c.id = 97560
+    
+    select
+        cps.id,
+        sm.id as sector_id,
+        sm.sector_name,
+        sm2.id as skill_id,
+        sm2.skill_name,
+        s.id as service_id,
+        s.service_name,
+        s.service_code,
+        cps.candidate_id,
+        cps.others_service_name 
+    from candidate_preferred_services cps
+    inner join candidates c on c.id = cps.candidate_id 
+    left join sector_master sm on sm.id = cps.sector_id 
+    left join skill_master sm2 on sm2.id = cps.skill_id
+    left join services s on s.id = cps.service_id
+    where cps.status = 1 and c.id = 97560
+    
+    select 
+        cpd.id, 
+        cpd.day_id,
+        dl.domain_value as days_name,
+        cpd.candidate_id   
+    from candidate_preferred_days cpd
+    inner join candidates c on c.id = cpd.candidate_id 
+    left join domain_lookup dl on dl.domain_code = cpd.day_id::integer and dl.domain_type = 'preferred_days'
+    where cpd.status = 1 and c.id = 97560
+    
+    select 
+        c.id as candidate_id,
+        tc.training_center_name,
+        bm.start_date as training_start_date,
+        bm.end_date as training_end_date,
+        sm.id as training_state_id,
+        sm.state_name as training_state_name,
+        dm.id as training_distict_id,
+        dm.district_name as training_district_name,
+        sm2.id as training_sector_id,
+        sm2.sector_name as training_sector_name,
+        ct.sector_others as training_sector_others,
+        sm3.id as training_skill_id,
+        sm3.skill_name as training_skill_name,
+        ct.skill_others as training_skill_others
+    from candidates c
+    left join candidate_training ct on ct.candidate_id  = c.id 
+    left join training_center tc on tc.id  = ct.training_id  and tc.status = 1
+    left join batch_master bm on bm.id = c.batch_id and bm.status = 1
+    left join state_master sm on sm.id = tc.state_id and sm.status = 1
+    left join district_master dm on dm.id = tc.district_id and dm.status = 1
+    left join sector_master sm2 on sm2.id = ct.sector_id and sm2.status = 1
+    left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+    where c.status = 1 and c.id = 97560
+    
+    
+    SELECT 
+        dmst.doc_id,
+        dl.domain_value AS doc_type_name,
+        dl.domain_code AS doc_type_id,
+        dmst.doc_path,
+        dmst.doc_file_type,
+        dmst.doc_name,
+        dmst.status 
+    FROM document_master dmst
+    inner join candidates c on c.id = dmst.ref_id 
+    JOIN domain_lookup dl ON dl.domain_code = dmst.upload_doc_type AND dl.domain_type = 'doc_type'
+    WHERE dmst.status = 1 AND dl.status = 1 and c.id = 97560
+    ORDER BY dl.domain_code asc
+    
+    
+    
+  select *
+    from service_request sr
+where sr.status = 1
+and sr.created_on::date < CURRENT_DATE - INTERVAL '3 days'   
+    
