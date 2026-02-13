@@ -231,11 +231,11 @@ select * from cmo_domain_lookup_master cdlm ;
 select * from cmo_office_master com; --35 --53 --68
 select * from cmo_sub_office_master csom where csom.office_id = 53;
 select * from admin_user au where au.u_phone = '8777729301';
-select * from admin_user au where au.admin_user_id = 15001;
+select * from admin_user au where au.admin_user_id = 2988;
 select * from admin_user_details aud where aud.admin_user_id in (1227);
 select * from admin_position_master apm where apm.sub_office_id = 3101;
 select * from admin_position_master apm where apm.position_id = 15405;
-select * from admin_user_position_mapping aupm where aupm.admin_user_id = 15001;
+select * from admin_user_position_mapping aupm where aupm.admin_user_id = 2988;
 select * from admin_user_position_mapping aupm where aupm.position_id = 1227;
 select * from admin_position_master apm where apm.office_id = 35 and role_master_id = 7 and record_status = 1;
 select * from admin_position_master apm where role_master_id = 9 and record_status = 1;
@@ -244,6 +244,11 @@ select * from cmo_domain_lookup_master cdlm ;
 select * from cmo_parameter_master cpm ;
 select * from cmo_grievance_category_master cgcm ;
 
+
+select * 
+from admin_user_position_mapping aupm 
+left join admin_position_master apm on apm.position_id = aupm.position_id 
+where aupm.admin_user_id = 2988
 
 --select * from grievance_returned_data grd ;
 select * from grievance_retruned_data grd ;
