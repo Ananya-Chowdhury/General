@@ -1983,6 +1983,233 @@ and sr.created_on::date < CURRENT_DATE - INTERVAL '3 days'
         where sr.is_citizen_ratted = true and sr.candidate_id = 61729
         
         
+        
+    select
+        ce.id as candidate_experience_id,
+        ce.candidate_id,
+        sm.id as sector_id,
+        sm.sector_name,
+        sk.id as skill_id,
+        sk.skill_name,
+        ce.experience_duration,
+        ce.self_employed as self_employed,
+        ce.organization_name as organization_name,
+        ce.job_role
+    from candidate_experience ce
+    inner join candidates c on c.id = ce.candidate_id 
+    left join sector_master sm on sm.id = ce.sector_id
+    left join skill_master sk on sk.id = ce.skill_id
+    where ce.status = 1 and c.id = 97560
+    
+    
+    select
+        cpl.id as candidate_preferred_id,
+        dm.district_name,
+        dm.id as district_id,
+        cpl.candidate_id 
+    from candidate_preferred_location cpl
+    inner join candidates c on c.id = cpl.candidate_id 
+    left join district_master dm on dm.id = cpl.district_id 
+    where cpl.status = 1 and c.id = 97560
+    
+    select
+        cps.id,
+        sm.id as sector_id,
+        sm.sector_name,
+        sm2.id as skill_id,
+        sm2.skill_name,
+        s.id as service_id,
+        s.service_name,
+        s.service_code,
+        cps.candidate_id,
+        cps.others_service_name 
+    from candidate_preferred_services cps
+    inner join candidates c on c.id = cps.candidate_id 
+    left join sector_master sm on sm.id = cps.sector_id 
+    left join skill_master sm2 on sm2.id = cps.skill_id
+    left join services s on s.id = cps.service_id
+    where cps.status = 1 and c.id = 97560
+    
+    select 
+        cpd.id, 
+        cpd.day_id,
+        dl.domain_value as days_name,
+        cpd.candidate_id   
+    from candidate_preferred_days cpd
+    inner join candidates c on c.id = cpd.candidate_id 
+    left join domain_lookup dl on dl.domain_code = cpd.day_id::integer and dl.domain_type = 'preferred_days'
+    where cpd.status = 1 and c.id = 97560
+    
+    select 
+        c.id as candidate_id,
+        tc.training_center_name,
+        bm.start_date as training_start_date,
+        bm.end_date as training_end_date,
+        sm.id as training_state_id,
+        sm.state_name as training_state_name,
+        dm.id as training_distict_id,
+        dm.district_name as training_district_name,
+        sm2.id as training_sector_id,
+        sm2.sector_name as training_sector_name,
+        ct.sector_others as training_sector_others,
+        sm3.id as training_skill_id,
+        sm3.skill_name as training_skill_name,
+        ct.skill_others as training_skill_others
+    from candidates c
+    left join candidate_training ct on ct.candidate_id  = c.id 
+    left join training_center tc on tc.id  = ct.training_id  and tc.status = 1
+    left join batch_master bm on bm.id = c.batch_id and bm.status = 1
+    left join state_master sm on sm.id = tc.state_id and sm.status = 1
+    left join district_master dm on dm.id = tc.district_id and dm.status = 1
+    left join sector_master sm2 on sm2.id = ct.sector_id and sm2.status = 1
+    left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+    where c.status = 1 and c.id = 97560
+    
+    
+    SELECT 
+        dmst.doc_id,
+        dl.domain_value AS doc_type_name,
+        dl.domain_code AS doc_type_id,
+        dmst.doc_path,
+        dmst.doc_file_type,
+        dmst.doc_name,
+        dmst.status 
+    FROM document_master dmst
+    inner join candidates c on c.id = dmst.ref_id 
+    JOIN domain_lookup dl ON dl.domain_code = dmst.upload_doc_type AND dl.domain_type = 'doc_type'
+    WHERE dmst.status = 1 AND dl.status = 1 and c.id = 97560
+    ORDER BY dl.domain_code asc
+    
+    
+    
+  select *
+    from service_request sr
+where sr.status = 1
+and sr.created_on::date < CURRENT_DATE - INTERVAL '3 days'   
+
+
+
+select 
+	  	 	--Candidate Profile Details 
+	  		c.id as candidate_id,
+	  		"user".id as candidate_user_id,
+	  		"user".user_type as candidate_user_type,
+	  		c.candidate_code,
+	  		concat_ws(' ', c.first_name, c.last_name) as candidate_name,
+	        c.candidate_type,
+	        dl7.domain_value as candidate_type_name,
+	  		c.father_name as candidate_father_name,
+	  		c.email as candidate_email,
+	  		c.dob as candidate_dob,
+	  		c.mobile_no as candidate_mobile,
+	  		c.gender as gender_id,
+	  		dl.domain_value as candidate_gender,
+	  		c.category as category_id,
+	  		dl2.domain_value as candidate_category,
+	  		c.minority as minority_id,
+	  		dl4.domain_value as candidate_minority,
+	  		c.religion as religion_id,
+	  		dl5.domain_value as candidate_religion,
+	        c.status,
+	        dl6.domain_value as candidate_status,
+	  		c.is_active as candidate_active_status,
+	  		c.available_start_time,
+	  		c.available_end_time,
+	  		c.interest_freelancer,
+			c.remarks,
+	  		--Candidate Address Details
+	  		c.state_id,
+	  		sm2.state_name as candidate_state_name,
+	  		c.district_id,
+	  		dm.district_name as candidate_district_name,
+	  		c.block_id,
+	  		bm.block_name as candidate_block_name,
+	  		c.house_no,
+	  		c.permanent_address as candidate_address,
+	  		c.village_address_id,
+	  		vm.village_name,
+			c.pincode,		
+			c.constituency_id,
+			ac.constituency_name as candidate_constituency,
+			--Candidate Additional Details
+	  		c.pwd as pwd_id,
+	  		dl3.domain_value as candidate_pwd,
+	  		c.kaushal_panjee_id,
+	  		c.employer_id,
+	  		c.mpr_id,
+	  		c.sanction_order,
+	  		c.mpr_project_id,
+	  		--Candidate Qualification Details
+	  		c.qualification_id,
+            em.name as qualification,
+	  		c.batch_id,
+	  		bm2.batch_code,
+	  		--Candidate Documnetal Details
+	  		c.aadhar as candidate_aadhar,
+	  		c.bank_account as candidate_bank_account,
+			--Candidate Verified Data
+	  		c.is_verified as candidate_verified,
+	        cvd.email as is_email_verified,
+			cvd.first_name as is_firstname_verified,
+			cvd.last_name as is_lastname_verified,
+			cvd.gender as is_gender_verified,
+			cvd.religion as is_religion_verified,
+			cvd.dob as is_dob_verified,
+			cvd.mobile_no as is_mobile_verified,
+			cvd.block as is_block_verified,
+			cvd.district as is_district_verified,
+			cvd.trained_sector as is_sector_verified,
+			cvd.trained_skill as is_skill_verified,
+	  		--Candidate Trining Details
+	  		c.nature_of_training,
+	  		ct.sector_id as training_sector_id,
+	       	sm.sector_name as training_sector_name,
+	  		ct.skill_id as training_skill_id,
+	        sm3.skill_code as training_skill_code,
+	        sm3.skill_name as training_skill_name
+	  	from candidates c 
+	  	left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+	  	left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+	  	left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+	  	left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+	  	left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+	  	left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+	  	left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+	  	left join district_master dm on dm.id = c.district_id and dm.status = 1 
+	  	left join block_master bm on bm.id = c.block_id and bm.status = 1
+	  	left join batch_master bm2 on bm2.id = c.batch_id and bm2.status = 1
+	  	left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+	  	left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+	  	left join candidate_training ct on ct.candidate_id  = c.id and ct.status = 1
+	  	left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+	  	left join training_center tc on tc.id = ct.training_id  and tc.status = 1
+	  	left join village_master vm on vm.village_id = c.village_address_id and vm.status = 1
+	  	left join sector_master sm on sm.id = ct.sector_id and sm.status = 1
+	  	left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+        left join education_master em on em.id = c.qualification_id 
+	  	left join "user" on "user".ref_id = c.id 
+	  	where c.status = 1 
+    
+	  	
+	  	select 
+			sm.id as skill_id,
+			sm.skill_name,
+            sm.skill_code,
+			im.icon_base64 as skill_icon,
+            sm.sector_id,
+            sm1.sector_name,
+            sm.doc_required as is_doc_required,
+            sm.skill_type,
+            dl.domain_value as skill_type_name,
+            sm.is_active as skill_status
+		from skill_master sm
+        left join sector_master sm1 on sm1.id = sm.sector_id
+        left join icon_master im on im.entity_id = sm.id and im.entity_type = 2
+        left join domain_lookup dl on dl.domain_code = sm.skill_type::integer and dl.domain_type = 'skill_type'
+        where sm.is_active = TRUE and sm.status = 1 
+        order by sm.skill_name ASC
+        
+        
      
         
         

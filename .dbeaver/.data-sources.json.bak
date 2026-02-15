@@ -36,7 +36,7 @@
 				"type": "prod",
 				"closeIdleConnection": true,
 				"provider-properties": {
-					"@dbeaver-show-non-default-db@": "false",
+					"@dbeaver-show-non-default-db@": "true",
 					"@dbeaver-chosen-role@": "",
 					"@dbeaver-show-template-db@": "false",
 					"@dbeaver-show-unavailable-db@": "false",
@@ -312,6 +312,24 @@
 				"provider-properties": {
 					"@dbeaver-show-non-default-db@": "false"
 				},
+				"auth-model": "native"
+			},
+			"custom-properties": {
+				"resultset.maxrows": "4"
+			}
+		},
+		"mysql8-19be596a625-3596c4b253937ad4": {
+			"provider": "mysql",
+			"driver": "mysql8",
+			"name": "MSQUBE-DEV-MYSQL",
+			"save-password": true,
+			"configuration": {
+				"host": "10.0.0.1",
+				"port": "3336",
+				"url": "jdbc:mysql://10.0.0.1:3336/",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
 				"auth-model": "native"
 			}
 		},

@@ -36,7 +36,7 @@
 				"type": "prod",
 				"closeIdleConnection": true,
 				"provider-properties": {
-					"@dbeaver-show-non-default-db@": "false",
+					"@dbeaver-show-non-default-db@": "true",
 					"@dbeaver-chosen-role@": "",
 					"@dbeaver-show-template-db@": "false",
 					"@dbeaver-show-unavailable-db@": "false",
