@@ -665,6 +665,23 @@ ORDER BY pg_stat_activity.query_start;
 --START_REPLICATION SLOT "replica_2" 2B0C/F2000000 TIMELINE 1
 
 
+
+SELECT slot_name, active, restart_lsn
+FROM pg_replication_slots;
+
+
+--To check replication status, run:
+SELECT * FROM pg_stat_wal_receiver;
+
+--if replication stopped --
+SELECT slot_name, active FROM pg_replication_slots;
+
+
+select * from grievance_master limit 100;
+
+
+--SELECT pg_drop_replication_slot('replica_2');
+
 --  select * from home_page_grievance_counts 
 
 

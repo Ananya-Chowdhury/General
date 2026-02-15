@@ -1981,3 +1981,10 @@ and sr.created_on::date < CURRENT_DATE - INTERVAL '3 days'
         from service_review sr 
         left join citizen c on c.id = sr.citizen_id 
         where sr.is_citizen_ratted = true and sr.candidate_id = 61729
+        
+        
+     
+        
+        
+        REFRESH MATERIALIZED VIEW "sector_skill_by_district_mv"
+        
