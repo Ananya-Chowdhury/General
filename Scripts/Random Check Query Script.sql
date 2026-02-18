@@ -6059,7 +6059,7 @@ with uinion_part as (
             sum(coalesce(atr_sent.atr_submitted::int, 0) + coalesce(atr_yet_to_sent.yet_atr_not_submitted::int, 0)) as atr_total
         from griev_forwarded
             inner join admin_user_details on griev_forwarded.assigned_to_id = admin_user_details.admin_user_id
-            inner join admin_user_position_mapping on admin_user_position_mapping.admin_user_id = admin_user_details.admin_user_id and admin_user_position_mapping.position_id = griev_forwarded.assigned_to_position
+            left join admin_user_position_mapping on admin_user_position_mapping.admin_user_id = admin_user_details.admin_user_id and admin_user_position_mapping.position_id = griev_forwarded.assigned_to_position
 --          left join admin_position_master on griev_forwarded.assigned_to_position = admin_position_master.position_id
             left join griev_yet_to_assigned on griev_yet_to_assigned.assigned_to_id = griev_forwarded.assigned_to_id
             left join atr_sent on atr_sent.assigned_by_id = griev_forwarded.assigned_to_id
@@ -6083,3 +6083,252 @@ with uinion_part as (
                 else 4
             end
    
+--------------------------------------------------------------------------
+
+            with grievances_recieved as (
+                            select COUNT(1) as grievances_recieved_cnt
+                            from forwarded_latest_3_bh_mat_2 as bh
+                            where 1 = 1  and bh.assigned_to_office_id = 75
+                    ), atr_sent as (
+                        select COUNT(1) as atr_sent_cnt,
+                        coalesce(sum(case when bm.current_status = 15 then 1 else 0 end), 0) as disposed_cnt,
+                        coalesce(sum(case when bm.current_status = 15 and bm.grievance_master_closure_reason_id = 1 then 1 else 0 end), 0) as bnft_prvd,
+                        coalesce(sum(case when bm.current_status = 15 and bm.grievance_master_closure_reason_id in (5, 9) then 1 else 0 end), 0) as matter_taken_up,
+                        coalesce(sum(case when bm.current_status = 15 and bm.grievance_master_closure_reason_id not in (1, 5, 9, 2) then 1 else 0 end), 0) as not_elgbl,
+                        coalesce(sum(case when bm.current_status = 15 and bm.grievance_master_closure_reason_id = 2 then 1 else 0 end), 0) as pending_for_policy_decision
+                        from atr_latest_14_bh_mat_2 as bh
+                        inner join forwarded_latest_3_bh_mat_2 as bm on bm.grievance_id = bh.grievance_id
+                        where bm.current_status in (14,15)   and bh.assigned_by_office_id = 75
+                    ), atr_pending as (
+                        select COUNT(1) as atr_pending_cnt
+                        from forwarded_latest_3_bh_mat_2 as bh
+                        WHERE NOT EXISTS ( select 1 from atr_latest_14_bh_mat_2 as bm where bh.grievance_id = bm.grievance_id and bm.current_status in (14,15))
+                          and bh.assigned_to_office_id = 75
+                    ), grievance_received_other_hod as (
+                            select count(1) as griev_recv_cnt_other_hod
+                            from forwarded_latest_5_bh_mat_2 as bh
+                            where 1 = 1  and bh.assigned_to_office_id = 75
+                    ),
+                    /*, atr_sent_other_hod as (
+                            select
+                                count(1) as atr_sent_cnt_other_hod,
+                                coalesce(sum(case when bm.current_status = 15 then 1 else 0 end), 0) as disposed_cnt_other_hod,
+                                coalesce(sum(case when bm.current_status = 15 and bm.grievance_master_closure_reason_id = 1 then 1 else 0 end), 0) as bnft_prvd_other_hod,
+                                coalesce(sum(case when bm.current_status = 15 and bm.grievance_master_closure_reason_id in (5, 9) then 1 else 0 end), 0) as matter_taken_up_other_hod,
+                                coalesce(sum(case when bm.current_status = 15 and bm.grievance_master_closure_reason_id not in (1, 5, 9) then 1 else 0 end), 0) as not_elgbl_other_hod
+                            from atr_latest_13_bh_mat_2 as bh
+                        inner join forwarded_latest_5_bh_mat_2 as bm ON bm.grievance_id = bh.grievance_id
+                        where 1 = 1   and bh.assigned_by_office_id = 75
+                    )*/
+                    atr_sent_other_hod as (
+                        select count(1) as atr_sent_cnt_other_hod  from atr_latest_13_bh_mat_2 as bh where 1 = 1   and bh.assigned_by_office_id = 75
+                    ), close_other_hod as (
+                            select
+                                count(1) as disposed_cnt_other_hod,
+                                coalesce(sum(case when bm.closure_reason_id = 1 then 1 else 0 end), 0) as bnft_prvd_other_hod,
+                                coalesce(sum(case when bm.closure_reason_id in (5, 9) then 1 else 0 end), 0) as matter_taken_up_other_hod,
+                                coalesce(sum(case when bm.closure_reason_id not in (1, 5, 9, 2) then 1 else 0 end), 0) as not_elgbl_other_hod,
+                                coalesce(sum(case when bm.closure_reason_id = 2 then 1 else 0 end), 0) as pending_for_policy_deci_other_hod
+                            from forwarded_latest_5_bh_mat_2 as bh
+                            inner join grievance_master_bh_mat_2 as bm on bm.grievance_id = bh.grievance_id
+                            where bm.status = 15  and bh.assigned_to_office_id = 75
+                    ), atr_pending_other_hod as (
+                        select
+                            COUNT(1) as atr_pending_cnt_other_hod
+                            from forwarded_latest_5_bh_mat_2 as bh
+                            left join pending_for_other_hod_wise_mat_2 as bm on bh.grievance_id = bm.grievance_id
+                                WHERE NOT EXISTS ( select 1 from atr_latest_13_bh_mat_2 as bm where bh.grievance_id = bm.grievance_id) /*and bm.current_status in (14,15)*/
+                          and bh.assigned_to_office_id = 75
+                    )
+                    select * ,
+                        '2026-02-17 16:30:01.601924+00:00'::timestamp as refresh_time_utc
+                        from grievances_recieved
+                        cross join atr_sent
+                        cross join atr_pending
+                        cross join grievance_received_other_hod
+                        cross join atr_sent_other_hod
+                        cross join atr_pending_other_hod
+                        cross join close_other_hod;
+            
+            
+            
+            
+ --- Individual Benefit Scheme Wise Disposed Grievances HOD DASHBOARD -- old
+            
+with fwd_count as (
+            select bh.grievance_category, count(1) as _fwd_
+            from forwarded_latest_3_bh_mat_2 as bh
+            where bh.grievance_category > 0    and bh.assigned_to_office_id = 75
+            group by bh.grievance_category
+        ), atr_count as (
+            select bh.grievance_category, count(1) as _atr_,
+                sum(case when bh.current_status = 15 then 1 else 0 end) as _clse_,
+                sum(case when bh.current_status = 15 and bh.grievance_master_closure_reason_id = 1 then 1 else 0 end) as bnft_prvd,
+                sum(case when bh.current_status = 15 and bh.grievance_master_closure_reason_id in (5, 9) then 1 else 0 end) as matter_taken_up
+            from atr_latest_14_bh_mat_2 as bh
+            where bh.grievance_category > 0 and bh.current_status in (14,15)    and bh.assigned_by_office_id = 75
+            group by bh.grievance_category
+        ), pending_count as (
+            select bh.grievance_category, count(1) as _pndddd_ , avg(pm.days_diff) as _avg_pending_
+            from forwarded_latest_3_bh_mat_2 as bh
+            inner join pending_for_hod_wise_mat_2 as pm on bh.grievance_id = pm.grievance_id
+            where not exists (select 1 from atr_latest_14_bh_mat_2 as bm where bm.grievance_id = bh.grievance_id and bm.current_status in (14,15))
+               and bh.assigned_to_office_id = 75
+            group by bh.grievance_category
+        ) select
+                '2026-02-17 16:30:01.601924+00:00'::timestamp as refresh_time_utc,
+row_number() over() as sl_no,
+cgcm.grievance_cat_id,
+cgcm.grievance_category_desc,
+coalesce(com.office_name,'N/A') as office_name,
+        cgcm.parent_office_id,
+        com.office_id,
+        coalesce(fc._fwd_, 0) as grievances_received,
+        coalesce(ac._clse_, 0) as grievances_disposed,
+        coalesce(ac.bnft_prvd, 0) as benefit_provided,
+        coalesce(ac.matter_taken_up, 0) as matter_taken_up,
+        coalesce(pc._pndddd_, 2) as grievances_pending,
+        coalesce(round(pc._avg_pending_, 0)) as days_diff,
+        coalesce(ROUND(CASE WHEN (ac.bnft_prvd + ac.matter_taken_up) = 0 THEN 0
+        ELSE (ac.bnft_prvd::numeric / (ac.bnft_prvd + ac.matter_taken_up)) * 100 END,2),0) AS bsp_percentage
+from cmo_grievance_category_master cgcm
+left join cmo_office_master com on com.office_id = cgcm.parent_office_id
+left join atr_count ac on cgcm.grievance_cat_id = ac.grievance_category
+left join pending_count pc on cgcm.grievance_cat_id = pc.grievance_category
+left join fwd_count fc on cgcm.grievance_cat_id = fc.grievance_category
+where cgcm.grievance_cat_id  > 0 and coalesce(fc._fwd_, 0) > 0
+order by cgcm.grievance_category_desc
+
+
+
+
+----- new modification---
+
+with fwd_count as (
+        select bh.grievance_category, count(1) as _fwd_
+        from forwarded_latest_3_bh_mat_2 as bh
+        where bh.grievance_category > 0 and bh.assigned_to_office_id = 75
+        group by bh.grievance_category
+    ), fwd_count_other_hod as (
+        select bh.grievance_category, count(1) as fwd_other_hod
+        from forwarded_latest_5_bh_mat_2 as bh
+        where bh.grievance_category > 0 and bh.assigned_to_office_id = 75
+        group by bh.grievance_category
+    ), atr_count as (
+        select bh.grievance_category, count(1) as _atr_,
+            sum(case when bh.current_status = 15 then 1 else 0 end) as _clse_,
+            sum(case when bh.current_status = 15 and bh.grievance_master_closure_reason_id = 1 then 1 else 0 end) as bnft_prvd,
+            sum(case when bh.current_status = 15 and bh.grievance_master_closure_reason_id in (5, 9) then 1 else 0 end) as matter_taken_up
+        from atr_latest_14_bh_mat_2 as bh
+        where bh.grievance_category > 0 and bh.current_status in (14,15) and bh.assigned_by_office_id = 75
+        group by bh.grievance_category
+    ), atr_count_other_hod as (
+         select bh.grievance_category, count(1) as atr_clse_other_hod  
+          from atr_latest_13_bh_mat_2 as bh 
+         where bh.grievance_category > 0 and bh.assigned_by_office_id = 75
+         group by bh.grievance_category
+    ), pending_count as (
+        select bh.grievance_category, count(1) as _pndddd_ , avg(pm.days_diff) as _avg_pending_
+        from forwarded_latest_3_bh_mat_2 as bh
+        inner join pending_for_hod_wise_mat_2 as pm on bh.grievance_id = pm.grievance_id
+        where not exists (select 1 from atr_latest_14_bh_mat_2 as bm where bm.grievance_id = bh.grievance_id and bm.current_status in (14,15))
+           and bh.assigned_to_office_id = 75
+        group by bh.grievance_category
+   ), pending_count_other_hod as (
+        select
+        	bh.grievance_category, COUNT(1) as atr_pending_other_hod, avg(bm.days_diff) as avg_pending_other_hod
+         from forwarded_latest_5_bh_mat_2 as bh
+         left join pending_for_other_hod_wise_mat_2 as bm on bh.grievance_id = bm.grievance_id
+        WHERE NOT EXISTS ( select 1 from atr_latest_13_bh_mat_2 as bm where bh.grievance_id = bm.grievance_id) /*and bm.current_status in (14,15)*/
+          and bh.assigned_to_office_id = 75
+          group by bh.grievance_category
+    ), close_other_hod as (
+    select
+    	bh.grievance_category,
+        coalesce(sum(case when bm.closure_reason_id = 1 then 1 else 0 end), 0) as bnft_prvd_other_hod,
+        coalesce(sum(case when bm.closure_reason_id in (5, 9) then 1 else 0 end), 0) as matter_taken_up_other_hod
+    from forwarded_latest_5_bh_mat_2 as bh
+    inner join grievance_master_bh_mat_2 as bm on bm.grievance_id = bh.grievance_id
+    where bh.grievance_category > 0 and bm.status = 15  and bh.assigned_to_office_id = 75
+    group by bh.grievance_category                 
+    ) select
+        '2026-02-17 16:30:01.601924+00:00'::timestamp as refresh_time_utc,
+		row_number() over() as sl_no,
+		cgcm.grievance_cat_id,
+		cgcm.grievance_category_desc,
+		coalesce(com.office_name,'N/A') as office_name,
+		cgcm.parent_office_id,
+		com.office_id,
+		SUM(COALESCE(fc._fwd_, 0) + COALESCE(fcoh.fwd_other_hod, 0)) AS grievances_received,
+		SUM(COALESCE(ac._clse_, 0) + COALESCE(acod.atr_clse_other_hod, 0)) AS grievances_disposed,
+		SUM(COALESCE(ac.bnft_prvd, 0) + COALESCE(coh.bnft_prvd_other_hod, 0)) AS benefit_provided,
+		SUM(COALESCE(ac.matter_taken_up, 0) + COALESCE(coh.matter_taken_up_other_hod, 0)) AS matter_taken_up,
+		SUM(COALESCE(pc._pndddd_, 2) + COALESCE(pcoh.atr_pending_other_hod, 2)) AS grievances_pending,
+		COALESCE(SUM(COALESCE(ROUND(pc._avg_pending_, 0), 0) + COALESCE(ROUND(pcoh.avg_pending_other_hod, 0), 0)), 0) AS days_diff,
+		COALESCE(ROUND(CASE 
+            WHEN 
+                SUM(COALESCE(ac.bnft_prvd,0) + COALESCE(coh.bnft_prvd_other_hod,0)) +
+                SUM(COALESCE(ac.matter_taken_up,0) + COALESCE(coh.matter_taken_up_other_hod,0)) = 0
+            THEN 0
+            else (SUM(COALESCE(ac.bnft_prvd,0) + COALESCE(coh.bnft_prvd_other_hod,0))::numeric /
+                    (SUM(COALESCE(ac.bnft_prvd,0) + COALESCE(coh.bnft_prvd_other_hod,0)) + SUM(COALESCE(ac.matter_taken_up,0) + COALESCE(coh.matter_taken_up_other_hod,0)))
+                ) * 100
+        END, 2), 0) AS bsp_percentage
+from cmo_grievance_category_master cgcm
+left join cmo_office_master com on com.office_id = cgcm.parent_office_id
+left join atr_count ac on cgcm.grievance_cat_id = ac.grievance_category
+left join atr_count_other_hod acod on cgcm.grievance_cat_id = acod.grievance_category
+left join close_other_hod coh on cgcm.grievance_cat_id = coh.grievance_category
+left join pending_count pc on cgcm.grievance_cat_id = pc.grievance_category
+left join pending_count_other_hod pcoh on cgcm.grievance_cat_id = pcoh.grievance_category
+left join fwd_count fc on cgcm.grievance_cat_id = fc.grievance_category
+left join fwd_count_other_hod fcoh on cgcm.grievance_cat_id = fcoh.grievance_category
+where cgcm.grievance_cat_id  > 0 /*and coalesce(fc._fwd_, 0) > 0*/
+group by cgcm.grievance_cat_id, com.office_name, com.office_id
+order by cgcm.grievance_category_desc
+
+
+--old code query bkp 
+with fwd_count as (
+            select bh.grievance_category, count(1) as _fwd_ 
+            from {forwarded_latest_3_bh_mat_variable} as bh
+            where bh.grievance_category > 0 {ssm_id_p} {dist_id_p} {dept_id_p}
+            group by bh.grievance_category
+        ), atr_count as (
+            select bh.grievance_category, count(1) as _atr_, 
+                sum(case when bh.current_status = 15 then 1 else 0 end) as _clse_,
+                sum(case when bh.current_status = 15 and bh.grievance_master_closure_reason_id = 1 then 1 else 0 end) as bnft_prvd,
+                sum(case when bh.current_status = 15 and bh.grievance_master_closure_reason_id in (5, 9) then 1 else 0 end) as matter_taken_up
+            from {atr_latest_14_bh_mat_variable} as bh
+            where bh.grievance_category > 0 and bh.current_status in (14,15) {ssm_id_p} {dist_id_p} {dept_id_q}
+            group by bh.grievance_category
+        ), pending_count as (
+            select bh.grievance_category, count(1) as _pndddd_ , avg(pm.days_diff) as _avg_pending_
+            from {forwarded_latest_3_bh_mat_variable} as bh
+            inner join {pending_for_hod_wise_mat_variable} as pm on bh.grievance_id = pm.grievance_id
+            where not exists (select 1 from {atr_latest_14_bh_mat_variable} as bm where bm.grievance_id = bh.grievance_id and bm.current_status in (14,15))
+            {ssm_id_p} {dist_id_p} {dept_id_p}
+            group by bh.grievance_category
+        ) select 
+                '{refresh_time}'::timestamp as refresh_time_utc,
+                row_number() over() as sl_no,
+                cgcm.grievance_cat_id, 
+                cgcm.grievance_category_desc, 
+                coalesce(com.office_name,'N/A') as office_name,
+                cgcm.parent_office_id, 
+                com.office_id, 
+                coalesce(fc._fwd_, 0) as grievances_received,
+                coalesce(ac._clse_, 0) as grievances_disposed,  
+                coalesce(ac.bnft_prvd, 0) as benefit_provided, 
+                coalesce(ac.matter_taken_up, 0) as matter_taken_up,
+                coalesce(pc._pndddd_, 2) as grievances_pending,
+                coalesce(round(pc._avg_pending_, 0)) as days_diff,
+                coalesce(ROUND(CASE WHEN (ac.bnft_prvd + ac.matter_taken_up) = 0 THEN 0 
+                ELSE (ac.bnft_prvd::numeric / (ac.bnft_prvd + ac.matter_taken_up)) * 100 END,2),0) AS bsp_percentage
+        from cmo_grievance_category_master cgcm
+        left join cmo_office_master com on com.office_id = cgcm.parent_office_id
+        left join atr_count ac on cgcm.grievance_cat_id = ac.grievance_category
+        left join pending_count pc on cgcm.grievance_cat_id = pc.grievance_category
+        left join fwd_count fc on cgcm.grievance_cat_id = fc.grievance_category
+        where cgcm.grievance_cat_id  > 0 and coalesce(fc._fwd_, 0) > 0
+        order by cgcm.grievance_category_desc;

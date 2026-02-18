@@ -2213,5 +2213,293 @@ select
      
         
         
-        REFRESH MATERIALIZED VIEW "sector_skill_by_district_mv"
+--        REFRESH MATERIALIZED VIEW "sector_skill_by_district_mv"
         
+        
+        
+        -- login details
+        select 
+        	us.id as admin_user_id,
+            us.username as admin_user_name,
+            us.user_type as admin_user_type,
+            dl.domain_value as admin_user_type_name,
+            us.ref_id as admin_ref_id,
+            us.is_active as admin_user_is_active,
+            us.login_flag as admin_is_login,
+            us.designation as admin_designation,
+            dl2.domain_value as admin_designation_name,
+            aud.id as admin_details_id,
+            aud.official_name as admin_name,
+            aud.official_code as admin_code,
+            aud.official_phone as admin_phone,
+            aud.official_email as admin_email,
+            aud.is_active as admin_active,
+            aud.state_id as admin_state_id,
+            sm.state_name as admin_state_name,
+            aulm.id as admin_loc_mapping_id,
+            coalesce(aulm.state_id, null) as login_state_id,
+            coalesce(sm2.state_name, 'N/A') as login_state_name,
+            coalesce(aulm.district_id, null) as login_district_id,
+            coalesce(dm.district_name, 'N/A') as login_district_name,
+            coalesce(aulm.block_id, null) as login_block_id,
+            coalesce(bm.block_name, 'N/A') as login_block_name,
+           	coalesce(aulm.cadre_id, null) as login_cadres_id,
+            aud.status as admin_user_details_status
+        from admin_user_details aud
+        left join "user" us on us.ref_id = aud.id and aud.is_active = true
+        left join state_master sm on sm.id = aud.state_id and sm.is_active = true
+        left join admin_user_location_mapping aulm on aulm.admin_user_id = us.id and us.is_active = true
+        left join state_master sm2 on sm2.id = aulm.state_id and sm2.is_active = true
+        left join district_master dm on dm.id = aulm.district_id and dm.is_active = true
+		left join block_master bm on bm.id = aulm.block_id and bm.is_active = true
+		left join domain_lookup dl on dl.domain_code = us.user_type::integer and dl.domain_type = 'user_type'
+		left join domain_lookup dl2 on dl2.domain_code = us.designation::integer and dl2.domain_type = 'designation_level'
+        where us.id = 38;
+        
+        
+        select count(1)
+            from candidates c
+            left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+            left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+            left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+            left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+            left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+            left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+            left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+            left join district_master dm on dm.id = c.district_id
+            left join block_master bm on bm.id = c.block_id
+            left join batch_master bm2 on bm2.id = c.batch_id 
+            left join assembly_constituency ac on ac.id = c.constituency_id 
+            left join state_master sm2 on sm2.id = c.state_id 
+            left join candidate_training ct on ct.candidate_id  = c.id 
+            left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+            left join training_center tc on tc.id = ct.training_id  and tc.status = 1
+            left join village_master vm on vm.village_id = c.village_address_id 
+            left join sector_master sm on sm.id = ct.sector_id and sm.status = 1
+            left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+            left join education_master em on em.id = c.qualification_id 
+            where c.is_active = true and c.interest_freelancer = false and c.status = 1 
+             and c.block_id = 59 
+             
+             
+             select 
+	  	 	--Candidate Profile Details 
+	  		c.id as candidate_id,
+	  		"user".id as candidate_user_id,
+	  		"user".user_type as candidate_user_type,
+	  		c.candidate_code,
+	  		concat_ws(' ', c.first_name, c.last_name) as candidate_name,
+	        c.candidate_type,
+	        dl7.domain_value as candidate_type_name,
+	  		c.father_name as candidate_father_name,
+	  		c.email as candidate_email,
+	  		c.dob as candidate_dob,
+	  		c.mobile_no as candidate_mobile,
+	  		c.gender as gender_id,
+	  		dl.domain_value as candidate_gender,
+	  		c.category as category_id,
+	  		dl2.domain_value as candidate_category,
+	  		c.minority as minority_id,
+	  		dl4.domain_value as candidate_minority,
+	  		c.religion as religion_id,
+	  		dl5.domain_value as candidate_religion,
+	        c.status,
+	        dl6.domain_value as candidate_status,
+	  		c.is_active as candidate_active_status,
+	  		c.available_start_time,
+	  		c.available_end_time,
+	  		c.interest_freelancer,
+			c.remarks,
+	  		--Candidate Address Details
+	  		c.state_id,
+	  		sm2.state_name as candidate_state_name,
+	  		c.district_id,
+	  		dm.district_name as candidate_district_name,
+	  		c.block_id,
+	  		bm.block_name as candidate_block_name,
+	  		c.house_no,
+	  		c.permanent_address as candidate_address,
+	  		c.village_address_id,
+	  		vm.village_name,
+			c.pincode,		
+			c.constituency_id,
+			ac.constituency_name as candidate_constituency,
+			--Candidate Additional Details
+	  		c.pwd as pwd_id,
+	  		dl3.domain_value as candidate_pwd,
+	  		c.kaushal_panjee_id,
+	  		c.employer_id,
+	  		c.mpr_id,
+	  		c.sanction_order,
+	  		c.mpr_project_id,
+	  		--Candidate Qualification Details
+	  		c.qualification_id as candidate_qualification_id,
+            em.name as candidate_qualification,
+	  		c.batch_id,
+	  		bm2.batch_code,
+	  		--Candidate Documnetal Details
+	  		c.aadhar as candidate_aadhar,
+	  		c.bank_account as candidate_bank_account,
+			--Candidate Verified Data
+	  		c.is_verified as candidate_verified,
+	        cvd.email as is_email_verified,
+			cvd.first_name as is_firstname_verified,
+			cvd.last_name as is_lastname_verified,
+			cvd.gender as is_gender_verified,
+			cvd.religion as is_religion_verified,
+			cvd.dob as is_dob_verified,
+			cvd.mobile_no as is_mobile_verified,
+			cvd.block as is_block_verified,
+			cvd.district as is_district_verified,
+			cvd.trained_sector as is_sector_verified,
+			cvd.trained_skill as is_skill_verified,
+	  		--Candidate Trining Details
+	  		c.nature_of_training,
+	  		ct.sector_id as training_sector_id,
+	       	sm.sector_name as training_sector_name,
+	  		ct.skill_id as training_skill_id,
+	        sm3.skill_code as training_skill_code,
+	        sm3.skill_name as training_skill_name
+	  	from candidates c 
+	  	left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+	  	left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+	  	left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+	  	left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+	  	left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+	  	left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+	  	left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+	  	left join district_master dm on dm.id = c.district_id and dm.status = 1 
+	  	left join block_master bm on bm.id = c.block_id and bm.status = 1
+	  	left join batch_master bm2 on bm2.id = c.batch_id and bm2.status = 1
+	  	left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+	  	left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+	  	left join candidate_training ct on ct.candidate_id  = c.id and ct.status = 1
+	  	left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+	  	left join training_center tc on tc.id = ct.training_id  and tc.status = 1
+	  	left join village_master vm on vm.village_id = c.village_address_id and vm.status = 1
+	  	left join sector_master sm on sm.id = ct.sector_id and sm.status = 1
+	  	left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+        left join education_master em on em.id = c.qualification_id 
+	  	left join "user" on "user".ref_id = c.id 
+	  	where c.is_active = true and c.interest_freelancer = false and c.status = 1 
+	  	 and c.block_id = 59 order by c.id desc 
+	  	 
+	  	 
+	  	 
+	  	 
+--- card count for candidates	 
+select
+    count(*) filter (where c.status = 1) AS total_registered,
+    count(*) filter (where c.status = 2) AS total_counselling,
+    count(*) filter (where c.status = 3) AS total_mobilization,
+    count(*) filter (where c.status = 5) AS total_assessment,
+    count(*) filter (where c.status = 4) AS total_enrollment_batch,
+    count(*) filter (where c.status = 6) AS total_certificate_issued,
+    count(*) filter (where c.status = 7) AS total_on_job_training,
+    count(*) filter (where c.status = 8) AS total_placement,
+    count(*) filter (where c.status = 9) AS total_training,
+    count(*) filter (where c.status = 10) AS total_counselling
+from candidates c
+where c.is_active = true and c.interest_freelancer = false
+
+
+select 
+ 	--Candidate Profile Details 
+	c.id as candidate_id,
+	"user".id as candidate_user_id,
+	"user".user_type as candidate_user_type,
+	c.candidate_code,
+	concat_ws(' ', c.first_name, c.last_name) as candidate_name,
+    c.candidate_type,
+    dl7.domain_value as candidate_type_name,
+	c.father_name as candidate_father_name,
+	c.email as candidate_email,
+	c.dob as candidate_dob,
+	c.mobile_no as candidate_mobile,
+	c.gender as gender_id,
+	dl.domain_value as candidate_gender,
+	c.category as category_id,
+	dl2.domain_value as candidate_category,
+	c.minority as minority_id,
+	dl4.domain_value as candidate_minority,
+	c.religion as religion_id,
+	dl5.domain_value as candidate_religion,
+    c.status,
+    dl6.domain_value as candidate_status,
+	c.is_active as candidate_active_status,
+	c.available_start_time,
+	c.available_end_time,
+	c.interest_freelancer,
+	c.remarks,
+	--Candidate Address Details
+	c.state_id,
+	sm2.state_name as candidate_state_name,
+	c.district_id,
+	dm.district_name as candidate_district_name,
+	c.block_id,
+	bm.block_name as candidate_block_name,
+	c.house_no,
+	c.permanent_address as candidate_address,
+	c.village_address_id,
+	vm.village_name,
+	c.pincode,		
+	c.constituency_id,
+	ac.constituency_name as candidate_constituency,
+	--Candidate Additional Details
+	c.pwd as pwd_id,
+	dl3.domain_value as candidate_pwd,
+	c.kaushal_panjee_id,
+	c.employer_id,
+	c.mpr_id,
+	c.sanction_order,
+	c.mpr_project_id,
+	--Candidate Qualification Details
+	c.qualification_id as candidate_qualification_id,
+    em.name as candidate_qualification,
+	c.batch_id,
+	bm2.batch_code,
+	--Candidate Documnetal Details
+	c.aadhar as candidate_aadhar,
+	c.bank_account as candidate_bank_account,
+	--Candidate Verified Data
+	c.is_verified as candidate_verified,
+    cvd.email as is_email_verified,
+	cvd.first_name as is_firstname_verified,
+	cvd.last_name as is_lastname_verified,
+	cvd.gender as is_gender_verified,
+	cvd.religion as is_religion_verified,
+	cvd.dob as is_dob_verified,
+	cvd.mobile_no as is_mobile_verified,
+	cvd.block as is_block_verified,
+	cvd.district as is_district_verified,
+	cvd.trained_sector as is_sector_verified,
+	cvd.trained_skill as is_skill_verified,
+	--Candidate Trining Details
+	c.nature_of_training,
+	ct.sector_id as training_sector_id,
+   	sm.sector_name as training_sector_name,
+	ct.skill_id as training_skill_id,
+    sm3.skill_code as training_skill_code,
+    sm3.skill_name as training_skill_name
+from candidates c 
+left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+left join district_master dm on dm.id = c.district_id and dm.status = 1 
+left join block_master bm on bm.id = c.block_id and bm.status = 1
+left join batch_master bm2 on bm2.id = c.batch_id and bm2.status = 1
+left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+left join candidate_training ct on ct.candidate_id  = c.id and ct.status = 1
+left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+left join training_center tc on tc.id = ct.training_id  and tc.status = 1
+left join village_master vm on vm.village_id = c.village_address_id and vm.status = 1
+left join sector_master sm on sm.id = ct.sector_id and sm.status = 1
+left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+left join education_master em on em.id = c.qualification_id 
+left join "user" on "user".ref_id = c.id and "user".is_active = true
+where c.is_active = true and c.interest_freelancer = false  and c.id = 1296965 
