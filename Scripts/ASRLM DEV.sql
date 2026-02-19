@@ -2502,4 +2502,94 @@ left join sector_master sm on sm.id = ct.sector_id and sm.status = 1
 left join candidate_verification_details cvd on cvd.candidate_id = c.id 
 left join education_master em on em.id = c.qualification_id 
 left join "user" on "user".ref_id = c.id and "user".is_active = true
-where c.is_active = true and c.interest_freelancer = false  and c.id = 1296965 
+where c.is_active = true and c.interest_freelancer = false  and c.id = 1296965 ;
+
+
+
+
+
+SELECT 
+    dl.domain_type,
+    dl.domain_code,
+    dl.domain_value,
+    COUNT(c.id) AS total_count
+FROM domain_lookup dl
+LEFT JOIN candidates c ON c.status = dl.domain_code AND c.is_active = true AND c.interest_freelancer = false
+WHERE dl.domain_type = 'candidate_status'
+GROUP BY dl.domain_type, dl.domain_code, dl.domain_value
+ORDER BY dl.domain_code::int
+
+
+select
+    count(*) filter (where c.status = 1) AS total_registered,
+    count(*) filter (where c.status = 2) AS total_counselling,
+    count(*) filter (where c.status = 3) AS total_mobilization,
+    count(*) filter (where c.status = 5) AS total_assessment,
+    count(*) filter (where c.status = 4) AS total_enrollment_batch,
+    count(*) filter (where c.status = 6) AS total_certificate_issued,
+    count(*) filter (where c.status = 7) AS total_on_job_training,
+    count(*) filter (where c.status = 8) AS total_placement,
+    count(*) filter (where c.status = 9) AS total_training,
+    count(*) filter (where c.status = 10) AS total_gigworker
+from candidates c
+where c.is_active = true and c.interest_freelancer = false
+
+
+select count(*) from candidates c where c.is_active = true and c.interest_freelancer = false and c.status = 2;
+
+
+
+
+SELECT 
+    dm.id as district_id,
+    dm.district_name,
+    /*count(c.id) as total_count,*/
+    COUNT(c.id) FILTER (WHERE c.status = 1) AS total_registered,
+    COUNT(c.id) FILTER (WHERE c.status = 2) AS total_counselling,
+    COUNT(c.id) FILTER (WHERE c.status = 3) AS total_mobilization,
+    coalesce(c.status, 0) as candidate_status,
+    coalesce(dl.domain_value, 'N/A') as status_name
+from district_master dm
+left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false 
+left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+where 1 = 1 
+group by dm.id, c.status, dl.domain_value, c.district_id
+    order by dm.district_name asc
+    
+    
+    
+SELECT 
+   COUNT(c.id) FILTER (WHERE c.status = 1) AS total_registered,
+COUNT(c.id) FILTER (WHERE c.status = 2) AS total_counselling,
+COUNT(c.id) FILTER (WHERE c.status = 3) AS total_mobilization
+from district_master dm
+left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false
+left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'   
+    
+SELECT 
+    bm.id AS block_id,
+    bm.block_name,
+    COUNT(c.id) AS total_count
+FROM block_master bm
+LEFT JOIN candidates c ON bm.id = c.block_id AND bm.status = 1 and c.is_active = true AND c.interest_freelancer = false and c.status = 1  -- put status condition inside JOIN
+WHERE 1 = 1 and bm.district_id = 5
+GROUP BY bm.id, bm.block_name
+ORDER BY bm.block_name
+
+
+SELECT 
+	c.id,
+	concat_ws('', c.first_name, c.last_name) as candidate_name,
+	c.mobile_no,
+	c.district_id,
+	dm.district_name,
+	c.status,
+    bm.id AS block_id,
+    bm.block_name
+FROM candidates c
+LEFT join block_master bm  ON bm.id = c.block_id AND bm.status = 1 
+left join district_master dm on dm.id = c.district_id and dm.status = 1
+left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+WHERE 1 = 1 and bm.id = 322 and c.status = 1 and c.is_active = true AND c.interest_freelancer = false 
+GROUP BY c.id, bm.id, bm.block_name, dm.district_name
+ORDER BY bm.block_name
