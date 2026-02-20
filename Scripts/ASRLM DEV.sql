@@ -2593,3 +2593,89 @@ left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_t
 WHERE 1 = 1 and bm.id = 322 and c.status = 1 and c.is_active = true AND c.interest_freelancer = false 
 GROUP BY c.id, bm.id, bm.block_name, dm.district_name
 ORDER BY bm.block_name
+
+
+SELECT 
+                c.id as candidate_id,
+                concat_ws('', c.first_name, c.last_name) as candidate_name,
+                c.mobile_no as candidate_mobile,
+                c.district_id as candidate_district_id,
+                dm.district_name as candidate_district_name,
+                c.status as candidate_status,
+                dl.domain_value as candidate_status_name,
+                bm.block_name as candidate_block_name,
+                bm.id as candidate_block_id
+            FROM candidates c
+            LEFT join block_master bm  ON bm.id = c.block_id AND bm.status = 1 
+            left join district_master dm on dm.id = c.district_id and dm.status = 1
+            left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+            WHERE 1 = 1 and c.is_active = true and c.interest_freelancer = false  and c.status = 1   
+            GROUP BY c.id, bm.id, bm.block_name, dm.district_name, dl.domain_value
+            order by candidate_name asc
+            
+            
+            
+            
+            
+            
+            SELECT 
+                dm.id as district_id,
+                dm.district_name,
+                null as block_id,
+                null as block_name,
+                coalesce(c.status, null) as candidate_status,
+                coalesce(dl.domain_value, 'N/A') as status_name,
+                count(c.id) as total_count
+            from district_master dm
+            left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false  and c.status = 1 
+            left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+            left join block_master bm on bm.id = c.block_id and bm.status = 1
+            where 1 = 1
+            group by dm.id, c.status, dl.domain_value, c.district_id
+            order by total_count desc
+            
+            SELECT 
+                count(c.id) as total_count
+            from district_master dm
+            left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false  and c.status = 1 
+            left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+            left join block_master bm on bm.id = c.block_id and bm.status = 1
+--            where c.district_id = 28
+            
+            
+            
+     select *
+     from  cadre c ;
+     
+     SELECT
+        c.id as cadres_id,
+        c.cadre_code,
+        concat_ws(' ', c.first_name, c.middle_name, c.last_name) as cadres_full_name,
+        c.first_name as cadres_first_name,
+        c.middle_name as cadres_middle_name,
+        c.last_name as cadres_last_name,
+        c.mobile_no as cadres_mobile,
+        c.email as cadres_email,
+        c.address as cadres_address,
+        c.designation as designation_id,
+        dl.domain_value as cadres_designation,
+        c.gender as gender_id,
+        dl2.domain_value as cadres_gender,
+        c.dob as cadres_dob,
+        c.pan_no,
+        c.qualification,
+        c.education,
+        c.experience,
+        c.training,
+        c.is_active as cadres_status,
+        c.status,
+        c.block_id,
+        bm.block_name as cadres_block,
+        bm.district_id,
+        dm.district_name as cadres_district
+    FROM cadre c
+    LEFT JOIN block_master bm ON bm.id = c.block_id
+    LEFT JOIN district_master dm ON dm.id = bm.district_id
+	left join domain_lookup dl on dl.domain_code = c.designation::integer and dl.domain_type = 'designation_level'
+	left join domain_lookup dl2 on dl2.domain_code = c.gender::integer and dl2.domain_type = 'gender'
+			
