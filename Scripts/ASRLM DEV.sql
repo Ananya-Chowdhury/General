@@ -2508,6 +2508,182 @@ where c.is_active = true and c.interest_freelancer = false  and c.id = 1296965 ;
 
 
 
+SELECT 
+    dl.domain_type,
+    dl.domain_code,
+    dl.domain_value,
+    COUNT(c.id) AS total_count
+FROM domain_lookup dl
+LEFT JOIN candidates c ON c.status = dl.domain_code AND c.is_active = true AND c.interest_freelancer = false
+WHERE dl.domain_type = 'candidate_status'
+GROUP BY dl.domain_type, dl.domain_code, dl.domain_value
+ORDER BY dl.domain_code::int
+
+
+select
+    count(*) filter (where c.status = 1) AS total_registered,
+    count(*) filter (where c.status = 2) AS total_counselling,
+    count(*) filter (where c.status = 3) AS total_mobilization,
+    count(*) filter (where c.status = 5) AS total_assessment,
+    count(*) filter (where c.status = 4) AS total_enrollment_batch,
+    count(*) filter (where c.status = 6) AS total_certificate_issued,
+    count(*) filter (where c.status = 7) AS total_on_job_training,
+    count(*) filter (where c.status = 8) AS total_placement,
+    count(*) filter (where c.status = 9) AS total_training,
+    count(*) filter (where c.status = 10) AS total_gigworker
+from candidates c
+where c.is_active = true and c.interest_freelancer = false
+
+
+select count(*) from candidates c where c.is_active = true and c.interest_freelancer = false and c.status = 2;
+
+
+
+
+SELECT 
+    dm.id as district_id,
+    dm.district_name,
+    /*count(c.id) as total_count,*/
+    COUNT(c.id) FILTER (WHERE c.status = 1) AS total_registered,
+    COUNT(c.id) FILTER (WHERE c.status = 2) AS total_counselling,
+    COUNT(c.id) FILTER (WHERE c.status = 3) AS total_mobilization,
+    coalesce(c.status, 0) as candidate_status,
+    coalesce(dl.domain_value, 'N/A') as status_name
+from district_master dm
+left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false 
+left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+where 1 = 1 
+group by dm.id, c.status, dl.domain_value, c.district_id
+    order by dm.district_name asc
+    
+    
+    
+SELECT 
+   COUNT(c.id) FILTER (WHERE c.status = 1) AS total_registered,
+COUNT(c.id) FILTER (WHERE c.status = 2) AS total_counselling,
+COUNT(c.id) FILTER (WHERE c.status = 3) AS total_mobilization
+from district_master dm
+left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false
+left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'   
+    
+SELECT 
+    bm.id AS block_id,
+    bm.block_name,
+    COUNT(c.id) AS total_count
+FROM block_master bm
+LEFT JOIN candidates c ON bm.id = c.block_id AND bm.status = 1 and c.is_active = true AND c.interest_freelancer = false and c.status = 1  -- put status condition inside JOIN
+WHERE 1 = 1 and bm.district_id = 5
+GROUP BY bm.id, bm.block_name
+ORDER BY bm.block_name
+
+
+SELECT 
+	c.id,
+	concat_ws('', c.first_name, c.last_name) as candidate_name,
+	c.mobile_no,
+	c.district_id,
+	dm.district_name,
+	c.status,
+    bm.id AS block_id,
+    bm.block_name
+FROM candidates c
+LEFT join block_master bm  ON bm.id = c.block_id AND bm.status = 1 
+left join district_master dm on dm.id = c.district_id and dm.status = 1
+left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+WHERE 1 = 1 and bm.id = 322 and c.status = 1 and c.is_active = true AND c.interest_freelancer = false 
+GROUP BY c.id, bm.id, bm.block_name, dm.district_name
+ORDER BY bm.block_name
+
+
+SELECT 
+                c.id as candidate_id,
+                concat_ws('', c.first_name, c.last_name) as candidate_name,
+                c.mobile_no as candidate_mobile,
+                c.district_id as candidate_district_id,
+                dm.district_name as candidate_district_name,
+                c.status as candidate_status,
+                dl.domain_value as candidate_status_name,
+                bm.block_name as candidate_block_name,
+                bm.id as candidate_block_id
+            FROM candidates c
+            LEFT join block_master bm  ON bm.id = c.block_id AND bm.status = 1 
+            left join district_master dm on dm.id = c.district_id and dm.status = 1
+            left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+            WHERE 1 = 1 and c.is_active = true and c.interest_freelancer = false  and c.status = 1   
+            GROUP BY c.id, bm.id, bm.block_name, dm.district_name, dl.domain_value
+            order by candidate_name asc
+            
+            
+            
+            
+            
+            
+            SELECT 
+                dm.id as district_id,
+                dm.district_name,
+                null as block_id,
+                null as block_name,
+                coalesce(c.status, null) as candidate_status,
+                coalesce(dl.domain_value, 'N/A') as status_name,
+                count(c.id) as total_count
+            from district_master dm
+            left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false  and c.status = 1 
+            left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+            left join block_master bm on bm.id = c.block_id and bm.status = 1
+            where 1 = 1
+            group by dm.id, c.status, dl.domain_value, c.district_id
+            order by total_count desc
+            
+            SELECT 
+                count(c.id) as total_count
+            from district_master dm
+            left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false  and c.status = 1 
+            left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+            left join block_master bm on bm.id = c.block_id and bm.status = 1
+--            where c.district_id = 28
+            
+            
+            
+     select *
+     from  cadre c ;
+     
+     SELECT
+        c.id as cadres_id,
+        c.cadre_code,
+        concat_ws(' ', c.first_name, c.middle_name, c.last_name) as cadres_full_name,
+        c.first_name as cadres_first_name,
+        c.middle_name as cadres_middle_name,
+        c.last_name as cadres_last_name,
+        c.mobile_no as cadres_mobile,
+        c.email as cadres_email,
+        c.address as cadres_address,
+        c.designation as designation_id,
+        dl.domain_value as cadres_designation,
+        c.gender as gender_id,
+        dl2.domain_value as cadres_gender,
+        c.dob as cadres_dob,
+        c.pan_no,
+        c.qualification,
+        c.education,
+        c.experience,
+        c.training,
+        c.is_active as cadres_status,
+        c.status,
+        c.block_id,
+        bm.block_name as cadres_block,
+        bm.district_id,
+        dm.district_name as cadres_district
+    FROM cadre c
+    LEFT JOIN block_master bm ON bm.id = c.block_id
+    LEFT JOIN district_master dm ON dm.id = bm.district_id
+	left join domain_lookup dl on dl.domain_code = c.designation::integer and dl.domain_type = 'designation_level'
+	left join domain_lookup dl2 on dl2.domain_code = c.gender::integer and dl2.domain_type = 'gender'
+			;
+
+
+
+
+
 
 
 -- development.district_master definition
