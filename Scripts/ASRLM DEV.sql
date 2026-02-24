@@ -1,7 +1,7 @@
 -- Queries For Data Searching ---
 
 select * from candidates c where c.is_verified = false;
-select * from candidates c where c.id = 61730;
+select * from candidates c where c.id = 1297054;
 
 
 
@@ -2440,8 +2440,6 @@ select
 	bm.block_name as candidate_block_name,
 	c.house_no,
 	c.permanent_address as candidate_address,
-	c.village_address_id,
-	vm.village_name,
 	c.pincode,		
 	c.constituency_id,
 	ac.constituency_name as candidate_constituency,
@@ -2496,13 +2494,12 @@ left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 
 left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
 left join candidate_training ct on ct.candidate_id  = c.id and ct.status = 1
 left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
-left join training_center tc on tc.id = ct.training_id  and tc.status = 1
-left join village_master vm on vm.village_id = c.village_address_id and vm.status = 1
+left join training_center tc on tc.id = ct.training_center_id  and tc.status = 1
 left join sector_master sm on sm.id = ct.sector_id and sm.status = 1
 left join candidate_verification_details cvd on cvd.candidate_id = c.id 
 left join education_master em on em.id = c.qualification_id 
 left join "user" on "user".ref_id = c.id and "user".is_active = true
-where c.is_active = true and c.interest_freelancer = false  and c.id = 1296965 ;
+where c.is_active = true and c.interest_freelancer = false  and c.id = 1297054 ;
 
 
 
@@ -2709,3 +2706,184 @@ SELECT
 
 
 --update public.district_master set state_id = 1568;
+		
+		
+		
+		
+		
+		
+		
+--CREATE MATERIALIZED VIEW public.sector_skill_by_district_mv
+--TABLESPACE pg_default
+--AS SELECT cpl.district_id,
+--    dm.is_required AS is_available,....................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+		
+--    sm.id AS sector_id,
+--    sm.sector_name,
+--    im.icon_base64 AS sector_icon,
+--    jsonb_agg(DISTINCT jsonb_build_object('skill_id', sm2.id, 'skill_code', sm2.skill_code, 'skill_name', sm2.skill_name, 'skill_icon', im2.icon_base64)) FILTER (WHERE COALESCE(dac_skill.is_visible, true) = true) AS skills,
+--    now() AS last_refreshed
+--   FROM public.candidate_preferred_services cps
+--     JOIN public.candidate_preferred_location cpl ON cpl.candidate_id = cps.candidate_id
+--     LEFT JOIN public.district_master dm ON dm.id = cpl.district_id
+--     LEFT JOIN public.sector_master sm ON sm.id = cps.sector_id
+--     LEFT JOIN public.icon_master im ON im.entity_id = sm.id AND im.entity_type = 1 AND im.is_active = true
+--     LEFT JOIN public.skill_master sm2 ON sm2.id = cps.skill_id
+--     LEFT JOIN public.icon_master im2 ON im2.entity_id = sm2.id AND im2.entity_type = 2 AND im2.is_active = true
+--     LEFT JOIN public.service_admin_control dac_sector ON dac_sector.district_id = cpl.district_id AND dac_sector.entity_type = 1 AND dac_sector.entity_id = sm.id
+--     LEFT JOIN public.service_admin_control dac_skill ON dac_skill.district_id = cpl.district_id AND dac_skill.entity_type = 2 AND dac_skill.entity_id = sm2.id
+--  WHERE cps.status = 1 AND sm.is_active = true AND COALESCE(dac_sector.is_visible, true) = true
+--  GROUP BY cpl.district_id, dm.is_required, sm.id, sm.sector_name, im.icon_base64
+-- HAVING count(sm2.id) FILTER (WHERE COALESCE(dac_skill.is_visible, true) = true) > 0
+--WITH DATA;
+--
+---- View indexes:
+--CREATE INDEX idx_sector_skill_by_district_mv_district ON public.sector_skill_by_district_mv USING btree (district_id);
+--CREATE UNIQUE INDEX idx_sector_skill_by_district_mv_unique ON public.sector_skill_by_district_mv USING btree (district_id, sector_id);
+		
+		
+		
+		
+		
+	select 
+        c.id as candidate_id,
+        concat_ws('', c.first_name, c.last_name) as candidate_name,
+        c.mobile_no as candidate_mobile,
+        c.district_id as candidate_district_id,
+        dm.district_name as candidate_district_name,
+        c.status as candidate_status,
+        dl.domain_value as candidate_status_name,
+        bm.block_name as candidate_block_name,
+        bm.id as candidate_block_id,
+        c.updated_on,
+        pm.id as pia_id,
+		pm.pia_center_name,
+		bm2.id as batch_id,
+		bm2.batch_code,
+    	bm2.mpr_id,
+    	tc.id as training_center_id,
+    	tc.training_center_name,
+    	tc.mpr_id as training_mpr_id,
+    	tc.district_id as training_district_id,
+    	dm3.district_name as training_district_name,
+		coalesce(c.status, null) as candidate_status,
+        coalesce(dl.domain_value, 'N/A') as status_name
+    FROM candidates c
+    left join candidate_training ct on ct.candidate_id = c.id and ct.status in (1,2)
+    left join pia_master pm on pm.id = ct.pi_id
+    left join batch_master bm2 on bm2.id = ct.batch_id and bm2.status = 1
+    left join training_center tc on tc.id = ct.training_center_id and tc.status = 1
+    LEFT join block_master bm  ON bm.id = c.block_id AND bm.status = 1 
+    left join district_master dm on dm.id = c.district_id and dm.status = 1
+    left join district_master dm3 on dm3.id = tc.district_id and dm3.status = 1
+    left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+    WHERE 1 = 1 and c.is_active = true and c.interest_freelancer = false and c.status = 5 and ct.pi_id = 2 and ct.batch_id = 9
+    group by c.id, dm.district_name, dl.domain_value, bm.block_name, bm.id, pm.id, bm2.id, bm2.batch_code, bm2.mpr_id, tc.id, tc.training_center_name, tc.mpr_id, tc.district_id, dm3.district_name
+    
+   
+ SELECT 
+    pm.id AS pia_id,
+    pm.pia_center_name,
+    COUNT(c.id) AS total_count
+FROM pia_master pm
+LEFT JOIN candidate_training ct ON ct.pi_id = pm.id AND ct.status = 1
+LEFT JOIN candidates c ON c.id = ct.candidate_id AND c.is_active = true AND c.interest_freelancer = false AND c.status = 5
+LEFT JOIN batch_master bm2 ON bm2.id = ct.batch_id AND bm2.status = 1
+LEFT JOIN training_center tc ON tc.id = ct.training_center_id AND tc.status = 1
+GROUP BY pm.id, pm.pia_center_name
+ORDER BY total_count DESC  
+
+
+ SELECT 
+    tc.id AS training_center_id,
+    tc.training_center_name,
+    COUNT(c.id) AS total_count
+FROM  training_center tc
+LEFT JOIN candidate_training ct ON ct.training_center_id = tc.id AND ct.status = 1
+LEFT JOIN candidates c ON c.id = ct.candidate_id AND c.is_active = true AND c.interest_freelancer = false AND c.status = 5
+LEFT JOIN batch_master bm2 ON bm2.id = ct.batch_id AND bm2.status = 1
+LEFT JOIN pia_master pm ON pm.id = ct.pi_id AND pm.status = 1
+GROUP BY tc.id, tc.training_center_name
+ORDER BY total_count DESC   
+    
+    
+
+  select count(c.id) as total_count 
+    from candidates c 
+   left join candidate_training ct on ct.candidate_id = c.id 
+  where c.is_active = true AND c.interest_freelancer = false AND c.status = 5
+
+
+  
+ SELECT 
+    bm2.id AS batch_id,
+    bm2.batch_code,
+    bm2.mpr_id,
+    COUNT(c.id) AS total_count
+FROM batch_master bm2
+LEFT JOIN candidate_training ct ON ct.batch_id = bm2.id AND ct.status in (1,2)
+LEFT JOIN candidates c ON c.id = ct.candidate_id AND c.is_active = true AND c.interest_freelancer = false AND c.status = 5
+LEFT JOIN pia_master pm ON pm.id = ct.pi_id AND pm.status = 1
+LEFT JOIN training_center tc ON tc.id = ct.training_center_id AND tc.status = 1
+where bm2.status = 1 and pi_id = 2
+GROUP BY bm2.id, bm2.batch_code, bm2.mpr_id
+ORDER BY total_count DESC 
+  
+    
+   SELECT 
+        dm.id as district_id,
+        dm.district_name,
+        null as block_id,
+        null as block_name,
+        coalesce(c.status, null) as candidate_status,
+        coalesce(dl.domain_value, 'N/A') as status_name,
+        count(c.id) as total_count
+    from district_master dm
+    left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false
+    left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+    left join block_master bm on bm.id = c.block_id and bm.status = 1
+    where 1 = 1 
+    group by dm.id, c.status, dl.domain_value, c.district_id
+    order by total_count desc
+    
+    
+
+   
+    
+   
+--UPDATE candidates c
+----SET status = 5
+--SET interest_freelancer = false
+--FROM candidate_training ct
+--WHERE c.id = ct.candidate_id
+--  AND ct.batch_id IS NOT NULL
+--  AND ct.pi_id IS NOT null
+--  and c.status = 5
+--  AND ct.training_center_id IS NOT NULL;
+    
+    
+    
+    
+    
+    select 
+			sm.id as service_id,
+			sm.service_name,
+            sm.service_code,
+            sm1.sector_id,
+            sm2.sector_name,
+            sm2.sector_type,
+            dl2.domain_value as sector_type_name,
+            sm.skill_id,
+            sm1.skill_name,
+            sm.is_active as service_status,
+            im.id as service_icon_id,
+			im.icon_base64 as service_icon,
+            im.entity_id as service_entity_id,
+            im.entity_type as service_entity_type
+		from services sm
+        left join skill_master sm1 on sm1.id = sm.skill_id and sm1.status = 1
+        left join sector_master sm2 on sm2.id = sm1.sector_id and sm2.status = 1
+        left join icon_master im on im.entity_id = sm.id and im.entity_type = 3
+        left join domain_lookup dl2 on dl2.domain_code = sm2.sector_type::integer and dl2.domain_type = 'sector_type'
+        where 1 = 1  
+     limit 1000 offset 0 * 1000
