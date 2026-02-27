@@ -2886,4 +2886,35 @@ ORDER BY total_count DESC
         left join icon_master im on im.entity_id = sm.id and im.entity_type = 3
         left join domain_lookup dl2 on dl2.domain_code = sm2.sector_type::integer and dl2.domain_type = 'sector_type'
         where 1 = 1  
-     limit 1000 offset 0 * 1000
+     limit 1000 offset 0 * 1000;
+    
+    
+    
+    
+    SELECT
+	    (SELECT COUNT(*) FROM candidates c WHERE c.status = 10 AND c.interest_freelancer = true and c.is_active = true and c.district_id = 2) AS total_active_gig_workers,
+	    COUNT(*) AS total_service_provide,
+	    COUNT(*) FILTER (WHERE sr.status = 4) AS total_completed_service,
+	    COUNT(*) FILTER (WHERE sr.status = 3) AS total_rejected_service,
+	    COUNT(*) FILTER (WHERE sr.status = 2) AS total_pending_service,
+	    COUNT(*) FILTER (WHERE DATE(sr.created_on) = CURRENT_DATE) AS total_today_booked_services
+FROM service_request sr
+where 1 = 1 and sr.district_id = 2;
+
+
+select
+ (SELECT COUNT(*) FROM candidates c 
+ 	WHERE c.status = 10 AND c.interest_freelancer = true AND c.is_active = true AND c.district_id = dm.id ) AS total_active_gig_workers,
+    COUNT(sr.id) AS total_service_provide,
+    COUNT(*) FILTER (WHERE sr.status = 4) AS total_completed_service,
+    COUNT(*) FILTER (WHERE sr.status = 3) AS total_rejected_service,
+    COUNT(*) FILTER (WHERE sr.status = 2) AS total_pending_service,
+    COUNT(*) FILTER (
+        WHERE sr.created_on::date = CURRENT_DATE
+    ) AS total_today_booked_services
+FROM district_master dm
+LEFT JOIN service_request sr ON sr.district_id = dm.id
+--WHERE dm.id = 2
+--GROUP BY dm.id;
+
+
