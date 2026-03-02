@@ -3,6 +3,16 @@
 select * from candidates c where c.is_verified = false;
 select * from candidates c where c.id = 1297054;
 
+select * from state_master sm 
+select * from district_master dm where dm.state_id = 1568 and dm.id = 39;
+select * from block_master bm where bm.district_id = 31;
+select * from admin_designation_master adm ;
+select * from admin_role_master arm ;
+
+select * from admin_user_details aud ;
+select * from admin_user_location_mapping aulm ;
+select * from "user" u ;
+
 
 
 --- Candidate Data Search ---

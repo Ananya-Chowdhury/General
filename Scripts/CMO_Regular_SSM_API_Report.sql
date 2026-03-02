@@ -14,14 +14,14 @@
 ---- SSM PULL CHECK ----
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2026-02-22'  -- 02.06 in process
+WHERE batch_date::date = '2026-03-01'  -- 02.06 in process
 and status = 'S'
 ORDER by batch_id desc; -- cbrd.batch_id; --4307 (total data 3433 in 5 status = 2823 data) --22.05.24
 
 SELECT * 
 FROM cmo_batch_run_details cbrd
-WHERE batch_date::date = '2025-04-04'
-and status = 'S'
+WHERE batch_date::date = '2026-02-28'
+and status = 'S' 
 ORDER by batch_id desc;
 
  

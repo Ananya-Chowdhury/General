@@ -243,6 +243,7 @@ select * from admin_user_role_master aurm ;
 select * from cmo_domain_lookup_master cdlm ;
 select * from cmo_parameter_master cpm ;
 select * from cmo_grievance_category_master cgcm ;
+select * from parameter
 
 
 select * 
@@ -457,6 +458,9 @@ select * from public.cmo_closure_reason_master ccrm;
 
 ["9999999900","9999999999","8918939197","8777729301","9775761810","7719357638","7001322965","6292222444",
 "8334822522","9874263537","9432331563","9434495405","9559000099","9874263537"]
+
+["9999999900","9999999999","8918939197","8777729301","9775761810","7719357638","7001322965","6292222444",
+"8334822522","9874263537","9432331563","9434495405","9559000099","9874263537","9163479418","8101859077"]
 
 -- Get OTP Query --  
 SELECT * 
