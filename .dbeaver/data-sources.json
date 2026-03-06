@@ -310,6 +310,9 @@
 					"@dbeaver-show-non-default-db@": "false"
 				},
 				"auth-model": "native"
+			},
+			"custom-properties": {
+				"resultset.maxrows": "1000000000"
 			}
 		},
 		"mysql8-19be596a625-3596c4b253937ad4": {
@@ -344,6 +347,25 @@
 				"provider-properties": {
 					"@dbeaver-show-non-default-db@": "true",
 					"@dbeaver-chosen-role@": ""
+				},
+				"auth-model": "native"
+			}
+		},
+		"postgres-jdbc-19cc222ad45-168aa29c4cbb1e7c": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "MSQUBE-DEV-DB",
+			"save-password": true,
+			"configuration": {
+				"host": "45.114.178.184",
+				"port": "5444",
+				"database": "postgres",
+				"url": "jdbc:postgresql://45.114.178.184:5444/postgres",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "true"
 				},
 				"auth-model": "native"
 			}
@@ -409,7 +431,7 @@
 		},
 		"dev": {
 			"name": "Development",
-			"color": "255,128,128",
+			"color": "255,128,0",
 			"description": "Regular development database",
 			"auto-commit": true,
 			"confirm-execute": false,

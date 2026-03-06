@@ -310,6 +310,9 @@
 					"@dbeaver-show-non-default-db@": "false"
 				},
 				"auth-model": "native"
+			},
+			"custom-properties": {
+				"resultset.maxrows": "1"
 			}
 		},
 		"mysql8-19be596a625-3596c4b253937ad4": {
