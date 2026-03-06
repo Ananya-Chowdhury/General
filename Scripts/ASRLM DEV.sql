@@ -1,0 +1,2971 @@
+-- Queries For Data Searching ---
+
+select * from candidates c where c.is_verified = false;
+select * from candidates c where c.id = 1297054;
+
+select * from state_master sm 
+select * from district_master dm where dm.state_id = 1568 and dm.id = 39;
+select * from block_master bm where bm.district_id = 31;
+select * from admin_designation_master adm ;
+select * from admin_role_master arm ;
+
+select * from admin_user_details aud ;
+select * from admin_user_location_mapping aulm ;
+select * from "user" u ;
+
+
+
+--- Candidate Data Search ---
+select * 
+  from candidates c 
+  left join "user" u on u.ref_id = c.id
+  where c.id = 1;
+
+
+-- preferred days
+select * 
+from candidate_preferred_days cpd 
+left join candidates c on c.id = cpd.candidate_id 
+left join domain_lookup dl on dl.domain_code = cpd.day_id and dl.domain_type = 'preferred_days'
+where cpd.candidate_id = 1;
+
+
+-- preferred location
+select * 
+from candidate_preferred_location cpl 
+left join candidates c on c.id = cpl.candidate_id 
+left join district_master dm on dm.id = cpl.district_id 
+where cpl.candidate_id = 1;
+
+
+-- preferred service
+select *
+from candidate_preferred_services cps 
+left join services s on s.id = cps.
+
+
+
+
+
+SELECT 
+    sector_id,
+    sector_name,
+    sector_icon as icon_base64, 
+    skills
+FROM sector_skill_by_district_mv
+WHERE district_id = 25
+ORDER BY sector_id ASC
+
+
+SELECT 
+            sr.id,
+            sr.assigned_to AS gigworker_id,
+            TO_CHAR(sr.start_time, 'HH12:MI AM') AS start_time,
+            TO_CHAR(sr.end_time, 'HH12:MI AM') AS end_time,
+            sr.status,
+            c.mobile_no AS gig_mobile_no,
+            dl.domain_value AS candidate_type,
+            CONCAT_WS(' ', c.first_name, c.last_name) AS gigworker_name,
+            sr.service_id,
+            s.service_name,
+            s.service_code,
+            im.icon_base64 AS service_icon
+        FROM service_request sr 
+        JOIN candidates c ON sr.assigned_to = c.id 
+        JOIN services s ON s.id = sr.service_id
+        JOIN domain_lookup dl ON dl.domain_code = c.candidate_type AND dl.domain_type = 'candidate_type'
+        LEFT JOIN icon_master im
+            ON im.entity_id = s.id
+        AND im.is_active = TRUE
+        WHERE sr.citizen_id = 29 
+        AND sr.status = 2
+        AND sr.assigned_on::date = CURRENT_DATE
+
+
+
+SELECT *
+FROM services
+WHERE id = 999
+   OR service_code = 999;
+
+-- DB LOCK QUERY --
+SELECT pid, state, query
+FROM pg_stat_activity
+WHERE state = 'active';
+
+
+---- TERMINATE QUERY ----
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE datname = 'asrlm_dev'
+AND pid <> pg_backend_pid();
+
+
+SELECT tablename FROM pg_tables WHERE schemaname = 'public';
+
+
+SELECT token_id, user_id, user_type
+FROM user_token
+WHERE user_id = 5 AND user_type = 2;
+
+
+
+--- Cadre Details by Id API ---
+select 
+	"user".id as user_id,
+	c.id as cadre_id,
+  	CONCAT_WS(' ', c.first_name, c.middle_name, c.last_name) as full_name,
+  	c.address as full_address,
+  	bm.block_name as block_name,
+  	c.cadre_code,
+  	dl.domain_value as cadre_gender,
+  	c.designation,
+  	c.mobile_no,
+  	c.email,
+  	c.pan_no,
+  	c.dob as date_of_birth,
+  	c.education,
+  	c.qualication,
+  	c.designation,
+  	c.experience as cadre_work_expe,
+  	c.status as cadre_status
+  from cadre c 
+  inner join "user" on "user".ref_id = c.id 
+  inner join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
+  inner join block_master bm on bm.id = c.block_id 
+  where "user".id = 5;
+  
+ 
+ ---- Task Details By User ID ------ 
+ select 
+ 	tm.task_id,
+ 	tm.task_name,
+ 	tm.task_description,
+ 	tm.task_type,
+ 	dl.domain_value as task_type_name,
+ 	tm.remarks,
+ 	tm.start_date,
+ 	tm.end_date,
+ 	tm.assigned_user_id,
+ 	CONCAT_WS(' ', c.first_name, c.middle_name, c.last_name) as cadrec_full_name,
+ 	tm.assigned_user_type,
+ 	dl2.domain_value as user_type_name,
+ 	tm.status,
+ 	dl3.domain_value as status_name,
+ 	tm.created_by,
+ 	tm.created_on
+from task_master tm 
+left join "user" on "user".id = tm.assigned_user_id
+left join domain_lookup dl on dl.domain_code = tm.task_type::integer and dl.domain_type = 'task_type'
+left join domain_lookup dl2 on dl2.domain_code = tm.assigned_user_type::integer and dl2.domain_type = 'user_type'
+left join domain_lookup dl3 on dl3.domain_code = tm.assigned_user_type::integer and dl3.domain_type = 'status'
+left join cadre c on c.id = "user".ref_id
+ where "user".id = 1;
+ 
+ 
+ 
+ ----- Updated Task Details By User ID ------ 
+select 
+    tm.task_id,
+    tm.task_name,
+    tm.task_description,
+    dl.domain_value AS task_type_name,
+    tm.remarks,
+    TO_CHAR(tm.start_date, 'DD/MM/YYYY') as start_date,
+    TO_CHAR(tm.end_date , 'DD/MM/YYYY') as end_date,
+    tm.status,
+    dl3.domain_value AS status_name,
+    tm.updated_by,
+    tm.updated_on,
+    bm.block_name,
+    dm.district_name 
+from task_master tm 
+left join domain_lookup dl on dl.domain_code = tm.task_type::integer and dl.domain_type = 'task_type'
+left join domain_lookup dl3 on dl3.domain_code = tm.status::integer and dl3.domain_type = 'task_status'
+left join block_master bm on bm.id = tm.block_id    
+left join district_master dm on dm.id = bm.district_id 
+where tm.block_id = 7 and tm.status = 4
+ 
+ 
+
+------ Task Master ----
+select *
+	from task_master tm 
+	where task_id = 1
+	order by task_name asc;
+
+select * from "user" where phone = '9163479418';
+select * from cadre c where c.id = 3;
+select * from block_master bm ;
+
+
+-------- Cadres Details ----------
+select 
+    "user".id as user_id,
+    "user".user_type,
+    dl2.domain_value as user_type_name,
+    c.id as cadre_id,
+    CONCAT_WS(' ', c.first_name, c.middle_name, c.last_name) as full_name,
+    c.address as full_address,
+    bm.block_name as block_name,
+    c.cadre_code,
+    dl.domain_value as cadre_gender,
+    c.designation,
+    c.mobile_no,
+    c.email,
+    c.pan_no,
+    c.dob as date_of_birth,
+    c.education,
+    c.qualication,
+    c.designation,
+    "user".is_active,
+    c.experience as cadre_work_expe,
+    c.status as cadre_status,
+    bm.block_name,
+    bm.id as block_id,
+    dm.id as district_id,
+    dm.district_name 
+from cadre c 
+inner join "user" on "user".ref_id = c.id 
+inner join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
+inner join domain_lookup dl2 on dl2.domain_code = "user".user_type::integer and dl2.domain_type = 'user_type'
+inner join block_master bm on bm.id = c.block_id 
+inner join district_master dm on dm.id = bm.district_id 
+where "user".ref_id = 3
+
+
+
+--------- Candidate listing by Block Id --------
+select 
+	c.id as candidate_id,
+	c.candidate_code,
+	c.kaushal_panjee_id,
+	C.sanction_order,
+	C.kb_project_id,
+	C.village_address,
+	C.mpr_project_id,
+	C.pincode,
+	C.email,
+	C.qualification,
+	C.father_name,
+	C.mpr_id,
+	CONCAT_WS(' ', c.first_name, c.last_name) as full_name,
+	C.gender as gender_id,
+	dl.domain_value as cadre_gender,
+	C.category as category_id,
+	dl2.domain_value as category_name,
+	C.pwd as pwd_id,
+	dl3.domain_value as pwd_name,
+	C.minority,
+	dl4.domain_value as minority_name,
+	C.religion as religion_id,
+	dl5.domain_value as religion_name,
+	C.dob as date_of_birth,
+	C.mobile_no,
+	C.nature_of_training,
+	C.aadhar,
+	C.bank_account,
+	C.house_no,
+	C.permanent_address,
+	C.created_on,
+	C.updated_on,
+--	C.created_by,
+--	C.updated_by,
+--	coalesce(C.status) as status_id,
+	C.status as status_id,
+	dl6.domain_value as status,
+	C.batch_id,
+	C.block_id,
+	bm.block_name,
+	C.constituency_id,
+	C.employer_id,
+	C.district_id,
+	dm.district_name,
+	C.sector_id,
+	sm.sector_name,
+	C.state_id,
+	sm2.state_name,
+	C.training_center_id,
+	tc.training_center_name,
+	C.workplace_postoffice,
+	C.available_days,
+	C.available_time,
+	C.location_pref,
+	C.skill_id,
+	sm3.skill_code,
+	sm3.skill_name 
+from candidates c 
+left join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
+left join domain_lookup dl2 on dl2.domain_code = c.category::integer and dl2.domain_type = 'category'
+left join domain_lookup dl3 on dl3.domain_code = c.pwd::integer and dl3.domain_type = 'pwd'
+left join domain_lookup dl4 on dl4.domain_code = c.minority::integer and dl4.domain_type = 'minority'
+left join domain_lookup dl5 on dl5.domain_code = c.religion::integer and dl5.domain_type = 'religion'
+left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+left join district_master dm on dm.id = c.district_id 
+left join block_master bm on bm.id = c.block_id 
+left join sector_master sm on sm.id = c.sector_id 
+left join state_master sm2 on sm2.id = c.state_id 
+left join training_center tc on tc.id = c.training_center_id 
+left join skill_master sm3 on sm3.id = c.skill_id 
+where c.block_id = 1;
+
+
+--------- Candidate Details by Id --------
+select 
+    c.id as candidate_id,
+    c.candidate_code,
+    c.kaushal_panjee_id,
+    c.sanction_order,
+    c.kb_project_id,
+    c.village_address,
+    c.mpr_project_id,
+    c.pincode,
+    c.email,
+    c.qualification,
+    c.father_name,
+    c.mpr_id,
+    CONCAT_WS(' ', c.first_name, c.last_name) as full_name,
+    c.gender as gender_id,
+    dl.domain_value as gender_name,
+    c.category as category_id,
+    dl2.domain_value as category_name,
+    c.pwd as pwd_id,
+    dl3.domain_value as pwd_name,
+    c.minority,
+    dl4.domain_value as minority_name,
+    c.religion as religion_id,
+    dl5.domain_value as religion_name,
+    c.dob as date_of_birth,
+    c.mobile_no,
+    c.nature_of_training,
+    c.aadhar,
+    c.bank_account,
+    c.house_no,
+    c.permanent_address,
+    c.created_on,
+    c.updated_on,
+--	c.created_by,
+--	c.updated_by,
+--	coalesce(c.status) as status_id,
+    c.status as status_id,
+    dl6.domain_value as status,
+    c.batch_id,
+    c.block_id,
+    bm.block_name,
+    avd.block as is_block_verified,
+    c.constituency_id,
+    ac.constituency_name,
+    c.employer_id,
+    c.district_id,
+    dm.district_name,
+    avd.district as is_dist_verified,
+    c.sector_id,
+    sm.sector_name,
+    c.state_id,
+    sm2.state_name,
+    c.training_center_id,
+    tc.training_center_name,
+    c.available_days,
+    c.available_time,
+    c.skill_id,
+    sm3.skill_code,
+    sm3.skill_name 
+from candidates c 
+left join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
+left join domain_lookup dl2 on dl2.domain_code = c.category::integer and dl2.domain_type = 'category'
+left join domain_lookup dl3 on dl3.domain_code = c.pwd::integer and dl3.domain_type = 'pwd'
+left join domain_lookup dl4 on dl4.domain_code = c.minority::integer and dl4.domain_type = 'minority'
+left join domain_lookup dl5 on dl5.domain_code = c.religion::integer and dl5.domain_type = 'religion'
+left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+left join district_master dm on dm.id = c.district_id 
+left join block_master bm on bm.id = c.block_id 
+left join sector_master sm on sm.id = c.sector_id 
+left join state_master sm2 on sm2.id = c.state_id 
+left join training_center tc on tc.id = c.training_center_id 
+left join skill_master sm3 on sm3.id = c.skill_id 
+left join assembly_constituency ac on ac.id = c.constituency_id 
+left join candidate_verification_details avd on avd.candidate_id = c.id 
+where c.id = 14773 
+
+
+-------- District MAster ------
+select * 
+    from district_master dm 
+where 1=1 and dm.id = 41
+----------------------
+
+select 
+        c.id as candidate_id,
+        c.candidate_code,
+        c.kaushal_panjee_id,
+        c.sanction_order,
+        c.kb_project_id,
+        c.village_address,
+        c.mpr_project_id,
+        c.pincode,
+        c.email,
+        c.qualification,
+        c.father_name,
+        c.mpr_id,
+        CONCAT_WS(' ', c.first_name, c.last_name) as full_name,
+        c.gender as gender_id,
+        dl.domain_value as gender_name,
+        c.category as category_id,
+        dl2.domain_value as category_name,
+        c.pwd as pwd_id,
+        dl3.domain_value as pwd_name,
+        c.minority,
+        dl4.domain_value as minority_name,
+        c.religion as religion_id,
+        dl5.domain_value as religion_name,
+        c.dob as date_of_birth,
+        c.mobile_no,
+        c.nature_of_training,
+        c.aadhar,
+        c.bank_account,
+        c.house_no,
+        c.permanent_address,
+        c.created_on,
+        c.updated_on,
+    --	c.created_by,
+    --	c.updated_by,
+    --	coalesce(C.status) as status_id,
+        c.status as status_id,
+        dl6.domain_value as status,
+        c.batch_id,
+        c.block_id,
+        bm.block_name,
+        c.constituency_id,
+        c.constituency_id,
+        ac.constituency_name,
+        c.employer_id,
+        c.district_id,
+        dm.district_name,
+        c.sector_id,
+        sm.sector_name,
+        c.state_id,
+        sm2.state_name,
+        c.training_center_id,
+        tc.training_center_name,
+        c.available_days,
+        c.available_time,
+        c.skill_id,
+        sm3.skill_code,
+        sm3.skill_name 
+    from candidates c 
+    left join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
+    left join domain_lookup dl2 on dl2.domain_code = c.category::integer and dl2.domain_type = 'category'
+    left join domain_lookup dl3 on dl3.domain_code = c.pwd::integer and dl3.domain_type = 'pwd'
+    left join domain_lookup dl4 on dl4.domain_code = c.minority::integer and dl4.domain_type = 'minority'
+    left join domain_lookup dl5 on dl5.domain_code = c.religion::integer and dl5.domain_type = 'religion'
+    left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+    left join district_master dm on dm.id = c.district_id 
+    left join block_master bm on bm.id = c.block_id 
+    left join sector_master sm on sm.id = c.sector_id 
+    left join state_master sm2 on sm2.id = c.state_id 
+    left join training_center tc on tc.id = c.training_center_id 
+    left join skill_master sm3 on sm3.id = c.skill_id 
+    left join assembly_constituency ac on ac.id = c.constituency_id 
+    where c.block_id = 7  limit 10 offset 1 * 10
+
+        
+        
+        
+        select 
+            c.id as candidate_id,
+            c.candidate_code,
+            c.kaushal_panjee_id,
+            c.sanction_order,
+            c.kb_project_id,
+            c.village_address,
+            c.mpr_project_id,
+            c.pincode,
+            c.email,
+            cvd.email as is_email_verified,
+            c.qualification,
+            c.father_name,
+            c.mpr_id,
+            CONCAT_WS(' ', c.first_name, c.last_name) as full_name,
+            cvd.first_name as is_firstname_verified,
+            cvd.last_name as is_lastname_verified,
+            c.gender as gender_id,
+            dl.domain_value as gender_name,
+            cvd.gender as is_gender_verified,
+            c.category as category_id,
+            dl2.domain_value as category_name,
+            c.pwd as pwd_id,
+            dl3.domain_value as pwd_name,
+            c.minority,
+            dl4.domain_value as minority_name,
+            c.religion as religion_id,
+            dl5.domain_value as religion_name,
+            cvd.religion as is_religion_verified,
+            c.dob as date_of_birth,
+            c.mobile_no,
+            cvd.mobile_no as is_mobile_verified,
+            c.nature_of_training,
+            c.aadhar,
+            c.bank_account,
+            c.house_no,
+            c.permanent_address,
+            c.created_on,
+            c.updated_on,
+        --	c.created_by,
+        --	c.updated_by,
+        --	coalesce(c.status) as status_id,
+            c.status as status_id,
+            dl6.domain_value as status,
+            c.batch_id,
+            c.block_id,
+            bm.block_name,
+            cvd.block as is_block_verified,
+            c.constituency_id,
+	        ac.constituency_name,
+            c.employer_id,
+            c.district_id,
+            dm.district_name,
+            cvd.district as is_district_verified,
+            c.sector_id,
+            sm.sector_name,
+            cvd.trained_sector as is_sector_verified,
+            c.state_id,
+            sm2.state_name,
+            c.training_center_id,
+            tc.training_center_name,
+            c.available_days,
+            c.available_time,
+            c.skill_id,
+            sm3.skill_code,
+            sm3.skill_name,
+            cvd.trained_skill as is_skill_verified,
+            cvd.updated_by as updated_cadres_id
+        from candidates c 
+        left join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
+        left join domain_lookup dl2 on dl2.domain_code = c.category::integer and dl2.domain_type = 'category'
+        left join domain_lookup dl3 on dl3.domain_code = c.pwd::integer and dl3.domain_type = 'pwd'
+        left join domain_lookup dl4 on dl4.domain_code = c.minority::integer and dl4.domain_type = 'minority'
+        left join domain_lookup dl5 on dl5.domain_code = c.religion::integer and dl5.domain_type = 'religion'
+        left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+        left join district_master dm on dm.id = c.district_id 
+        left join block_master bm on bm.id = c.block_id 
+        left join sector_master sm on sm.id = c.sector_id 
+        left join state_master sm2 on sm2.id = c.state_id 
+        left join training_center tc on tc.id = c.training_center_id 
+        left join skill_master sm3 on sm3.id = c.skill_id 
+        left join assembly_constituency ac on ac.id = c.constituency_id 
+        left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+        where c.id = 14773;
+        
+        
+----- available time ------        
+select c.id,
+	c.available_start_time,
+	c.available_end_time
+from candidates c where c.id  = 2;
+
+
+---
+select
+    cps.id,
+    sm.id as sector_id,
+    sm.sector_name,
+    sm2.id as skill_id,
+    sm2.skill_name,
+    cps.candidate_id 
+from candidate_preferred_services cps
+left join sector_master sm on sm.id = cps.sector_id 
+left join skill_master sm2 on sm2.sector_id = sm.id 
+        where cps.candidate_id = 2
+        
+        
+        select 
+            cpd.id, 
+            cpd.day_id,
+            dl.domain_value as days_name,
+            cpd.candidate_id   
+        from candidate_preferred_days cpd
+        left join domain_lookup dl on dl.domain_code = cpd.day_id::integer and dl.domain_type = 'preferred_days'
+        where cpd.candidate_id  = 2
+        
+        
+select
+    cps.id,
+    sm.id as sector_id,
+    sm.sector_name,
+    sm2.id as skill_id,
+    sm2.skill_name,
+    cps.candidate_id 
+from candidate_preferred_services cps
+left join sector_master sm on sm.id = cps.sector_id 
+left join skill_master sm2 on sm2.sector_id = sm.id 
+where cps.candidate_id = 98134
+
+
+
+
+
+select 
+    c.id as candidate_id,
+    c.candidate_code,
+    c.kaushal_panjee_id,
+    c.sanction_order,
+    c.kb_project_id,
+    c.village_address,
+    c.mpr_project_id,
+    c.pincode,
+    c.email,
+    cvd.email as is_email_verified,
+    c.qualification,
+    c.father_name,
+    c.mpr_id,
+    CONCAT_WS(' ', c.first_name, c.last_name) as full_name,
+    c.first_name as firstname,
+    c.last_name as lastname,
+    cvd.first_name as is_firstname_verified,
+    cvd.last_name as is_lastname_verified,
+    c.gender as gender_id,
+    dl.domain_value as gender_name,
+    cvd.gender as is_gender_verified,
+    c.category as category_id,
+    dl2.domain_value as category_name,
+    c.pwd as pwd_id,
+    dl3.domain_value as pwd_name,
+    c.minority,
+    dl4.domain_value as minority_name,
+    c.religion as religion_id,
+    dl5.domain_value as religion_name,
+    cvd.religion as is_religion_verified,
+    c.dob as date_of_birth,
+    c.mobile_no,
+    cvd.mobile_no as is_mobile_verified,
+    c.nature_of_training,
+    c.aadhar,
+    c.bank_account,
+    c.house_no,
+    c.permanent_address,
+    c.created_on,
+    c.updated_on,
+--	c.created_by,
+--	c.updated_by,
+--	coalesce(c.status) as status_id,
+    c.status as status_id,
+    dl6.domain_value as status,
+    c.batch_id,
+    c.block_id,
+    bm.block_name,
+    cvd.block as is_block_verified,
+    c.constituency_id,
+    ac.constituency_name,
+    c.employer_id,
+    c.district_id,
+    dm.district_name,
+    cvd.district as is_district_verified,
+    c.sector_id,
+    sm.sector_name,
+    cvd.trained_sector as is_sector_verified,
+    c.state_id,
+    sm2.state_name,
+    c.training_center_id,
+    tc.training_center_name,
+    c.available_days,
+    c.skill_id,
+    sm3.skill_code,
+    sm3.skill_name,
+    cvd.trained_skill as is_skill_verified,
+    cvd.updated_by as updated_cadres_id,
+    c.available_start_time,
+    c.available_end_time,
+    c.interest_freelancer as is_gig_worker,
+    c.is_verified,
+    c.remarks
+from candidates c 
+left join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
+left join domain_lookup dl2 on dl2.domain_code = c.category::integer and dl2.domain_type = 'category'
+left join domain_lookup dl3 on dl3.domain_code = c.pwd::integer and dl3.domain_type = 'pwd'
+left join domain_lookup dl4 on dl4.domain_code = c.minority::integer and dl4.domain_type = 'minority'
+left join domain_lookup dl5 on dl5.domain_code = c.religion::integer and dl5.domain_type = 'religion'
+left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+left join district_master dm on dm.id = c.district_id and dm.status = 1
+left join block_master bm on bm.id = c.block_id and bm.status = 1
+left join sector_master sm on sm.id = c.sector_id and sm.status = 1
+left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+left join training_center tc on tc.id = c.training_center_id and tc.status = 1
+left join skill_master sm3 on sm3.id = c.skill_id and sm3.status = 1
+left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+left join candidate_verification_details cvd on cvd.candidate_id = c.id
+where c.status = 1 and c.id = 126678        --98296
+        
+
+---         
+select
+    cpl.id as candidate_preferred_id,
+    dm.district_name,
+    dm.id as district_id,
+    cpl.candidate_id 
+from candidate_preferred_location cpl
+left join district_master dm on dm.id = cpl.district_id 
+where cpl.status = 1 and cpl.candidate_id = 98296;
+
+
+
+select 
+	c.id,
+	dm.doc_id ,
+	dm.doc_location,  
+	dm.doc_name ,
+	dm.doc_path,
+	dm.doc_file_type,
+	dl.domain_value 
+from candidates c 
+left join document_master dm on dm.ref_id = c.id 
+left join domain_lookup dl on dl.domain_code = dm.upload_doc_type  
+where dl.domain_code = 2 and dl.domain_type  = 'doc_type'
+and c.id = 97210;
+
+
+select 
+            c.id,
+            dm.doc_id ,
+            dm.doc_location,  
+            dm.doc_name ,
+            dm.doc_path,
+            dm.doc_file_type,
+            dl.domain_value 
+        from candidates c 
+        left join document_master dm on dm.ref_id = c.id 
+        left join domain_lookup dl on dl.domain_code = dm.upload_doc_type and dl.domain_type = 'doc_type'
+        where dl.domain_code = 2
+        
+        
+        
+        
+select
+    cps.id,
+    sm.id as sector_id,
+    sm.sector_name,
+    sm2.id as skill_id,
+    sm2.skill_name,
+    s.id as service_id,
+    s.service_name ,
+    s.service_code ,
+    cps.candidate_id,
+    cps.others_service_name 
+from candidate_preferred_services cps
+left join sector_master sm on sm.id = cps.sector_id 
+left join skill_master sm2 on sm2.id = cps.skill_id
+left join services s on s.id = cps.service_id
+where cps.status = 1 and cps.candidate_id = 93327;
+
+--387354
+select * from candidate_preferred_services cps where cps.candidate_id  = 98212;
+
+
+SELECT
+    dmst.doc_id,
+    dl.domain_value AS doc_type_name,
+    dl.domain_code AS doc_type_id,
+    dmst.doc_path,
+    dmst.doc_file_type,
+    dmst.doc_name
+FROM document_master dmst
+JOIN domain_lookup dl
+    ON dl.domain_code = dmst.upload_doc_type
+AND dl.domain_type = 'doc_type'
+WHERE dmst.ref_id =98212
+AND dmst.status = 1
+AND dl.status = 1
+ORDER BY dl.domain_code asc
+
+
+select
+        ce.id as candidate_experience_id,
+        ce.candidate_id,
+        sm.id as sector_id,
+        sm.sector_name,
+        sk.id as skill_id,
+        sk.skill_name,
+        ce.experience_duration,
+        ce.self_employed as self_employed,
+        ce.organization_name as organization_name,
+        ce.job_role
+    from candidate_experience ce
+    left join sector_master sm on sm.id = ce.sector_id
+    left join skill_master sk on sk.id = ce.skill_id
+    where ce.status = 1 and ce.candidate_id = 97158
+    
+    
+    select 
+            c.id as candidate_id,
+            tc.training_center_name,
+            bm.start_date as training_start_date,
+            bm.end_date as training_end_date,
+            sm.id as training_state_id,
+            sm.state_name as training_state_name,
+            dm.id as training_distict_id,
+            dm.district_name as training_district_name,
+            sm2.id as training_sector_id,
+            sm2.sector_name as training_sector_name,
+            ct.sector_others as training_sector_others,
+            sm3.id as training_skill_id,
+            sm3.skill_name as training_skill_name,
+            ct.skill_others as training_skill_others
+        from candidates c
+        left join candidate_training ct on ct.candidate_id  = c.id 
+        left join training_center tc on tc.id  = ct.training_id  and tc.status = 1
+        left join batch_master bm on bm.id = c.batch_id and bm.status = 1
+        left join state_master sm on sm.id = tc.state_id and sm.status = 1
+        left join district_master dm on dm.id = tc.district_id and dm.status = 1
+        left join sector_master sm2 on sm2.id = ct.sector_id and sm2.status = 1
+        left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+        where c.status = 1 and c.id = 61730
+        
+        
+        select 
+            cpd.id, 
+            cpd.day_id,
+            dl.domain_value as days_name,
+            cpd.candidate_id   
+        from candidate_preferred_days cpd
+        left join domain_lookup dl on dl.domain_code = cpd.day_id::integer and dl.domain_type = 'preferred_days'
+        where cpd.status = 1 and cpd.candidate_id  = 97158
+        
+        
+         select
+            cps.id,
+            sm.id as sector_id,
+            sm.sector_name,
+            sm2.id as skill_id,
+            sm2.skill_name,
+            s.id as service_id,
+            s.service_name,
+            s.service_code,
+            cps.candidate_id,
+            cps.others_service_name 
+        from candidate_preferred_services cps
+        left join sector_master sm on sm.id = cps.sector_id 
+        left join skill_master sm2 on sm2.id = cps.skill_id
+        left join services s on s.id = cps.service_id
+        where cps.status = 1 and cps.candidate_id = 97158
+        
+        
+        select
+            cpl.id as candidate_preferred_id,
+            dm.district_name,
+            dm.id as district_id,
+            cpl.candidate_id 
+        from candidate_preferred_location cpl
+        left join district_master dm on dm.id = cpl.district_id 
+        where cpl.status = 1 and cpl.candidate_id = 97158
+        
+        
+        select
+            ce.id as candidate_experience_id,
+            ce.candidate_id,
+            sm.id as sector_id,	
+            sm.sector_name,
+            sk.id as skill_id,
+            sk.skill_name,
+            ce.experience_duration,
+            ce.self_employed as self_employed,
+            ce.organization_name as organization_name,
+            ce.job_role
+        from candidate_experience ce
+        left join sector_master sm on sm.id = ce.sector_id
+        left join skill_master sk on sk.id = ce.skill_id
+        where ce.status = 1 and ce.candidate_id = 97158
+        
+        
+  select * from citizen c where c.id = 4;
+        
+        
+        SELECT 
+            c.id as citizen_id,
+            c.first_name,
+            c.middle_name,
+            c.last_name,
+            c.user_type,
+            dl2.domain_value as citizen_user_type,
+            c.gender,
+            dl.domain_value as citizen_gender,
+            c.date_of_birth as citizen_dob,
+            c.mobile_number,
+            c.email,
+            c.status,
+            c.state_id,
+            sm.state_name,
+            c.district_id,
+            dm.district_name,
+            c.block_id,
+            bm.block_name,
+            c.created_by,
+            c.created_on,
+            c.updated_by,
+            c.updated_on
+        from citizen c
+        left join domain_lookup dl on dl.domain_code = c.gender::integer and dl.domain_type = 'gender'
+        left join domain_lookup dl2 on dl2.domain_code = c.user_type::integer and dl2.domain_type = 'user_type'
+        left join state_master sm on sm.id = c.state_id and sm.status = 1
+        left join block_master bm on bm.id = c.block_id and bm.status = 1
+        left join district_master dm on dm.id = c.district_id and dm.status = 1
+        where c.id = 4
+        
+        
+        
+        
+        
+        select * from services s where s.id = 21;
+ select * from candidates c where c.id = 100645;
+ 
+
+
+-- Citizen Booking List ---	
+select 
+	sr.id as service_request_id,
+	sr.service_code,
+	sr.status as service_request_status_id,
+	dl.domain_value as service_request_status,
+	sr.citizen_id,
+	concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+	sr.created_on as service_request_created,
+	CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+	(
+	    SELECT COUNT(*)
+	    FROM service_review sr
+	    WHERE sr.candidate_id = cc.id
+	) AS total_reviews,
+	(
+	    SELECT COALESCE(ROUND(AVG(sr.ratings), 1), 0)
+	    FROM service_review sr
+	    WHERE sr.candidate_id = cc.id
+	) AS avg_rating,
+	sr.district_id,
+	dm.district_name,
+	sr.sector_id,
+	sm.sector_name,
+	sr.service_id,
+	s.service_name,
+	sr.skill_id,
+	sm2.skill_name,
+	coalesce(sr.service_desc, 'N/A') as service_desc,
+	dm_profile.doc_path AS gig_profile_path,
+	dm_profile.doc_location  AS doc_location
+from service_request sr 
+left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+left join citizen c on c.id = sr.citizen_id
+left join candidates cc on cc.id = sr.assigned_to 
+left join district_master dm on dm.id = sr.district_id
+left join sector_master sm on sm.id = sr.sector_id 
+left join services s on s.id = sr.service_id 
+left join skill_master sm2 on sm2.id = sr.skill_id 
+left join document_master dm_profile on dm_profile.ref_id = cc.id and exists (select 1 from domain_lookup dl where dl.domain_code = dm_profile.upload_doc_type and dl.domain_type = 'doc_type' and dl.domain_code = 2)
+where sr.citizen_id = 12;
+
+
+
+--- query by sourav da  for booking service
+select 
+	CONCAT_WS(' ', c2.first_name, c2.last_name) AS citizen_name,
+	CONCAT_WS(' ', c.first_name, c.last_name) AS gigworker_name,
+	sr.id as service_req_id,
+	s.service_name,
+	TO_CHAR(sr.assigned_on AT TIME ZONE 'Asia/Kolkata',  'Mon FMDD, YYYY') as assign_date,
+	sr.service_code,
+	(
+	    SELECT COUNT(*)
+	    FROM service_review sr
+	    WHERE sr.candidate_id = c.id
+	) AS total_reviews,
+	(
+	    SELECT COALESCE(ROUND(AVG(sr.ratings), 1), 0)
+	    FROM service_review sr
+	    WHERE sr.candidate_id = c.id
+	) AS avg_rating,
+	dl.domain_value as status,
+	dm_profile.doc_path AS gig_profile_path,
+	dm_profile.doc_location  AS doc_location
+	from service_request sr 
+	left join candidates c on c.id = sr.assigned_to 
+	left join citizen c2 on c2.id  = sr.citizen_id 
+	left join services s on s.id = sr.service_id 
+	left join domain_lookup dl on dl.domain_code = sr.status 
+	LEFT JOIN document_master dm_profile
+	    ON dm_profile.ref_id = c.id
+	 AND EXISTS (
+	   SELECT 1
+	   FROM domain_lookup dl
+	   WHERE dl.domain_code = dm_profile.upload_doc_type
+	   AND dl.domain_type = 'doc_type'
+	   AND dl.domain_code = 2
+	)
+where dl.domain_type = 'service_status' and 
+sr.citizen_id = 12;
+
+
+
+select 
+        sr.id as service_request_id,
+        sr.service_code,
+        sr.status as service_request_status_id,
+        dl.domain_value as service_request_status,
+        sr.citizen_id,
+        concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+        sr.created_on as service_request_created,
+        CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+        (
+            select count(*)
+            from service_review sr
+            where sr.candidate_id = cc.id
+        ) as total_reviews,
+        (
+            select coalesce(round(AVG(sr.ratings), 1), 0)
+            from service_review sr
+            where sr.candidate_id = cc.id
+        ) as avg_rating,
+        sr.district_id,
+        dm.district_name,
+        sr.sector_id,
+        sm.sector_name,
+        sr.service_id,
+        s.service_name,
+        sr.skill_id,
+        sm2.skill_name,
+        coalesce(sr.service_desc, 'N/A') as service_desc,
+        sr.preferred_day as service_preferred_day,
+        sr.preferred_date as service_requested_date,
+        dm_profile.doc_path AS gig_profile_path,
+        dm_profile.doc_location  AS doc_location,
+        ca.address_line_1 as service_requested_address_line1,
+        ca.address_line_2 as service_requested_address_line2,
+        ca.city as service_requested_city,
+        ca.is_primary as is_primary_service_location,
+        ca.land_mark as service_requested_landmark,
+        ca.lattitude as service_lattitude,
+        ca.longitude as service_longtitude,
+        ca.pincode as service_pincode
+    from service_request sr 
+    left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+    left join citizen c on c.id = sr.citizen_id
+    left join citizen_address ca on ca.id = sr.address_id and ca.status = 1
+    left join candidates cc on cc.id = sr.assigned_to 
+    left join district_master dm on dm.id = sr.district_id
+    left join sector_master sm on sm.id = sr.sector_id 
+    left join services s on s.id = sr.service_id 
+    left join skill_master sm2 on sm2.id = sr.skill_id 
+    left join document_master dm_profile on dm_profile.ref_id = cc.id 
+        and exists (select 1 from domain_lookup dl where dl.domain_code = dm_profile.upload_doc_type and dl.domain_type = 'doc_type' and dl.domain_code = 2)
+    where sr.citizen_id = 12
+    order by sr.created_on desc
+        
+        
+        
+        
+select 
+            sr.id as service_request_id,
+            sr.service_code,
+            sr.status as service_request_status_id,
+            dl.domain_value as service_request_status,
+            sr.citizen_id,
+            concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+            sr.created_on as service_request_created,
+            sr.assigned_to as service_requested_to,
+            CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+            case 
+            	when sr.status = 2 then c.mobile_number
+            	else 'N/A'
+            end as citizen_mobile_number,
+            sr.district_id,
+            dm.district_name as service_district,
+            sr.sector_id,
+            sm.sector_name,
+            sr.service_id,
+            s.service_name,
+            sr.skill_id,
+            sm2.skill_name,
+            coalesce(sr.service_desc, 'N/A') as service_desc,
+            sr.address_id as citizen_service_address_id,
+            srl.remarks as service_remarks,
+            sr.preferred_day as service_preferred_day,
+            sr.preferred_date as service_requested_date,
+            dl2.domain_value as service_preferred_day_name,
+            ca.address_line_1 as service_address_line_1,
+            ca.address_line_2 as service_address_line_2,
+            ca.land_mark as service_land_mark,
+            ca.city as service_city,
+            ca.pincode as service_pincode,
+            ca.lattitude as service_lattitude,
+            ca.longitude as service_longitude,
+            ca.district_id,
+            ca.state as service_state,
+            ca.country as service_country,
+            ca.is_primary as service_is_primary,
+            (select count(*) from service_review srv where srv.candidate_id = cc.id) as total_reviews,
+            (select coalesce(round(AVG(srv.ratings), 1), 0) from service_review srv where srv.candidate_id = cc.id) as avg_rating
+        from service_request sr 
+        inner join service_request_lifecycle srl on srl.service_request_id = sr.id
+        inner join candidates cc on cc.id = sr.assigned_to
+        inner join citizen c on c.id = sr.citizen_id
+        left join citizen_address ca on ca.id = sr.address_id 
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join domain_lookup dl2 on dl2.domain_code = sr.status and dl2.domain_type = 'preferred_days'
+        left join district_master dm on dm.id = sr.district_id
+        left join sector_master sm on sm.id = sr.sector_id 
+        left join services s on s.id = sr.service_id 
+        left join skill_master sm2 on sm2.id = sr.skill_id 
+        where sr.assigned_to = 91061 /*and srl.lifecycle_status = 1*/  and sr.status = 1
+        order by sr.created_on desc
+        
+        
+        select * from service_request sr where sr.status = 1
+        
+        
+        
+  select 
+            sr.id as service_request_id,
+            sr.service_code,
+            sr.status as service_request_status_id,
+            dl.domain_value as service_request_status,
+            sr.citizen_id,
+            concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+            sr.created_on as service_request_created,
+            sr.assigned_to as service_requested_to,
+            CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+            case 
+            	when sr.status = 2 then c.mobile_number
+            	else 'N/A'
+            end as citizen_mobile_number,
+            sr.district_id,
+            dm.district_name as service_district,
+            sr.sector_id,
+            sm.sector_name,
+            sr.service_id,
+            s.service_name,
+            sr.skill_id,
+            sm2.skill_name,
+            coalesce(sr.service_desc, 'N/A') as service_desc,
+            sr.address_id as citizen_service_address_id,
+--            srl.remarks as service_remarks,
+            sr.preferred_day as service_preferred_day,
+            sr.preferred_date as service_requested_date,
+            dl2.domain_value as service_preferred_day_name,
+            ca.address_line_1 as service_address_line_1,
+            ca.address_line_2 as service_address_line_2,
+            ca.land_mark as service_land_mark,
+            ca.city as service_city,
+            ca.pincode as service_pincode,
+            ca.lattitude as service_lattitude,
+            ca.longitude as service_longitude,
+            ca.district_id,
+            ca.state as service_state,
+            ca.country as service_country,
+            ca.is_primary as service_is_primary,
+            (select count(*) from service_review srv where srv.candidate_id = cc.id) as total_reviews,
+            (select coalesce(round(AVG(srv.ratings), 1), 0) from service_review srv where srv.candidate_id = cc.id) as avg_rating
+        from service_request sr 
+--        inner join service_request_lifecycle srl on srl.service_request_id = sr.id
+        inner join candidates cc on cc.id = sr.assigned_to
+        inner join citizen c on c.id = sr.citizen_id
+        left join citizen_address ca on ca.id = sr.address_id 
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join domain_lookup dl2 on dl2.domain_code = sr.status and dl2.domain_type = 'preferred_days'
+        left join district_master dm on dm.id = sr.district_id
+        left join sector_master sm on sm.id = sr.sector_id 
+        left join services s on s.id = sr.service_id 
+        left join skill_master sm2 on sm2.id = sr.skill_id 
+        where sr.assigned_to = 91061 
+        order by sr.created_on desc
+        
+        
+        
+        select * from service_request sr where sr.id =3;
+        select * from service_request_lifecycle srl where srl.service_request_id = 3;
+        
+        
+        
+        select
+            sr.id as service_request_id,
+            sr.service_code,
+            sr.status as service_request_status_id,
+            dl.domain_value as service_request_status,
+            sr.citizen_id,
+            concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+            sr.created_on as service_request_created,
+            sr.assigned_to as service_requested_to,
+            CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+            case
+                when sr.status = 2 then c.mobile_number
+                else 'N/A'
+            end as citizen_mobile_number,
+            sr.district_id,
+            dm.district_name as service_district,
+            sr.sector_id,
+            sm.sector_name,
+            sr.service_id,
+            s.service_name,
+            sr.skill_id,
+            sm2.skill_name,
+            coalesce(sr.service_desc, 'N/A') as service_desc,
+            sr.address_id as citizen_service_address_id,
+         --   srl.remarks as service_remarks,
+            sr.preferred_day as service_preferred_day,
+            sr.preferred_date as service_requested_date,
+            dl2.domain_value as service_preferred_day_name,
+            ca.address_line_1 as service_address_line_1,
+            ca.address_line_2 as service_address_line_2,
+            ca.land_mark as service_land_mark,
+            ca.city as service_city,
+            ca.pincode as service_pincode,
+            ca.lattitude as service_lattitude,
+            ca.longitude as service_longitude,
+            ca.district_id,
+            ca.state as service_state,
+            ca.country as service_country,
+            ca.is_primary as service_is_primary,
+            (select count(*) from service_review srv where srv.candidate_id = cc.id) as total_reviews,
+            (select coalesce(round(AVG(srv.ratings), 1), 0) from service_review srv where srv.candidate_id = cc.id) as avg_rating
+        from service_request sr
+    --    inner join service_request_lifecycle srl on srl.service_request_id = sr.id
+        inner join candidates cc on cc.id = sr.assigned_to
+        inner join citizen c on c.id = sr.citizen_id
+        left join citizen_address ca on ca.id = sr.address_id
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join domain_lookup dl2 on dl2.domain_code = sr.status and dl2.domain_type = 'preferred_days'
+        left join district_master dm on dm.id = sr.district_id
+        left join sector_master sm on sm.id = sr.sector_id
+        left join services s on s.id = sr.service_id
+        left join skill_master sm2 on sm2.id = sr.skill_id
+        where sr.assigned_to = 91061
+        order by sr.created_on desc
+        
+        
+        
+        select ft."token" from fcm_token ft where ft.user_id = 19 and ft.user_type = 3 and ft.is_active = true;
+        
+        
+        
+        select s.service_name from services s where lower(s.service_name) like '%ma%'
+        
+        
+        select 
+            s.service_name 
+        from services s 
+        where lower(s.service_name) like '%home guard%'
+        
+        
+       select 
+            dk.keyword 
+        from device_keyword dk
+        where dk.device_uid = 'c8XVywidQjq3X22GAmeGar'
+        order by dk.created_on desc
+        limit 6
+        
+        
+        
+        SELECT 
+        	dm.doc_id,	
+        	dm.doc_path
+                FROM document_master dm
+                WHERE dm.ref_id = 55
+                AND EXISTS (
+                    SELECT 1
+                    FROM domain_lookup dl
+                    WHERE dl.domain_code = dm.upload_doc_type
+                        AND dl.domain_type = 'display_image_type'
+                        AND dl.domain_code = 3
+                )
+                ORDER BY dm.doc_id DESC
+                LIMIT 1
+                
+                
+                
+         select 
+            dk.id as keyword_id,
+            dk.keyword,
+            dk.keyword_id as service_id
+        from device_keyword dk
+        where dk.device_uid = 'c8XVywidQjq3X22GAmeGar'
+        order by dk.created_on desc
+        limit 6
+        
+        
+        
+        select
+			cl.id,
+			cl.candidate_id,
+            c.candidate_code,
+			cl.ip_address as candidate_ip_address,
+			cl.is_active,
+			cl.latitude,
+			cl.longitude,
+			cl.mac_id as candidate_mac_id,
+			c.permanent_address,
+            c.house_no,
+            c.pincode,
+            c.block_id,
+            bm.block_name,
+            c.district_id,
+            dm.district_name,
+            c.state_id,
+            sm.state_name,
+            c.village_address_id,
+            vm.village_name 
+        from cadres_location cl 
+        inner join candidates c on cl.candidate_id = c.id  
+        left join block_master bm on bm.id = c.block_id 
+        left join district_master dm on dm.id = c.district_id 
+        left join state_master sm on sm.id = c.state_id 
+        left join village_master vm on vm.village_id = c.village_address_id 
+        where c.id = 91061;
+        
+        
+        select 
+        	c.id as preferred_loc_id,
+        	c.status,
+        	c.district_id,
+        	dm.district_name,
+        	c.candidate_id 
+        from candidate_preferred_location c
+        left join district_master dm on dm.id = c.district_id 
+        where c.candidate_id = 91061
+        
+        
+        
+        SELECT 
+            COALESCE(ROUND(AVG(sr.ratings), 1), 0)
+        FROM service_review sr
+        inner join candidates c on sr.candidate_id = c.id
+        WHERE c.id = 91061
+        
+        
+        
+        SELECT
+            CONCAT_WS(' ', c.first_name, c.last_name) AS full_name,
+            TO_CHAR(c.available_start_time AT TIME ZONE 'Asia/Kolkata', 'HH12:MI AM') || ' - ' ||
+            TO_CHAR(c.available_end_time AT TIME ZONE 'Asia/Kolkata', 'HH12:MI AM') AS available_time,
+            dmp.doc_path AS profile_path,
+            dmp.doc_location  AS doc_location,
+            (
+                SELECT COUNT(*)
+                FROM service_review sr
+                WHERE sr.candidate_id = c.id
+            ) AS total_reviews,
+            (
+                SELECT 
+                    COALESCE(ROUND(AVG(sr.ratings), 1), 0)
+                FROM service_review sr
+                WHERE sr.candidate_id = c.id
+            ) AS avg_rating_out_of_5,
+            (
+                SELECT sm.service_name
+                FROM services sm
+                WHERE sm.id = 55
+            ) AS service_name,
+            (
+                SELECT dm.doc_path
+                FROM document_master dm
+                WHERE dm.ref_id = 55
+                AND EXISTS (
+                    SELECT 1
+                    FROM domain_lookup dl
+                    WHERE dl.domain_code = dm.upload_doc_type
+                        AND dl.domain_type = 'display_image_type'
+                        AND dl.domain_code = 3
+                )
+                ORDER BY dm.doc_id DESC
+                LIMIT 1
+            ) AS service_doc_path,
+            c.available_start_time,
+            c.available_end_time
+        FROM candidates c
+        LEFT JOIN document_master dmp ON dmp.ref_id = c.id
+        AND EXISTS ( SELECT 1 FROM domain_lookup dl  WHERE dl.domain_code = dmp.upload_doc_type AND dl.domain_type = 'doc_type' AND dl.domain_code = 2)
+        WHERE c.id = 91061
+        
+        
+        
+        select * from candidates c where c.first_name like '%Sayan%'
+        
+        
+        SELECT
+            c.id AS candidate_id,
+            c.first_name,
+            c.last_name,
+            c.mobile_no,
+            c.available_start_time,
+            c.available_end_time,
+            c.candidate_code,
+            c.candidate_type,
+            dl2.domain_value as candidate_type_name,
+            ARRAY_REMOVE(ARRAY_AGG(DISTINCT cpd.day_id), NULL) AS day_ids,
+            ARRAY_REMOVE(ARRAY_AGG(DISTINCT dl.domain_value), NULL) AS days_work,
+            (
+                SELECT COUNT(*)
+                FROM service_review sr
+                WHERE sr.candidate_id = c.id
+            ) AS total_reviews,
+            (
+                SELECT 
+                    COALESCE(ROUND(AVG(sr.ratings), 1), 0)
+                FROM service_review sr
+                WHERE sr.candidate_id = c.id
+            ) AS avg_rating_out_of_5
+        FROM candidate_preferred_services cps
+        JOIN candidates c ON c.id = cps.candidate_id
+        JOIN candidate_preferred_location cpl ON cpl.candidate_id = c.id AND cpl.status = 1 AND cpl.district_id = 25
+        LEFT JOIN candidate_preferred_days cpd ON cpd.candidate_id = c.id AND cpd.status = 1
+        LEFT JOIN domain_lookup dl ON dl.domain_code = cpd.day_id AND dl.domain_type = 'preferred_days' AND dl.status = 1
+        left join domain_lookup dl2 on dl2.domain_code = c.candidate_type and dl2.domain_type = 'candidate_type'
+        where cps.status = 1 AND c.status = 1 AND cpl.status = 1 AND cps.service_id = 22
+            AND EXISTS ( SELECT 1 FROM candidate_preferred_days cpd2 WHERE cpd2.candidate_id = c.id AND cpd2.status = 1 AND cpd2.day_id = 7)
+        GROUP by c.id, c.first_name, c.last_name, c.mobile_no, c.available_start_time, c.available_end_time, c.candidate_code, dl2.domain_value
+        ORDER BY c.first_name;
+        
+        
+        select 
+        	sr.id as service_request_id,
+        	sr.citizen_id,
+        	concat_ws(' ', c.first_name, c.last_name) AS citizen_full_name,
+        	sr.status as service_status,
+        	dl.domain_value as service_status_name,
+        	sr.created_on as service_requested_date,
+        	sr.block_id as service_block_id,
+        	bm.block_name as service_block_name,
+        	sr.district_id as service_district_id,
+        	dm.district_name as service_district_name,
+        	sr.sector_id as service_sector_id,
+        	sm.sector_name as service_sector_name,
+        	sr.service_id,
+        	s.service_name,
+        	sr.skill_id,
+        	sm2.skill_name,
+        	sr.is_active as service_active,
+        	sr.assigned_to as candidate_id,
+        	concat_ws(' ', c2.first_name, c2.last_name) AS candidate_full_name,
+        	sr.service_code,
+        	sr.service_desc,
+        	sr.address_id,
+        	ca.address_line_1 as citizen_address_line1,
+        	ca.address_line_2 as citizen_address_line2,
+        	sr.preferred_day as service_preferred_day_id,
+        	dl2.domain_value as service_preferred_day,
+        	sr.preferred_date,
+        	concat_ws('-', sr.start_time, sr.end_time) AS service_preferred_time,
+        	sr.booking_code
+        from service_request sr 
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join block_master bm on bm.id = sr.block_id 
+        left join citizen c on c.id = sr.citizen_id 
+        left join district_master dm on dm.id = sr.district_id 
+        left join sector_master sm on sm.id = sr.sector_id 
+        left join services s on s.id = sr.service_id 
+        left join skill_master sm2 on sm2.id = sr.skill_id
+        left join candidates c2 on c2.id = sr.assigned_to
+        left join citizen_address ca on ca.id = sr.address_id
+        left join domain_lookup dl2 on dl2. domain_code = sr.preferred_day and dl2.domain_type = 'preferred_days'
+        where sr.status = 2 and sr.assigned_on::date = '2026-01-29' and sr.assigned_to = 91061 
+        
+        
+        
+       select 
+        	sr.id as service_request_id,
+        	sr.citizen_id,
+        	concat_ws(' ', c.first_name, c.last_name) AS citizen_full_name,
+        	sr.status as service_status,
+        	dl.domain_value as service_status_name,
+        	sr.created_on as service_requested_date,
+        	sr.block_id as service_block_id,
+        	bm.block_name as service_block_name,
+        	sr.district_id as service_district_id,
+        	dm.district_name as service_district_name,
+        	sr.sector_id as service_sector_id,
+        	sm.sector_name as service_sector_name,
+        	sr.service_id,
+        	s.service_name,
+        	sr.skill_id,
+        	sm2.skill_name,
+        	sr.is_active as service_active,
+        	sr.assigned_to as candidate_id,
+        	concat_ws(' ', c2.first_name, c2.last_name) AS candidate_full_name,
+        	sr.service_code,
+        	sr.service_desc,
+        	sr.address_id,
+        	ca.address_line_1 as citizen_address_line1,
+        	ca.address_line_2 as citizen_address_line2,
+        	sr.preferred_day as service_preferred_day_id,
+        	dl2.domain_value as service_preferred_day,
+        	sr.preferred_date,
+        	concat_ws('-', sr.start_time, sr.end_time) AS service_preferred_time,
+        	sr.booking_code
+        from service_request sr 
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join block_master bm on bm.id = sr.block_id 
+        left join citizen c on c.id = sr.citizen_id 
+        left join district_master dm on dm.id = sr.district_id 
+        left join sector_master sm on sm.id = sr.sector_id 
+        left join services s on s.id = sr.service_id 
+        left join skill_master sm2 on sm2.id = sr.skill_id
+        left join candidates c2 on c2.id = sr.assigned_to
+        left join citizen_address ca on ca.id = sr.address_id
+        left join domain_lookup dl2 on dl2. domain_code = sr.preferred_day and dl2.domain_type = 'preferred_days'
+        where sr.status = 2 and sr.assigned_on::date = '2021-01-29' and sr.assigned_to = 91061 
+        
+        
+        
+        
+        select
+            sr.id as service_request_id,
+            sr.service_code,
+            sr.status as service_request_status_id,
+            dl.domain_value as service_request_status,
+            sr.citizen_id,
+            concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+            sr.created_on as service_request_created,
+            cc.id as gigworker_id,
+            CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+            case
+                when sr.status = 2 then cc.mobile_no
+                else 'N/A'
+            end as gigworker_mobile_number,
+            (
+                select count(*)
+                from service_review sr
+                where sr.candidate_id = cc.id
+            ) as total_reviews,
+            (
+                select coalesce(round(AVG(sr.ratings), 1), 0)
+                from service_review sr
+                where sr.candidate_id = cc.id
+            ) as avg_rating,
+            sr.district_id,
+            dm.district_name,
+            sr.sector_id,
+            sm.sector_name,
+            sr.service_id,
+            s.service_name,
+            sr.skill_id,
+            sm2.skill_name,
+            coalesce(sr.service_desc, 'N/A') as service_desc,
+            sr.preferred_day as service_preferred_day,
+            sr.preferred_date as service_requested_date,
+            dm_profile.doc_path AS gig_profile_path,
+            dm_profile.doc_location  AS doc_location,
+            ca.id as service_requested_address_id,
+            ca.address_line_1 as service_requested_address_line1,
+            ca.address_line_2 as service_requested_address_line2,
+            ca.city as service_requested_city,
+            ca.is_primary as is_primary_service_location,
+            ca.land_mark as service_requested_landmark,
+            ca.lattitude as service_lattitude,
+            ca.longitude as service_longtitude,
+            ca.pincode as service_pincode,
+            sr.booking_code as booking_code
+        from service_request sr
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join citizen c on c.id = sr.citizen_id
+        left join citizen_address ca on ca.id = sr.address_id and ca.status = 1
+        left join candidates cc on cc.id = sr.assigned_to
+        left join district_master dm on dm.id = sr.district_id
+        left join sector_master sm on sm.id = sr.sector_id
+        left join services s on s.id = sr.service_id
+        left join skill_master sm2 on sm2.id = sr.skill_id
+        left join document_master dm_profile on dm_profile.ref_id = cc.id
+            and exists (select 1 from domain_lookup dl where dl.domain_code = dm_profile.upload_doc_type and dl.domain_type = 'doc_type' and dl.domain_code = 2)
+        where sr.citizen_id = 33
+        order by sr.created_on desc
+
+        
+        select 
+                s.id as service__request_id,
+                s.service_code,
+                s.status,
+                s.district_id,
+                s.sector_id,
+                sm.sector_name,
+                s.skill_id,
+                sm2.skill_name,
+                s.service_id,
+                ss.service_name,
+                s.candidate_id,
+                s.is_active,
+                s.service_desc,
+                s.booking_code,
+                s.created_on as service_request_created
+            from service_request s
+            left join sector_master sm on sm.id = s.sector_id 
+            left join skill_master sm2 on sm2.id = s.skill_id
+            left join services ss on s.id = s.service_id
+            where s.assigned_to = 91061 and s.status = 2 and s.citizen_id = 12 and s.service_id = 38;
+        
+        
+        select *
+        from decline_question_master dqm;
+        
+        
+        
+        
+  SELECT
+    CONCAT_WS(' ', c.first_name, c.last_name) AS full_name,
+    TO_CHAR(c.available_start_time AT TIME ZONE 'Asia/Kolkata', 'HH12:MI AM') || ' - ' ||
+    TO_CHAR(c.available_end_time AT TIME ZONE 'Asia/Kolkata', 'HH12:MI AM') AS available_time,
+    dmp.doc_path AS profile_path,
+    dmp.doc_location  AS doc_location,
+    (
+        SELECT COUNT(*)
+        FROM service_review sr
+        WHERE sr.candidate_id = c.id
+    ) AS total_reviews,
+    (
+        SELECT
+            COALESCE(ROUND(AVG(sr.ratings), 1), 0)
+        FROM service_review sr
+        WHERE sr.candidate_id = c.id
+    ) AS avg_rating_out_of_5,
+    (
+        SELECT sm.service_name
+        FROM services sm
+        WHERE sm.id = 32
+    ) AS service_name,
+    (
+        SELECT dm.doc_path
+        FROM document_master dm
+        WHERE dm.ref_id = 32
+        AND EXISTS (
+            SELECT 1
+            FROM domain_lookup dl
+            WHERE dl.domain_code = dm.upload_doc_type
+                AND dl.domain_type = 'display_image_type'
+                AND dl.domain_code = 3
+        )
+        ORDER BY dm.doc_id DESC
+        LIMIT 1
+    ) AS service_doc_path,
+    c.available_start_time,
+    c.available_end_time,
+    c.candidate_type,
+    dl2.domain_value as candidate_type_name
+FROM candidates c
+LEFT JOIN document_master dmp ON dmp.ref_id = c.id
+left join domain_lookup dl2 on dl2.domain_code = c.candidate_type and dl2.domain_type = 'candidate_type'
+left join domain_lookup dl on dl.domain_code = dmp.upload_doc_type AND dl.domain_type = 'doc_type' AND dl.domain_code = 2
+--        AND EXISTS ( SELECT 1 FROM domain_lookup dl  WHERE dl.domain_code = dmp.upload_doc_type AND dl.domain_type = 'doc_type' AND dl.domain_code = 2)
+WHERE c.id = 97204
+        
+        
+        
+        
+        select * from document_master dm where dm.ref_id = 32;
+        
+        
+        
+ 
+ --- Admin Details --   
+  select 
+  	aud.id as admin_details_id,
+  	aud.official_name as admin_name,
+  	aud.official_code as admin_code,
+  	aud.official_phone as admin_phone,
+  	aud.official_email as admin_email,
+  	aud.is_active as admin_active,
+  	aud.status
+  from admin_user_details aud
+  where aud.id = 1
+        
+  
+  
+  -- Admin Listing Query --
+  
+  
+ with candidate_profile_details as (
+	  	select 
+	  	 	--Candidate Profile Details 
+	  		c.id as candidate_id,
+	  		"user".id as candidate_user_id,
+	  		c.candidate_code,
+	  		concat_ws(' ', c.first_name, c.last_name) as candidate_name,
+	        c.candidate_type,
+	        dl7.domain_value as candidate_type_name,
+	  		c.father_name as candidate_father_name,
+	  		c.email as candidate_email,
+	  		c.dob as candidate_dob,
+	  		c.mobile_no as candidate_mobile,
+	  		c.gender as gender_id,
+	  		dl.domain_value as candidate_gender,
+	  		c.category as category_id,
+	  		dl2.domain_value as candidate_category,
+	  		c.minority as minority_id,
+	  		dl4.domain_value as candidate_minority,
+	  		c.religion as religion_id,
+	  		dl5.domain_value as candidate_religion,
+	        c.status,
+	        dl6.domain_value as candidate_status,
+	  		c.is_active as candidate_active_status,
+	  		c.available_start_time,
+	  		c.available_end_time,
+	  		c.interest_freelancer,
+			c.remarks,
+	  		--Candidate Address Details
+	  		c.state_id,
+	  		sm2.state_name as candidate_state_name,
+	  		c.district_id,
+	  		dm.district_name as candidate_district_name,
+	  		c.block_id,
+	  		bm.block_name as candidate_block_name,
+	  		c.house_no,
+	  		c.permanent_address as candidate_address,
+	  		c.village_address_id,
+	  		vm.village_name,
+			c.pincode,		
+			c.constituency_id,
+			ac.constituency_name as candidate_constituency,
+			--Candidate Additional Details
+	  		c.pwd as pwd_id,
+	  		dl3.domain_value as candidate_pwd,
+	  		c.kaushal_panjee_id,
+	  		c.employer_id,
+	  		c.mpr_id,
+	  		c.sanction_order,
+	  		c.mpr_project_id,
+	  		--Candidate Qualification Details
+	  		c.qualification,
+	  		c.batch_id,
+	  		bm2.batch_code,
+	  		--Candidate Documnetal Details
+	  		c.aadhar as candidate_aadhar,
+	  		c.bank_account as candidate_bank_account,
+			--Candidate Verified Data
+	  		c.is_verified as candidate_verified,
+	        cvd.email as is_email_verified,
+			cvd.first_name as is_firstname_verified,
+			cvd.last_name as is_lastname_verified,
+			cvd.gender as is_gender_verified,
+			cvd.religion as is_religion_verified,
+			cvd.dob as is_dob_verified,
+			cvd.mobile_no as is_mobile_verified,
+			cvd.block as is_block_verified,
+			cvd.district as is_district_verified,
+			cvd.trained_sector as is_sector_verified,
+			cvd.trained_skill as is_skill_verified,
+	  		--Candidate Trining Details
+	  		c.nature_of_training,
+	  		ct.sector_id as training_sector_id,
+	       	sm.sector_name as training_sector_name,
+	  		ct.skill_id as training_skill_id,
+	        sm3.skill_code as training_skill_code,
+	        sm3.skill_name as training_skill_name
+	  	from candidates c 
+	  	left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+	  	left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+	  	left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+	  	left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+	  	left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+	  	left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+	  	left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+	  	left join district_master dm on dm.id = c.district_id and dm.status = 1 
+	  	left join block_master bm on bm.id = c.block_id and bm.status = 1
+	  	left join batch_master bm2 on bm2.id = c.batch_id and bm2.status = 1
+	  	left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+	  	left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+	  	left join candidate_training ct on ct.candidate_id  = c.id and ct.status = 1
+	  	left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+	  	left join training_center tc on tc.id = ct.training_id  and tc.status = 1
+	  	left join village_master vm on vm.village_id = c.village_address_id and vm.status = 1
+	  	left join sector_master sm on sm.id = ct.sector_id and sm.status = 1
+	  	left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+	  	left join "user" on "user".ref_id = c.id 
+	  	where c.status = 1 and c.id = 98061
+	  	
+ ), as candidate_experience_details as (
+ 		select
+            ce.id as candidate_experience_id,
+            ce.candidate_id,
+            sm.id as sector_id,
+            sm.sector_name,
+            sk.id as skill_id,
+            sk.skill_name,
+            ce.experience_duration,
+            ce.self_employed as self_employed,
+            ce.organization_name as organization_name,
+            ce.job_role
+        from candidate_experience ce
+        left join sector_master sm on sm.id = ce.sector_id
+        left join skill_master sk on sk.id = ce.skill_id
+        where ce.status = 1 and ce.candidate_id = 98061
+ ), as 
+  	
+  	
+  
+ 
+select *
+    from service_request sr
+where sr.status = 1
+and sr.created_on::date < CURRENT_DATE - INTERVAL '3 days'
+  	
+  	
+  	
+  	
+  	
+
+  	select
+            sr.id as service_request_id,
+            sr.service_code,
+            sr.status as service_request_status_id,
+            dl.domain_value as service_request_status,
+            sr.citizen_id,
+            concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+            sr.created_on as service_request_created,
+            sr.assigned_to as service_requested_to,
+            CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+            case
+                when sr.status = 2 then c.mobile_number
+                else 'N/A'
+            end as citizen_mobile_number,
+            sr.district_id,
+            dm.district_name as service_district,
+            sr.sector_id,
+            sm.sector_name,
+            sr.service_id,
+            s.service_name,
+            sr.skill_id,
+            sm2.skill_name,
+            coalesce(sr.service_desc, 'N/A') as service_desc,
+            sr.address_id as citizen_service_address_id,
+         --   srl.remarks as service_remarks,
+            sr.preferred_day as service_preferred_day,
+            sr.preferred_date as service_requested_date,
+            dl2.domain_value as service_preferred_day_name,
+            ca.address_line_1 as service_address_line_1,
+            ca.address_line_2 as service_address_line_2,
+            ca.land_mark as service_land_mark,
+            ca.city as service_city,
+            ca.pincode as service_pincode,
+            ca.lattitude as service_lattitude,
+            ca.longitude as service_longitude,
+            ca.district_id,
+            ca.state as service_state,
+            ca.country as service_country,
+            ca.is_primary as service_is_primary,
+            sr2.is_gig_ratted as is_gig_ratted,
+            (select count(*) from service_review srv where srv.candidate_id = cc.id) as total_reviews,
+            (select coalesce(round(AVG(srv.ratings), 1), 0) from service_review srv where srv.candidate_id = cc.id) as avg_rating
+        from service_request sr
+    --    inner join service_request_lifecycle srl on srl.service_request_id = sr.id
+        inner join candidates cc on cc.id = sr.assigned_to
+        inner join citizen c on c.id = sr.citizen_id
+        left join citizen_address ca on ca.id = sr.address_id
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join domain_lookup dl2 on dl2.domain_code = sr.status and dl2.domain_type = 'preferred_days'
+        left join district_master dm on dm.id = sr.district_id
+        left join sector_master sm on sm.id = sr.sector_id
+        left join services s on s.id = sr.service_id
+        left join skill_master sm2 on sm2.id = sr.skill_id
+        left join service_review sr2 on sr2.request_id = sr.id and sr2.is_gig_ratted = True
+        where sr.assigned_to = 61729
+        order by sr.created_on desc
+
+  	
+        
+        
+        
+        select 
+            sr.id as service_request_id,
+            sr.service_code,
+            sr.status as service_request_status_id,
+            dl.domain_value as service_request_status,
+            sr.citizen_id,
+            concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+            sr.created_on as service_request_created,
+            sr.assigned_to as service_requested_to,
+            CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+            case 
+            	when sr.status = 2 then c.mobile_number
+            	else 'N/A'
+            end as citizen_mobile_number,
+            sr.district_id,
+            dm.district_name as service_district,
+            sr.sector_id,
+            sm.sector_name,
+            sr.service_id,
+            s.service_name,
+            sr.skill_id,
+            sm2.skill_name,
+            coalesce(sr.service_desc, 'N/A') as service_desc,
+            sr.address_id as citizen_service_address_id,
+         --   srl.remarks as service_remarks,
+            sr.preferred_day as service_preferred_day,
+            sr.preferred_date as service_requested_date,
+            dl2.domain_value as service_preferred_day_name,
+            ca.address_line_1 as service_address_line_1,
+            ca.address_line_2 as service_address_line_2,
+            ca.land_mark as service_land_mark,
+            ca.city as service_city,
+            ca.pincode as service_pincode,
+            ca.lattitude as service_lattitude,
+            ca.longitude as service_longitude,
+            ca.district_id,
+            ca.state as service_state,
+            ca.country as service_country,
+            ca.is_primary as service_is_primary,
+            (select count(*) from service_review srv where srv.candidate_id = cc.id) as total_reviews,
+            (select coalesce(round(AVG(srv.ratings), 1), 0) from service_review srv where srv.candidate_id = cc.id) as avg_rating
+        from service_request sr 
+    --    inner join service_request_lifecycle srl on srl.service_request_id = sr.id
+        inner join candidates cc on cc.id = sr.assigned_to
+        inner join citizen c on c.id = sr.citizen_id
+        left join citizen_address ca on ca.id = sr.address_id 
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join domain_lookup dl2 on dl2.domain_code = sr.status and dl2.domain_type = 'preferred_days'
+        left join district_master dm on dm.id = sr.district_id
+        left join sector_master sm on sm.id = sr.sector_id 
+        left join services s on s.id = sr.service_id 
+        left join skill_master sm2 on sm2.id = sr.skill_id 
+        where sr.assigned_to = 61729 
+        order by sr.created_on desc
+        
+        
+  select 
+            sr.id as service_request_id,
+            sr.service_code,
+            sr.status as service_request_status_id,
+            dl.domain_value as service_request_status,
+            sr.citizen_id,
+            concat(c.first_name,' ', c.middle_name,' ', c.last_name) as citizen_name,
+            sr.created_on as service_request_created,
+            cc.id as gigworker_id,
+            CONCAT_WS(' ', cc.first_name, cc.last_name) AS gigworker_name,
+            case 
+            	when sr.status = 2 then cc.mobile_no
+            	else 'N/A'
+            end as gigworker_mobile_number,
+            (
+                select count(*)
+                from service_review sr
+                where sr.candidate_id = cc.id
+            ) as total_reviews,
+            (
+                select coalesce(round(AVG(sr.ratings), 1), 0)
+                from service_review sr
+                where sr.candidate_id = cc.id
+            ) as avg_rating,
+            sr.district_id,
+            dm.district_name,
+            sr.sector_id,
+            sm.sector_name,
+            sr.service_id,
+            s.service_name,
+            sr.skill_id,
+            sm2.skill_name,
+            coalesce(sr.service_desc, 'N/A') as service_desc,
+            sr.preferred_day as service_preferred_day,
+            sr.preferred_date as service_requested_date,
+            dm_profile.doc_path AS gig_profile_path,
+            dm_profile.doc_location  AS doc_location,
+            ca.id as service_requested_address_id,
+            ca.address_line_1 as service_requested_address_line1,
+            ca.address_line_2 as service_requested_address_line2,
+            ca.city as service_requested_city,
+            ca.is_primary as is_primary_service_location,
+            ca.land_mark as service_requested_landmark,
+            ca.lattitude as service_lattitude,
+            ca.longitude as service_longtitude,
+            ca.pincode as service_pincode,
+            sr.booking_code as booking_code
+        from service_request sr 
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join citizen c on c.id = sr.citizen_id
+        left join citizen_address ca on ca.id = sr.address_id and ca.status = 1
+        left join candidates cc on cc.id = sr.assigned_to 
+        left join district_master dm on dm.id = sr.district_id
+        left join sector_master sm on sm.id = sr.sector_id 
+        left join services s on s.id = sr.service_id 
+        left join skill_master sm2 on sm2.id = sr.skill_id 
+        left join document_master dm_profile on dm_profile.ref_id = cc.id and dm_profile.updated_by = 2
+            and exists (select 1 from domain_lookup dl where dl.domain_code = dm_profile.upload_doc_type and dl.domain_type = 'doc_type' and dl.domain_code = 2)
+        where sr.citizen_id = 33
+        order by sr.created_on desc
+        
+        
+        select 
+            CONCAT_WS(' ', c.first_name, c.last_name) as citizen_name,
+            sr.remarks ,
+            sr.ratings,
+            TO_CHAR(sr.created_on AT TIME ZONE 'Asia/Kolkata',  'Mon FMDD, YYYY') as date
+        from service_review sr 
+        left join citizen c on c.id = sr.citizen_id 
+        where sr.is_citizen_ratted = true and sr.candidate_id = 61729
+        
+        
+        
+    select
+        ce.id as candidate_experience_id,
+        ce.candidate_id,
+        sm.id as sector_id,
+        sm.sector_name,
+        sk.id as skill_id,
+        sk.skill_name,
+        ce.experience_duration,
+        ce.self_employed as self_employed,
+        ce.organization_name as organization_name,
+        ce.job_role
+    from candidate_experience ce
+    inner join candidates c on c.id = ce.candidate_id 
+    left join sector_master sm on sm.id = ce.sector_id
+    left join skill_master sk on sk.id = ce.skill_id
+    where ce.status = 1 and c.id = 97560
+    
+    
+    select
+        cpl.id as candidate_preferred_id,
+        dm.district_name,
+        dm.id as district_id,
+        cpl.candidate_id 
+    from candidate_preferred_location cpl
+    inner join candidates c on c.id = cpl.candidate_id 
+    left join district_master dm on dm.id = cpl.district_id 
+    where cpl.status = 1 and c.id = 97560
+    
+    select
+        cps.id,
+        sm.id as sector_id,
+        sm.sector_name,
+        sm2.id as skill_id,
+        sm2.skill_name,
+        s.id as service_id,
+        s.service_name,
+        s.service_code,
+        cps.candidate_id,
+        cps.others_service_name 
+    from candidate_preferred_services cps
+    inner join candidates c on c.id = cps.candidate_id 
+    left join sector_master sm on sm.id = cps.sector_id 
+    left join skill_master sm2 on sm2.id = cps.skill_id
+    left join services s on s.id = cps.service_id
+    where cps.status = 1 and c.id = 97560
+    
+    select 
+        cpd.id, 
+        cpd.day_id,
+        dl.domain_value as days_name,
+        cpd.candidate_id   
+    from candidate_preferred_days cpd
+    inner join candidates c on c.id = cpd.candidate_id 
+    left join domain_lookup dl on dl.domain_code = cpd.day_id::integer and dl.domain_type = 'preferred_days'
+    where cpd.status = 1 and c.id = 97560
+    
+    select 
+        c.id as candidate_id,
+        tc.training_center_name,
+        bm.start_date as training_start_date,
+        bm.end_date as training_end_date,
+        sm.id as training_state_id,
+        sm.state_name as training_state_name,
+        dm.id as training_distict_id,
+        dm.district_name as training_district_name,
+        sm2.id as training_sector_id,
+        sm2.sector_name as training_sector_name,
+        ct.sector_others as training_sector_others,
+        sm3.id as training_skill_id,
+        sm3.skill_name as training_skill_name,
+        ct.skill_others as training_skill_others
+    from candidates c
+    left join candidate_training ct on ct.candidate_id  = c.id 
+    left join training_center tc on tc.id  = ct.training_id  and tc.status = 1
+    left join batch_master bm on bm.id = c.batch_id and bm.status = 1
+    left join state_master sm on sm.id = tc.state_id and sm.status = 1
+    left join district_master dm on dm.id = tc.district_id and dm.status = 1
+    left join sector_master sm2 on sm2.id = ct.sector_id and sm2.status = 1
+    left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+    where c.status = 1 and c.id = 97560
+    
+    
+    SELECT 
+        dmst.doc_id,
+        dl.domain_value AS doc_type_name,
+        dl.domain_code AS doc_type_id,
+        dmst.doc_path,
+        dmst.doc_file_type,
+        dmst.doc_name,
+        dmst.status 
+    FROM document_master dmst
+    inner join candidates c on c.id = dmst.ref_id 
+    JOIN domain_lookup dl ON dl.domain_code = dmst.upload_doc_type AND dl.domain_type = 'doc_type'
+    WHERE dmst.status = 1 AND dl.status = 1 and c.id = 97560
+    ORDER BY dl.domain_code asc
+    
+    
+    
+  select *
+    from service_request sr
+where sr.status = 1
+and sr.created_on::date < CURRENT_DATE - INTERVAL '3 days'   
+
+
+
+select 
+	  	 	--Candidate Profile Details 
+	  		c.id as candidate_id,
+	  		"user".id as candidate_user_id,
+	  		"user".user_type as candidate_user_type,
+	  		c.candidate_code,
+	  		concat_ws(' ', c.first_name, c.last_name) as candidate_name,
+	        c.candidate_type,
+	        dl7.domain_value as candidate_type_name,
+	  		c.father_name as candidate_father_name,
+	  		c.email as candidate_email,
+	  		c.dob as candidate_dob,
+	  		c.mobile_no as candidate_mobile,
+	  		c.gender as gender_id,
+	  		dl.domain_value as candidate_gender,
+	  		c.category as category_id,
+	  		dl2.domain_value as candidate_category,
+	  		c.minority as minority_id,
+	  		dl4.domain_value as candidate_minority,
+	  		c.religion as religion_id,
+	  		dl5.domain_value as candidate_religion,
+	        c.status,
+	        dl6.domain_value as candidate_status,
+	  		c.is_active as candidate_active_status,
+	  		c.available_start_time,
+	  		c.available_end_time,
+	  		c.interest_freelancer,
+			c.remarks,
+	  		--Candidate Address Details
+	  		c.state_id,
+	  		sm2.state_name as candidate_state_name,
+	  		c.district_id,
+	  		dm.district_name as candidate_district_name,
+	  		c.block_id,
+	  		bm.block_name as candidate_block_name,
+	  		c.house_no,
+	  		c.permanent_address as candidate_address,
+	  		c.village_address_id,
+	  		vm.village_name,
+			c.pincode,		
+			c.constituency_id,
+			ac.constituency_name as candidate_constituency,
+			--Candidate Additional Details
+	  		c.pwd as pwd_id,
+	  		dl3.domain_value as candidate_pwd,
+	  		c.kaushal_panjee_id,
+	  		c.employer_id,
+	  		c.mpr_id,
+	  		c.sanction_order,
+	  		c.mpr_project_id,
+	  		--Candidate Qualification Details
+	  		c.qualification_id,
+            em.name as qualification,
+	  		c.batch_id,
+	  		bm2.batch_code,
+	  		--Candidate Documnetal Details
+	  		c.aadhar as candidate_aadhar,
+	  		c.bank_account as candidate_bank_account,
+			--Candidate Verified Data
+	  		c.is_verified as candidate_verified,
+	        cvd.email as is_email_verified,
+			cvd.first_name as is_firstname_verified,
+			cvd.last_name as is_lastname_verified,
+			cvd.gender as is_gender_verified,
+			cvd.religion as is_religion_verified,
+			cvd.dob as is_dob_verified,
+			cvd.mobile_no as is_mobile_verified,
+			cvd.block as is_block_verified,
+			cvd.district as is_district_verified,
+			cvd.trained_sector as is_sector_verified,
+			cvd.trained_skill as is_skill_verified,
+	  		--Candidate Trining Details
+	  		c.nature_of_training,
+	  		ct.sector_id as training_sector_id,
+	       	sm.sector_name as training_sector_name,
+	  		ct.skill_id as training_skill_id,
+	        sm3.skill_code as training_skill_code,
+	        sm3.skill_name as training_skill_name
+	  	from candidates c 
+	  	left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+	  	left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+	  	left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+	  	left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+	  	left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+	  	left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+	  	left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+	  	left join district_master dm on dm.id = c.district_id and dm.status = 1 
+	  	left join block_master bm on bm.id = c.block_id and bm.status = 1
+	  	left join batch_master bm2 on bm2.id = c.batch_id and bm2.status = 1
+	  	left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+	  	left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+	  	left join candidate_training ct on ct.candidate_id  = c.id and ct.status = 1
+	  	left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+	  	left join training_center tc on tc.id = ct.training_id  and tc.status = 1
+	  	left join village_master vm on vm.village_id = c.village_address_id and vm.status = 1
+	  	left join sector_master sm on sm.id = ct.sector_id and sm.status = 1
+	  	left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+        left join education_master em on em.id = c.qualification_id 
+	  	left join "user" on "user".ref_id = c.id 
+	  	where c.status = 1 
+    
+	  	
+	  	select 
+			sm.id as skill_id,
+			sm.skill_name,
+            sm.skill_code,
+			im.icon_base64 as skill_icon,
+            sm.sector_id,
+            sm1.sector_name,
+            sm.doc_required as is_doc_required,
+            sm.skill_type,
+            dl.domain_value as skill_type_name,
+            sm.is_active as skill_status
+		from skill_master sm
+        left join sector_master sm1 on sm1.id = sm.sector_id
+        left join icon_master im on im.entity_id = sm.id and im.entity_type = 2
+        left join domain_lookup dl on dl.domain_code = sm.skill_type::integer and dl.domain_type = 'skill_type'
+        where sm.is_active = TRUE and sm.status = 1 
+        order by sm.skill_name ASC
+        
+        
+     
+        
+        
+--        REFRESH MATERIALIZED VIEW "sector_skill_by_district_mv"
+        
+        
+        
+        -- login details
+        select 
+        	us.id as admin_user_id,
+            us.username as admin_user_name,
+            us.user_type as admin_user_type,
+            dl.domain_value as admin_user_type_name,
+            us.ref_id as admin_ref_id,
+            us.is_active as admin_user_is_active,
+            us.login_flag as admin_is_login,
+            us.designation as admin_designation,
+            dl2.domain_value as admin_designation_name,
+            aud.id as admin_details_id,
+            aud.official_name as admin_name,
+            aud.official_code as admin_code,
+            aud.official_phone as admin_phone,
+            aud.official_email as admin_email,
+            aud.is_active as admin_active,
+            aud.state_id as admin_state_id,
+            sm.state_name as admin_state_name,
+            aulm.id as admin_loc_mapping_id,
+            coalesce(aulm.state_id, null) as login_state_id,
+            coalesce(sm2.state_name, 'N/A') as login_state_name,
+            coalesce(aulm.district_id, null) as login_district_id,
+            coalesce(dm.district_name, 'N/A') as login_district_name,
+            coalesce(aulm.block_id, null) as login_block_id,
+            coalesce(bm.block_name, 'N/A') as login_block_name,
+           	coalesce(aulm.cadre_id, null) as login_cadres_id,
+            aud.status as admin_user_details_status
+        from admin_user_details aud
+        left join "user" us on us.ref_id = aud.id and aud.is_active = true
+        left join state_master sm on sm.id = aud.state_id and sm.is_active = true
+        left join admin_user_location_mapping aulm on aulm.admin_user_id = us.id and us.is_active = true
+        left join state_master sm2 on sm2.id = aulm.state_id and sm2.is_active = true
+        left join district_master dm on dm.id = aulm.district_id and dm.is_active = true
+		left join block_master bm on bm.id = aulm.block_id and bm.is_active = true
+		left join domain_lookup dl on dl.domain_code = us.user_type::integer and dl.domain_type = 'user_type'
+		left join domain_lookup dl2 on dl2.domain_code = us.designation::integer and dl2.domain_type = 'designation_level'
+        where us.id = 38;
+        
+        
+        select count(1)
+            from candidates c
+            left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+            left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+            left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+            left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+            left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+            left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+            left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+            left join district_master dm on dm.id = c.district_id
+            left join block_master bm on bm.id = c.block_id
+            left join batch_master bm2 on bm2.id = c.batch_id 
+            left join assembly_constituency ac on ac.id = c.constituency_id 
+            left join state_master sm2 on sm2.id = c.state_id 
+            left join candidate_training ct on ct.candidate_id  = c.id 
+            left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+            left join training_center tc on tc.id = ct.training_id  and tc.status = 1
+            left join village_master vm on vm.village_id = c.village_address_id 
+            left join sector_master sm on sm.id = ct.sector_id and sm.status = 1
+            left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+            left join education_master em on em.id = c.qualification_id 
+            where c.is_active = true and c.interest_freelancer = false and c.status = 1 
+             and c.block_id = 59 
+             
+             
+             select 
+	  	 	--Candidate Profile Details 
+	  		c.id as candidate_id,
+	  		"user".id as candidate_user_id,
+	  		"user".user_type as candidate_user_type,
+	  		c.candidate_code,
+	  		concat_ws(' ', c.first_name, c.last_name) as candidate_name,
+	        c.candidate_type,
+	        dl7.domain_value as candidate_type_name,
+	  		c.father_name as candidate_father_name,
+	  		c.email as candidate_email,
+	  		c.dob as candidate_dob,
+	  		c.mobile_no as candidate_mobile,
+	  		c.gender as gender_id,
+	  		dl.domain_value as candidate_gender,
+	  		c.category as category_id,
+	  		dl2.domain_value as candidate_category,
+	  		c.minority as minority_id,
+	  		dl4.domain_value as candidate_minority,
+	  		c.religion as religion_id,
+	  		dl5.domain_value as candidate_religion,
+	        c.status,
+	        dl6.domain_value as candidate_status,
+	  		c.is_active as candidate_active_status,
+	  		c.available_start_time,
+	  		c.available_end_time,
+	  		c.interest_freelancer,
+			c.remarks,
+	  		--Candidate Address Details
+	  		c.state_id,
+	  		sm2.state_name as candidate_state_name,
+	  		c.district_id,
+	  		dm.district_name as candidate_district_name,
+	  		c.block_id,
+	  		bm.block_name as candidate_block_name,
+	  		c.house_no,
+	  		c.permanent_address as candidate_address,
+	  		c.village_address_id,
+	  		vm.village_name,
+			c.pincode,		
+			c.constituency_id,
+			ac.constituency_name as candidate_constituency,
+			--Candidate Additional Details
+	  		c.pwd as pwd_id,
+	  		dl3.domain_value as candidate_pwd,
+	  		c.kaushal_panjee_id,
+	  		c.employer_id,
+	  		c.mpr_id,
+	  		c.sanction_order,
+	  		c.mpr_project_id,
+	  		--Candidate Qualification Details
+	  		c.qualification_id as candidate_qualification_id,
+            em.name as candidate_qualification,
+	  		c.batch_id,
+	  		bm2.batch_code,
+	  		--Candidate Documnetal Details
+	  		c.aadhar as candidate_aadhar,
+	  		c.bank_account as candidate_bank_account,
+			--Candidate Verified Data
+	  		c.is_verified as candidate_verified,
+	        cvd.email as is_email_verified,
+			cvd.first_name as is_firstname_verified,
+			cvd.last_name as is_lastname_verified,
+			cvd.gender as is_gender_verified,
+			cvd.religion as is_religion_verified,
+			cvd.dob as is_dob_verified,
+			cvd.mobile_no as is_mobile_verified,
+			cvd.block as is_block_verified,
+			cvd.district as is_district_verified,
+			cvd.trained_sector as is_sector_verified,
+			cvd.trained_skill as is_skill_verified,
+	  		--Candidate Trining Details
+	  		c.nature_of_training,
+	  		ct.sector_id as training_sector_id,
+	       	sm.sector_name as training_sector_name,
+	  		ct.skill_id as training_skill_id,
+	        sm3.skill_code as training_skill_code,
+	        sm3.skill_name as training_skill_name
+	  	from candidates c 
+	  	left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+	  	left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+	  	left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+	  	left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+	  	left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+	  	left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+	  	left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+	  	left join district_master dm on dm.id = c.district_id and dm.status = 1 
+	  	left join block_master bm on bm.id = c.block_id and bm.status = 1
+	  	left join batch_master bm2 on bm2.id = c.batch_id and bm2.status = 1
+	  	left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+	  	left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+	  	left join candidate_training ct on ct.candidate_id  = c.id and ct.status = 1
+	  	left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+	  	left join training_center tc on tc.id = ct.training_id  and tc.status = 1
+	  	left join village_master vm on vm.village_id = c.village_address_id and vm.status = 1
+	  	left join sector_master sm on sm.id = ct.sector_id and sm.status = 1
+	  	left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+        left join education_master em on em.id = c.qualification_id 
+	  	left join "user" on "user".ref_id = c.id 
+	  	where c.is_active = true and c.interest_freelancer = false and c.status = 1 
+	  	 and c.block_id = 59 order by c.id desc 
+	  	 
+	  	 
+	  	 
+	  	 
+--- card count for candidates	 
+select
+    count(*) filter (where c.status = 1) AS total_registered,
+    count(*) filter (where c.status = 2) AS total_counselling,
+    count(*) filter (where c.status = 3) AS total_mobilization,
+    count(*) filter (where c.status = 5) AS total_assessment,
+    count(*) filter (where c.status = 4) AS total_enrollment_batch,
+    count(*) filter (where c.status = 6) AS total_certificate_issued,
+    count(*) filter (where c.status = 7) AS total_on_job_training,
+    count(*) filter (where c.status = 8) AS total_placement,
+    count(*) filter (where c.status = 9) AS total_training,
+    count(*) filter (where c.status = 10) AS total_counselling
+from candidates c
+where c.is_active = true and c.interest_freelancer = false
+
+
+select 
+ 	--Candidate Profile Details 
+	c.id as candidate_id,
+	"user".id as candidate_user_id,
+	"user".user_type as candidate_user_type,
+	c.candidate_code,
+	concat_ws(' ', c.first_name, c.last_name) as candidate_name,
+    c.candidate_type,
+    dl7.domain_value as candidate_type_name,
+	c.father_name as candidate_father_name,
+	c.email as candidate_email,
+	c.dob as candidate_dob,
+	c.mobile_no as candidate_mobile,
+	c.gender as gender_id,
+	dl.domain_value as candidate_gender,
+	c.category as category_id,
+	dl2.domain_value as candidate_category,
+	c.minority as minority_id,
+	dl4.domain_value as candidate_minority,
+	c.religion as religion_id,
+	dl5.domain_value as candidate_religion,
+    c.status,
+    dl6.domain_value as candidate_status,
+	c.is_active as candidate_active_status,
+	c.available_start_time,
+	c.available_end_time,
+	c.interest_freelancer,
+	c.remarks,
+	--Candidate Address Details
+	c.state_id,
+	sm2.state_name as candidate_state_name,
+	c.district_id,
+	dm.district_name as candidate_district_name,
+	c.block_id,
+	bm.block_name as candidate_block_name,
+	c.house_no,
+	c.permanent_address as candidate_address,
+	c.pincode,		
+	c.constituency_id,
+	ac.constituency_name as candidate_constituency,
+	--Candidate Additional Details
+	c.pwd as pwd_id,
+	dl3.domain_value as candidate_pwd,
+	c.kaushal_panjee_id,
+	c.employer_id,
+	c.mpr_id,
+	c.sanction_order,
+	c.mpr_project_id,
+	--Candidate Qualification Details
+	c.qualification_id as candidate_qualification_id,
+    em.name as candidate_qualification,
+	c.batch_id,
+	bm2.batch_code,
+	--Candidate Documnetal Details
+	c.aadhar as candidate_aadhar,
+	c.bank_account as candidate_bank_account,
+	--Candidate Verified Data
+	c.is_verified as candidate_verified,
+    cvd.email as is_email_verified,
+	cvd.first_name as is_firstname_verified,
+	cvd.last_name as is_lastname_verified,
+	cvd.gender as is_gender_verified,
+	cvd.religion as is_religion_verified,
+	cvd.dob as is_dob_verified,
+	cvd.mobile_no as is_mobile_verified,
+	cvd.block as is_block_verified,
+	cvd.district as is_district_verified,
+	cvd.trained_sector as is_sector_verified,
+	cvd.trained_skill as is_skill_verified,
+	--Candidate Trining Details
+	c.nature_of_training,
+	ct.sector_id as training_sector_id,
+   	sm.sector_name as training_sector_name,
+	ct.skill_id as training_skill_id,
+    sm3.skill_code as training_skill_code,
+    sm3.skill_name as training_skill_name
+from candidates c 
+left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+left join district_master dm on dm.id = c.district_id and dm.status = 1 
+left join block_master bm on bm.id = c.block_id and bm.status = 1
+left join batch_master bm2 on bm2.id = c.batch_id and bm2.status = 1
+left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+left join candidate_training ct on ct.candidate_id  = c.id and ct.status = 1
+left join skill_master sm3 on sm3.id = ct.skill_id and sm3.status = 1
+left join training_center tc on tc.id = ct.training_center_id  and tc.status = 1
+left join sector_master sm on sm.id = ct.sector_id and sm.status = 1
+left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+left join education_master em on em.id = c.qualification_id 
+left join "user" on "user".ref_id = c.id and "user".is_active = true
+where c.is_active = true and c.interest_freelancer = false  and c.id = 1297054 ;
+
+
+
+
+
+SELECT 
+    dl.domain_type,
+    dl.domain_code,
+    dl.domain_value,
+    COUNT(c.id) AS total_count
+FROM domain_lookup dl
+LEFT JOIN candidates c ON c.status = dl.domain_code AND c.is_active = true AND c.interest_freelancer = false
+WHERE dl.domain_type = 'candidate_status'
+GROUP BY dl.domain_type, dl.domain_code, dl.domain_value
+ORDER BY dl.domain_code::int
+
+
+select
+    count(*) filter (where c.status = 1) AS total_registered,
+    count(*) filter (where c.status = 2) AS total_counselling,
+    count(*) filter (where c.status = 3) AS total_mobilization,
+    count(*) filter (where c.status = 5) AS total_assessment,
+    count(*) filter (where c.status = 4) AS total_enrollment_batch,
+    count(*) filter (where c.status = 6) AS total_certificate_issued,
+    count(*) filter (where c.status = 7) AS total_on_job_training,
+    count(*) filter (where c.status = 8) AS total_placement,
+    count(*) filter (where c.status = 9) AS total_training,
+    count(*) filter (where c.status = 10) AS total_gigworker
+from candidates c
+where c.is_active = true and c.interest_freelancer = false
+
+
+select count(*) from candidates c where c.is_active = true and c.interest_freelancer = false and c.status = 2;
+
+
+
+
+SELECT 
+    dm.id as district_id,
+    dm.district_name,
+    /*count(c.id) as total_count,*/
+    COUNT(c.id) FILTER (WHERE c.status = 1) AS total_registered,
+    COUNT(c.id) FILTER (WHERE c.status = 2) AS total_counselling,
+    COUNT(c.id) FILTER (WHERE c.status = 3) AS total_mobilization,
+    coalesce(c.status, 0) as candidate_status,
+    coalesce(dl.domain_value, 'N/A') as status_name
+from district_master dm
+left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false 
+left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+where 1 = 1 
+group by dm.id, c.status, dl.domain_value, c.district_id
+    order by dm.district_name asc
+    
+    
+    
+SELECT 
+   COUNT(c.id) FILTER (WHERE c.status = 1) AS total_registered,
+COUNT(c.id) FILTER (WHERE c.status = 2) AS total_counselling,
+COUNT(c.id) FILTER (WHERE c.status = 3) AS total_mobilization
+from district_master dm
+left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false
+left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'   
+    
+SELECT 
+    bm.id AS block_id,
+    bm.block_name,
+    COUNT(c.id) AS total_count
+FROM block_master bm
+LEFT JOIN candidates c ON bm.id = c.block_id AND bm.status = 1 and c.is_active = true AND c.interest_freelancer = false and c.status = 1  -- put status condition inside JOIN
+WHERE 1 = 1 and bm.district_id = 5
+GROUP BY bm.id, bm.block_name
+ORDER BY bm.block_name
+
+
+SELECT 
+	c.id,
+	concat_ws('', c.first_name, c.last_name) as candidate_name,
+	c.mobile_no,
+	c.district_id,
+	dm.district_name,
+	c.status,
+    bm.id AS block_id,
+    bm.block_name
+FROM candidates c
+LEFT join block_master bm  ON bm.id = c.block_id AND bm.status = 1 
+left join district_master dm on dm.id = c.district_id and dm.status = 1
+left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+WHERE 1 = 1 and bm.id = 322 and c.status = 1 and c.is_active = true AND c.interest_freelancer = false 
+GROUP BY c.id, bm.id, bm.block_name, dm.district_name
+ORDER BY bm.block_name
+
+
+SELECT 
+                c.id as candidate_id,
+                concat_ws('', c.first_name, c.last_name) as candidate_name,
+                c.mobile_no as candidate_mobile,
+                c.district_id as candidate_district_id,
+                dm.district_name as candidate_district_name,
+                c.status as candidate_status,
+                dl.domain_value as candidate_status_name,
+                bm.block_name as candidate_block_name,
+                bm.id as candidate_block_id
+            FROM candidates c
+            LEFT join block_master bm  ON bm.id = c.block_id AND bm.status = 1 
+            left join district_master dm on dm.id = c.district_id and dm.status = 1
+            left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+            WHERE 1 = 1 and c.is_active = true and c.interest_freelancer = false  and c.status = 1   
+            GROUP BY c.id, bm.id, bm.block_name, dm.district_name, dl.domain_value
+            order by candidate_name asc
+            
+            
+            
+            
+            
+            
+            SELECT 
+                dm.id as district_id,
+                dm.district_name,
+                null as block_id,
+                null as block_name,
+                coalesce(c.status, null) as candidate_status,
+                coalesce(dl.domain_value, 'N/A') as status_name,
+                count(c.id) as total_count
+            from district_master dm
+            left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false  and c.status = 1 
+            left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+            left join block_master bm on bm.id = c.block_id and bm.status = 1
+            where 1 = 1
+            group by dm.id, c.status, dl.domain_value, c.district_id
+            order by total_count desc
+            
+            SELECT 
+                count(c.id) as total_count
+            from district_master dm
+            left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false  and c.status = 1 
+            left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+            left join block_master bm on bm.id = c.block_id and bm.status = 1
+--            where c.district_id = 28
+            
+            
+            
+     select *
+     from  cadre c ;
+     
+     SELECT
+        c.id as cadres_id,
+        c.cadre_code,
+        concat_ws(' ', c.first_name, c.middle_name, c.last_name) as cadres_full_name,
+        c.first_name as cadres_first_name,
+        c.middle_name as cadres_middle_name,
+        c.last_name as cadres_last_name,
+        c.mobile_no as cadres_mobile,
+        c.email as cadres_email,
+        c.address as cadres_address,
+        c.designation as designation_id,
+        dl.domain_value as cadres_designation,
+        c.gender as gender_id,
+        dl2.domain_value as cadres_gender,
+        c.dob as cadres_dob,
+        c.pan_no,
+        c.qualification,
+        c.education,
+        c.experience,
+        c.training,
+        c.is_active as cadres_status,
+        c.status,
+        c.block_id,
+        bm.block_name as cadres_block,
+        bm.district_id,
+        dm.district_name as cadres_district
+    FROM cadre c
+    LEFT JOIN block_master bm ON bm.id = c.block_id
+    LEFT JOIN district_master dm ON dm.id = bm.district_id
+	left join domain_lookup dl on dl.domain_code = c.designation::integer and dl.domain_type = 'designation_level'
+	left join domain_lookup dl2 on dl2.domain_code = c.gender::integer and dl2.domain_type = 'gender'
+			;
+
+
+
+
+
+
+
+-- development.district_master definition
+
+-- Drop table
+
+-- DROP TABLE development.district_master;
+
+--CREATE TABLE public.district_master (
+--	id int4 GENERATED BY DEFAULT AS IDENTITY( INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1 NO CYCLE) NOT NULL,
+--	district_name varchar(50) NOT NULL,
+--	district_code varchar(50) NOT NULL,
+--	is_active bool NOT NULL,
+--	created_on timestamptz NULL,
+--	updated_on timestamptz NULL,
+--	created_by int4 NULL,
+--	updated_by int4 NULL,
+--	status int2 NULL,
+--	state_id int4 NULL,
+--	CONSTRAINT district_master_district_name_state_id_key UNIQUE (district_name, state_id),
+--	CONSTRAINT district_master_pkey PRIMARY KEY (id)
+--);
+
+
+--update public.district_master set state_id = 1568;
+		
+		
+		
+		
+		
+		
+		
+--CREATE MATERIALIZED VIEW public.sector_skill_by_district_mv
+--TABLESPACE pg_default
+--AS SELECT cpl.district_id,
+--    dm.is_required AS is_available,....................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+		
+--    sm.id AS sector_id,
+--    sm.sector_name,
+--    im.icon_base64 AS sector_icon,
+--    jsonb_agg(DISTINCT jsonb_build_object('skill_id', sm2.id, 'skill_code', sm2.skill_code, 'skill_name', sm2.skill_name, 'skill_icon', im2.icon_base64)) FILTER (WHERE COALESCE(dac_skill.is_visible, true) = true) AS skills,
+--    now() AS last_refreshed
+--   FROM public.candidate_preferred_services cps
+--     JOIN public.candidate_preferred_location cpl ON cpl.candidate_id = cps.candidate_id
+--     LEFT JOIN public.district_master dm ON dm.id = cpl.district_id
+--     LEFT JOIN public.sector_master sm ON sm.id = cps.sector_id
+--     LEFT JOIN public.icon_master im ON im.entity_id = sm.id AND im.entity_type = 1 AND im.is_active = true
+--     LEFT JOIN public.skill_master sm2 ON sm2.id = cps.skill_id
+--     LEFT JOIN public.icon_master im2 ON im2.entity_id = sm2.id AND im2.entity_type = 2 AND im2.is_active = true
+--     LEFT JOIN public.service_admin_control dac_sector ON dac_sector.district_id = cpl.district_id AND dac_sector.entity_type = 1 AND dac_sector.entity_id = sm.id
+--     LEFT JOIN public.service_admin_control dac_skill ON dac_skill.district_id = cpl.district_id AND dac_skill.entity_type = 2 AND dac_skill.entity_id = sm2.id
+--  WHERE cps.status = 1 AND sm.is_active = true AND COALESCE(dac_sector.is_visible, true) = true
+--  GROUP BY cpl.district_id, dm.is_required, sm.id, sm.sector_name, im.icon_base64
+-- HAVING count(sm2.id) FILTER (WHERE COALESCE(dac_skill.is_visible, true) = true) > 0
+--WITH DATA;
+--
+---- View indexes:
+--CREATE INDEX idx_sector_skill_by_district_mv_district ON public.sector_skill_by_district_mv USING btree (district_id);
+--CREATE UNIQUE INDEX idx_sector_skill_by_district_mv_unique ON public.sector_skill_by_district_mv USING btree (district_id, sector_id);
+		
+		
+		
+		
+		
+	select 
+        c.id as candidate_id,
+        concat_ws('', c.first_name, c.last_name) as candidate_name,
+        c.mobile_no as candidate_mobile,
+        c.district_id as candidate_district_id,
+        dm.district_name as candidate_district_name,
+        c.status as candidate_status,
+        dl.domain_value as candidate_status_name,
+        bm.block_name as candidate_block_name,
+        bm.id as candidate_block_id,
+        c.updated_on,
+        pm.id as pia_id,
+		pm.pia_center_name,
+		bm2.id as batch_id,
+		bm2.batch_code,
+    	bm2.mpr_id,
+    	tc.id as training_center_id,
+    	tc.training_center_name,
+    	tc.mpr_id as training_mpr_id,
+    	tc.district_id as training_district_id,
+    	dm3.district_name as training_district_name,
+		coalesce(c.status, null) as candidate_status,
+        coalesce(dl.domain_value, 'N/A') as status_name
+    FROM candidates c
+    left join candidate_training ct on ct.candidate_id = c.id and ct.status in (1,2)
+    left join pia_master pm on pm.id = ct.pi_id
+    left join batch_master bm2 on bm2.id = ct.batch_id and bm2.status = 1
+    left join training_center tc on tc.id = ct.training_center_id and tc.status = 1
+    LEFT join block_master bm  ON bm.id = c.block_id AND bm.status = 1 
+    left join district_master dm on dm.id = c.district_id and dm.status = 1
+    left join district_master dm3 on dm3.id = tc.district_id and dm3.status = 1
+    left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+    WHERE 1 = 1 and c.is_active = true and c.interest_freelancer = false and c.status = 5 and ct.pi_id = 2 and ct.batch_id = 9
+    group by c.id, dm.district_name, dl.domain_value, bm.block_name, bm.id, pm.id, bm2.id, bm2.batch_code, bm2.mpr_id, tc.id, tc.training_center_name, tc.mpr_id, tc.district_id, dm3.district_name
+    
+   
+ SELECT 
+    pm.id AS pia_id,
+    pm.pia_center_name,
+    COUNT(c.id) AS total_count
+FROM pia_master pm
+LEFT JOIN candidate_training ct ON ct.pi_id = pm.id AND ct.status = 1
+LEFT JOIN candidates c ON c.id = ct.candidate_id AND c.is_active = true AND c.interest_freelancer = false AND c.status = 5
+LEFT JOIN batch_master bm2 ON bm2.id = ct.batch_id AND bm2.status = 1
+LEFT JOIN training_center tc ON tc.id = ct.training_center_id AND tc.status = 1
+GROUP BY pm.id, pm.pia_center_name
+ORDER BY total_count DESC  
+
+
+ SELECT 
+    tc.id AS training_center_id,
+    tc.training_center_name,
+    COUNT(c.id) AS total_count
+FROM  training_center tc
+LEFT JOIN candidate_training ct ON ct.training_center_id = tc.id AND ct.status = 1
+LEFT JOIN candidates c ON c.id = ct.candidate_id AND c.is_active = true AND c.interest_freelancer = false AND c.status = 5
+LEFT JOIN batch_master bm2 ON bm2.id = ct.batch_id AND bm2.status = 1
+LEFT JOIN pia_master pm ON pm.id = ct.pi_id AND pm.status = 1
+GROUP BY tc.id, tc.training_center_name
+ORDER BY total_count DESC   
+    
+    
+
+  select count(c.id) as total_count 
+    from candidates c 
+   left join candidate_training ct on ct.candidate_id = c.id 
+  where c.is_active = true AND c.interest_freelancer = false AND c.status = 5
+
+
+  
+ SELECT 
+    bm2.id AS batch_id,
+    bm2.batch_code,
+    bm2.mpr_id,
+    COUNT(c.id) AS total_count
+FROM batch_master bm2
+LEFT JOIN candidate_training ct ON ct.batch_id = bm2.id AND ct.status in (1,2)
+LEFT JOIN candidates c ON c.id = ct.candidate_id AND c.is_active = true AND c.interest_freelancer = false AND c.status = 5
+LEFT JOIN pia_master pm ON pm.id = ct.pi_id AND pm.status = 1
+LEFT JOIN training_center tc ON tc.id = ct.training_center_id AND tc.status = 1
+where bm2.status = 1 and pi_id = 2
+GROUP BY bm2.id, bm2.batch_code, bm2.mpr_id
+ORDER BY total_count DESC 
+  
+    
+   SELECT 
+        dm.id as district_id,
+        dm.district_name,
+        null as block_id,
+        null as block_name,
+        coalesce(c.status, null) as candidate_status,
+        coalesce(dl.domain_value, 'N/A') as status_name,
+        count(c.id) as total_count
+    from district_master dm
+    left join candidates c on dm.id = c.district_id and dm.status = 1 and c.is_active = true and c.interest_freelancer = false
+    left join domain_lookup dl on dl.domain_code = c.status::integer and dl.domain_type = 'candidate_status'
+    left join block_master bm on bm.id = c.block_id and bm.status = 1
+    where 1 = 1 
+    group by dm.id, c.status, dl.domain_value, c.district_id
+    order by total_count desc
+    
+    
+
+   
+    
+   
+--UPDATE candidates c
+----SET status = 5
+--SET interest_freelancer = false
+--FROM candidate_training ct
+--WHERE c.id = ct.candidate_id
+--  AND ct.batch_id IS NOT NULL
+--  AND ct.pi_id IS NOT null
+--  and c.status = 5
+--  AND ct.training_center_id IS NOT NULL;
+    
+    
+    
+    
+    
+    select 
+			sm.id as service_id,
+			sm.service_name,
+            sm.service_code,
+            sm1.sector_id,
+            sm2.sector_name,
+            sm2.sector_type,
+            dl2.domain_value as sector_type_name,
+            sm.skill_id,
+            sm1.skill_name,
+            sm.is_active as service_status,
+            im.id as service_icon_id,
+			im.icon_base64 as service_icon,
+            im.entity_id as service_entity_id,
+            im.entity_type as service_entity_type
+		from services sm
+        left join skill_master sm1 on sm1.id = sm.skill_id and sm1.status = 1
+        left join sector_master sm2 on sm2.id = sm1.sector_id and sm2.status = 1
+        left join icon_master im on im.entity_id = sm.id and im.entity_type = 3
+        left join domain_lookup dl2 on dl2.domain_code = sm2.sector_type::integer and dl2.domain_type = 'sector_type'
+        where 1 = 1  
+     limit 1000 offset 0 * 1000;
+    
+    
+    
+    
+    SELECT
+	    (SELECT COUNT(*) FROM candidates c WHERE c.status = 10 AND c.interest_freelancer = true and c.is_active = true and c.district_id = 2) AS total_active_gig_workers,
+	    COUNT(*) AS total_service_provide,
+	    COUNT(*) FILTER (WHERE sr.status = 4) AS total_completed_service,
+	    COUNT(*) FILTER (WHERE sr.status = 3) AS total_rejected_service,
+	    COUNT(*) FILTER (WHERE sr.status = 2) AS total_pending_service,
+	    COUNT(*) FILTER (WHERE DATE(sr.created_on) = CURRENT_DATE) AS total_today_booked_services
+FROM service_request sr
+where 1 = 1 and sr.district_id = 2;
+
+
+select
+ (SELECT COUNT(*) FROM candidates c 
+ 	WHERE c.status = 10 AND c.interest_freelancer = true AND c.is_active = true AND c.district_id = dm.id ) AS total_active_gig_workers,
+    COUNT(sr.id) AS total_service_provide,
+    COUNT(*) FILTER (WHERE sr.status = 4) AS total_completed_service,
+    COUNT(*) FILTER (WHERE sr.status = 3) AS total_rejected_service,
+    COUNT(*) FILTER (WHERE sr.status = 2) AS total_pending_service,
+    COUNT(*) FILTER (
+        WHERE sr.created_on::date = CURRENT_DATE
+    ) AS total_today_booked_services
+FROM district_master dm
+LEFT JOIN service_request sr ON sr.district_id = dm.id
+--WHERE dm.id = 2
+--GROUP BY dm.id;
+
+
+
+
+
+
+-- public.sms_tracking definition
+
+-- Drop table
+
+-- DROP TABLE public.sms_tracking;
+
+CREATE TABLE public.sms_tracking (
+	id int4 GENERATED BY DEFAULT AS IDENTITY( INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1 NO CYCLE) NOT NULL,
+	request_data jsonb NULL,
+	request_mobile_no varchar(15) NULL,
+	request_message varchar(255) NULL,
+	processed_mobile_no varchar(15) NULL,
+	failed_mobile_no varchar(15) NULL,
+	processed bool NULL,
+	published bool NULL,
+	batch_no text NULL,
+	created_by_id int8 NULL,
+	created_by_type int8 NULL,
+	created_on timestamptz NULL,
+	updated_on timestamptz null,
+--	status text NULL,
+--	recipient varchar(255) NULL,
+--	sms_header varchar(8) NULL,
+--	template_id varchar(255) NULL,
+--	"content" text NULL,
+--	sent_status int2 NULL,
+--	sms_sent_on timestamptz NULL,
+--	"exception" varchar(100) NULL,
+--	created_on timestamptz NULL,
+--	updated_on timestamptz NULL,
+	CONSTRAINT sms_tracking_pkey PRIMARY KEY (id)
+);
+
+-- Permissions
+
+--ALTER TABLE public.sms_tracking OWNER TO asrlm_user;
+--GRANT ALL ON TABLE public.sms_tracking TO asrlm_user;
