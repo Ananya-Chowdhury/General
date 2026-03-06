@@ -2969,3 +2969,14 @@ CREATE TABLE public.sms_tracking (
 
 --ALTER TABLE public.sms_tracking OWNER TO asrlm_user;
 --GRANT ALL ON TABLE public.sms_tracking TO asrlm_user;
+
+
+
+
+SELECT usename, usesuper FROM pg_user;
+SELECT current_user;
+
+SELECT datname, datacl
+FROM pg_database
+WHERE datname = 'asrlm_dev';
+
