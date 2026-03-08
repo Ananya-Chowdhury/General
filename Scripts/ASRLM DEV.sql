@@ -2980,3 +2980,15 @@ SELECT datname, datacl
 FROM pg_database
 WHERE datname = 'asrlm_dev';
 
+
+
+SELECT column_default
+FROM information_schema.columns
+WHERE table_name = 'service_request'
+AND column_name = 'id';
+
+
+SELECT setval(
+    pg_get_serial_sequence('public.service_request','id'),
+    (SELECT MAX(id) FROM public.service_request)
+);

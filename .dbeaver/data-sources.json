@@ -310,9 +310,6 @@
 					"@dbeaver-show-non-default-db@": "false"
 				},
 				"auth-model": "native"
-			},
-			"custom-properties": {
-				"resultset.maxrows": "1000000000"
 			}
 		},
 		"mysql8-19be596a625-3596c4b253937ad4": {
@@ -431,7 +428,7 @@
 		},
 		"dev": {
 			"name": "Development",
-			"color": "255,128,0",
+			"color": "255,128,128",
 			"description": "Regular development database",
 			"auto-commit": true,
 			"confirm-execute": false,
