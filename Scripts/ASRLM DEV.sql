@@ -3000,3 +3000,269 @@ SELECT setval(
 --CREATE INDEX idx_services_name_trgm
 --ON services
 --USING GIN (lower(service_name) gin_trgm_ops);
+
+
+
+--- ========================================================
+--- PRE-DATA set for service mapping search 
+--- ========================================================
+INSERT INTO service_search_map (keyword, service_id, is_active) VALUES
+-- Body massage (6)
+('body massage',6,TRUE),
+('full body massage',6,TRUE),
+('relax massage',6,TRUE),
+
+-- Manicure / Pedicure (12)
+('manicure',12,TRUE),
+('pedicure',12,TRUE),
+('nail care',12,TRUE),
+
+-- Sales (14)
+('sales job',14,TRUE),
+('salesman',14,TRUE),
+('marketing sales',14,TRUE),
+
+-- Management (15)
+('management job',15,TRUE),
+('manager',15,TRUE),
+
+-- Home Guard (9)
+('home guard',9,TRUE),
+('security home',9,TRUE),
+
+-- Shopping Mall Guard (10)
+('mall guard',10,TRUE),
+('shopping mall security',10,TRUE),
+
+-- Makeup artistry (13)
+('makeup artist',13,TRUE),
+('bridal makeup',13,TRUE),
+('beauty makeup',13,TRUE),
+
+-- Packing & Moving (23)
+('packers movers',23,TRUE),
+('house shifting',23,TRUE),
+('packing service',23,TRUE),
+('moving service',23,TRUE),
+
+-- Iron (78)
+('iron clothes',78,TRUE),
+('press clothes',78,TRUE),
+
+-- Deep dusting (79)
+('deep cleaning',79,TRUE),
+('deep dusting',79,TRUE),
+
+-- Cycle (86)
+('cycle repair',86,TRUE),
+('bicycle repair',86,TRUE),
+
+-- Wash Clothes (87)
+('wash clothes',87,TRUE),
+('cloth washing',87,TRUE),
+
+-- Gatekeeper (88)
+('gatekeeper',88,TRUE),
+('gate security',88,TRUE),
+
+-- Stitch (89)
+('stitch clothes',89,TRUE),
+('tailoring',89,TRUE),
+('cloth stitch',89,TRUE),
+
+-- Wash utensils (90)
+('dish washing',90,TRUE),
+('wash utensils',90,TRUE),
+
+-- Bike Repair (60)
+('bike repair',60,TRUE),
+('motorcycle repair',60,TRUE),
+
+-- Car Repair (20)
+('car repair',20,TRUE),
+('auto repair',20,TRUE),
+
+-- Food & Grocery Delivery (22)
+('food delivery',22,TRUE),
+('grocery delivery',22,TRUE),
+
+-- E-commerce Delivery (21)
+('ecommerce delivery',21,TRUE),
+('parcel delivery',21,TRUE),
+('online order delivery',21,TRUE),
+
+-- Medical Attendant (25)
+('medical attendant',25,TRUE),
+('patient care',25,TRUE),
+
+-- Nursing (26)
+('nurse',26,TRUE),
+('nursing care',26,TRUE),
+
+-- Tutoring (24)
+('home tutor',24,TRUE),
+('private tutor',24,TRUE),
+
+-- Cake Making (29)
+('cake making',29,TRUE),
+('baking cake',29,TRUE),
+
+-- Hair Cutting (27)
+('haircut',27,TRUE),
+('barber',27,TRUE),
+
+-- Massage (31)
+('massage',31,TRUE),
+('spa massage',31,TRUE),
+
+-- Spa / Facial (32)
+('facial',32,TRUE),
+('spa',32,TRUE),
+
+-- Home Cleaning (28)
+('home cleaning',28,TRUE),
+('house cleaning',28,TRUE),
+
+-- Babysitter (33)
+('babysitter',33,TRUE),
+('baby care',33,TRUE),
+
+-- Caretaker (34)
+('caretaker',34,TRUE),
+('elder care',34,TRUE),
+
+-- Pet Care (36)
+('pet care',36,TRUE),
+('dog care',36,TRUE),
+
+-- Laundry (37)
+('laundry',37,TRUE),
+('cloth laundry',37,TRUE),
+
+-- Plumbing (42)
+('plumber',42,TRUE),
+('pipe repair',42,TRUE),
+('water leakage',42,TRUE),
+('tap repair',42,TRUE),
+
+-- Carpentry (38)
+('carpenter',38,TRUE),
+('wood work',38,TRUE),
+('furniture repair',38,TRUE),
+
+-- Electrical (39)
+('electrician',39,TRUE),
+('light repair',39,TRUE),
+('fan repair',39,TRUE),
+
+-- Mason (40)
+('mason',40,TRUE),
+('brick work',40,TRUE),
+
+-- Painter (41)
+('house painting',41,TRUE),
+('wall painting',41,TRUE),
+
+-- Security (43)
+('security',43,TRUE),
+
+-- Security Guard (44)
+('security guard',44,TRUE),
+('watchman',44,TRUE),
+
+-- Catering (48)
+('catering',48,TRUE),
+('food catering',48,TRUE),
+
+-- Photography (46)
+('photography',46,TRUE),
+('photo shoot',46,TRUE),
+
+-- Videography (47)
+('videography',47,TRUE),
+('video shoot',47,TRUE),
+
+-- Data Entry (45)
+('data entry',45,TRUE),
+('typing job',45,TRUE),
+
+-- Cook (49)
+('cook',49,TRUE),
+('home cook',49,TRUE),
+
+-- Gardener (35)
+('gardener',35,TRUE),
+('garden work',35,TRUE),
+
+-- Bike Taxi (55)
+('bike taxi',55,TRUE),
+('two wheeler taxi',55,TRUE),
+
+-- Driver Commercial (56)
+('commercial driver',56,TRUE),
+('truck driver',56,TRUE),
+
+-- Driver Passenger (57)
+('car driver',57,TRUE),
+('private driver',57,TRUE),
+
+-- Agricultural Driver (58)
+('tractor driver',58,TRUE),
+('farm driver',58,TRUE),
+
+-- Corel Draw (105)
+('corel draw',105,TRUE),
+('coreldraw design',105,TRUE),
+
+-- Photoshop (106)
+('photoshop',106,TRUE),
+('photo editing',106,TRUE),
+
+-- Page Maker (107)
+('page maker',107,TRUE),
+
+-- Excel (97)
+('excel',97,TRUE),
+('spreadsheet',97,TRUE),
+
+-- PPT (98)
+('powerpoint',98,TRUE),
+('ppt',98,TRUE),
+
+-- Word (96)
+('ms word',96,TRUE),
+('word document',96,TRUE),
+
+-- Primary Education (100)
+('primary education',100,TRUE),
+
+-- Secondary Education (101)
+('secondary education',101,TRUE),
+
+-- Higher Education (102)
+('higher education',102,TRUE),
+
+-- DTP English (108)
+('english dtp',108,TRUE),
+
+-- DTP Assamese (109)
+('assamese dtp',109,TRUE),
+
+-- DTP Hindi (110)
+('hindi dtp',110,TRUE),
+
+-- DTP Bengali (104)
+('bengali dtp',104,TRUE),
+
+-- DTP Bodo (111)EX idx_service_name_trgm
+--ON services
+--USING GIN (service_name gin_trgm_ops);
+--
+--CREATE INDEX idx_keyword_search
+--ON service_search_map
+--USING GIN (keyword gin_trgm_o
+('bodo dtp',111,TRUE);
+
+
+
+--CREATE INDps);
