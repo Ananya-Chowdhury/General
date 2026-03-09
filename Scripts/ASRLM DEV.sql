@@ -2992,3 +2992,11 @@ SELECT setval(
     pg_get_serial_sequence('public.service_request','id'),
     (SELECT MAX(id) FROM public.service_request)
 );
+
+
+-- Need to do in Production db ---
+--CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+--CREATE INDEX idx_services_name_trgm
+--ON services
+--USING GIN (lower(service_name) gin_trgm_ops);
