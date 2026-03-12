@@ -3000,3 +3000,85 @@ SELECT setval(
 --CREATE INDEX idx_services_name_trgm
 --ON services
 --USING GIN (lower(service_name) gin_trgm_ops);
+
+
+-- Need to do in Production db ---
+CREATE INDEX idx_userotp_phone_created
+ON user_otp (u_phone, created_on DESC);
+
+CREATE INDEX idx_userotp_email_created
+ON user_otp (u_email, created_on DESC);
+
+
+
+
+-- 7980676389, 9954068604
+-- otp chacek query ---
+select * from user_otp uo 
+where uo.u_phone = '9954068604' 
+order by uo.created_on desc limit 5
+
+select * from fcm_token fcm
+where fcm.c_m_no  = '7980015640' 
+order by fcm.created_on desc limit 5
+
+select * from fcm_token fcm
+where fcm.c_m_no  = '9855555555' 
+order by fcm.created_on desc limit 5
+
+select * from fcm_token ft where ft.user_id = 15122 and ft.user_type = 8 and ft.c_m_no = '7980015640';
+
+
+
+
+select * from grievance g ;
+
+
+
+select 
+	g.id as grievance_id,
+	g.grievance_code,
+	concat_ws(' ', c.first_name, c.last_name) as gig_full_name,
+	g.kb_id as gig_kb_id,
+	c.aadhar as gig_aadhar,
+	c.candidate_sys_code as gig_code,
+	c.candidate_type as gig_type_id,
+	dl2.domain_value as gig_type,
+	c.email as gig_email,
+    g.request_message,
+    g.status as grievance_status_id,
+    dl.domain_value as grievance_status,
+    g.priority,
+    g.admin_user_id,
+    g.assigned_by_type as assigned_by_type_id,
+    dl3.domain_value as assigned_by_user_type,
+    g.assigned_to,
+    g.assigned_to_type,
+    g.assigned_on,
+    g.created_by,
+    g.created_on,
+    g.updated_by,
+    g.updated_on,
+    g.is_active as grievance_active
+from grievance g
+left join candidates c on c.candidate_code = g.kb_id 
+left join domain_lookup dl on dl.domain_code = g.status::integer and dl.domain_type = 'grievance_status'
+left join domain_lookup dl2 on dl2.domain_code = c.candidate_type::integer and dl2.domain_type = 'candidate_type'
+left join domain_lookup dl3 on dl3.domain_code = g.assigned_by_type::integer and dl3.domain_type = 'user_type'
+where g.assigned_by_type = 3
+order by g.created_on desc
+
+
+
+
+
+
+
+SELECT 
+	id as sector_id, 
+	sector_name,
+	sector_type
+    FROM sector_master sm  
+    WHERE sm.is_active = true and 
+ ORDER BY sm.sector_name asc;
+

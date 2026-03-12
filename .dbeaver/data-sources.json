@@ -346,6 +346,9 @@
 					"@dbeaver-chosen-role@": ""
 				},
 				"auth-model": "native"
+			},
+			"custom-properties": {
+				"resultset.maxrows": "100000"
 			}
 		},
 		"postgres-jdbc-19cc222ad45-168aa29c4cbb1e7c": {
@@ -386,10 +389,10 @@
 		},
 		"prod": {
 			"name": "Production",
-			"color": "255,0,0",
+			"color": "128,0,0",
 			"description": "Production database",
 			"auto-commit": false,
-			"confirm-execute": false,
+			"confirm-execute": true,
 			"confirm-data-change": true,
 			"smart-commit": false,
 			"smart-commit-recover": false,
@@ -428,7 +431,7 @@
 		},
 		"dev": {
 			"name": "Development",
-			"color": "255,128,128",
+			"color": "255,128,0",
 			"description": "Regular development database",
 			"auto-commit": true,
 			"confirm-execute": false,
