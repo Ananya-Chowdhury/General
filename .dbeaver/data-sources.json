@@ -349,9 +349,6 @@
 					"@dbeaver-chosen-role@": ""
 				},
 				"auth-model": "native"
-			},
-			"custom-properties": {
-				"resultset.maxrows": "100000"
 			}
 		},
 		"postgres-jdbc-19cc222ad45-168aa29c4cbb1e7c": {

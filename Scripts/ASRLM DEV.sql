@@ -3365,8 +3365,6 @@ SELECT setval(
 );
 
 
-
-
 --- batch listing ---
 select
     btm.id as batch_id,
@@ -3403,3 +3401,184 @@ left join district_master dm2 on pia.pia_center_district_id = dm2.id and dm2.sta
 left join state_master stm on stm.id = tc.state_id and stm.status = 1
 left join district_master dm on dm.id = tc.district_id and dm.status = 1
 where btm.status = 1
+
+
+---- previous service request card query ---
+WITH service_stats AS (
+    SELECT 
+        COUNT(*) AS total_services,
+        COUNT(*) FILTER (WHERE created_on::date = CURRENT_DATE) AS total_today_booked_services
+    FROM service_request
+),
+gig_workers AS (
+    SELECT COUNT(*) AS total_active_gig_workers
+    FROM candidates c
+    WHERE c.status = 10 AND c.interest_freelancer = true AND c.is_active = true 
+)
+SELECT 
+    'Total Services' AS domain_value,
+    total_services AS total_count
+FROM service_stats
+UNION ALL
+SELECT
+    'Total Today Booked Services' AS domain_value,
+    total_today_booked_services AS total_count
+FROM service_stats
+UNION ALL
+SELECT
+    'Total Active Gig Workers' AS domain_value,
+    total_active_gig_workers AS total_count
+FROM gig_workers
+UNION ALL
+SELECT
+    dv.domain_value,
+    COUNT(sr.id) AS total_count
+FROM domain_lookup dv
+LEFT JOIN service_request sr ON sr.status = dv.domain_code
+WHERE dv.domain_type = 'service_status' 
+GROUP BY dv.domain_code, dv.domain_value
+ORDER BY total_count DESC;
+
+
+
+--- new service request query upadte ----
+WITH service_stats AS (
+    SELECT 
+        COUNT(*) AS total_services,
+        COUNT(*) FILTER (WHERE created_on::date = CURRENT_DATE) AS total_today_booked_services
+    FROM service_request
+),
+gig_workers AS (
+    SELECT COUNT(*) AS total_active_gig_workers
+    FROM candidates c
+    WHERE c.status = 10 
+      AND c.interest_freelancer = true 
+      AND c.is_active = true 
+),
+domain_counts AS (
+    SELECT 
+        dv.domain_value,
+        COUNT(sr.id) AS total_count
+    FROM domain_lookup dv
+    LEFT JOIN service_request sr 
+        ON sr.status = dv.domain_code
+    WHERE dv.domain_type = 'service_status'
+    GROUP BY dv.domain_code, dv.domain_value
+)
+-- FINAL OUTPUT
+SELECT 
+    'Total Services' AS domain_value,
+    ss.total_services AS total_count,
+    'CARD011' AS card_code
+FROM service_stats ss
+UNION ALL
+SELECT 
+    'Total Today Booked Services',
+    ss.total_today_booked_services,
+    'CARD012'
+FROM service_stats ss
+UNION ALL
+SELECT 
+    'Total Active Gig Workers',
+    gw.total_active_gig_workers,
+    'CARD013'
+FROM gig_workers gw
+UNION ALL
+SELECT 
+    dc.domain_value,
+    dc.total_count,
+    CASE dc.domain_value
+        WHEN 'Service Requested' THEN 'CARD001'
+        WHEN 'Service Accepted' THEN 'CARD002'
+        WHEN 'Service Rejected' THEN 'CARD003'
+        WHEN 'Service Completed' THEN 'CARD004'
+        WHEN 'Service Cancelled' THEN 'CARD005'
+        WHEN 'Service Not Complete' THEN 'CARD006'
+        WHEN 'Service Provided' THEN 'CARD007'
+        WHEN 'Service Not Provided' THEN 'CARD008'
+        WHEN 'Service Decline' THEN 'CARD009'
+        WHEN 'Service Auto-Terminated' THEN 'CARD010'
+        ELSE 'CARD999' -- fallback (optional)
+    END AS card_code
+FROM domain_counts dc
+ORDER BY card_code;
+
+
+
+select *
+--    count(1) as total_count
+from service_request sr 
+left join candidates c on c.id = sr.assigned_to and c.is_active = true
+left join citizen cc on cc.id = sr.citizen_id
+left join citizen_address ca on ca.id = sr.address_id
+left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+left join domain_lookup dl2 on dl2.domain_code = sr.status and dl2.domain_type = 'preferred_days'
+left join district_master dm on dm.id = sr.district_id and dm.is_active = true
+left join district_master gdm on gdm.id = c.district_id and gdm.is_active = true
+left join block_master bm on bm.id = c.block_id and bm.is_active = true
+left join sector_master sm on sm.id = sr.sector_id and sm.is_active = true
+left join services s on s.id = sr.service_id and s.is_active = true
+left join skill_master sm2 on sm2.id = sr.skill_id and sm2.is_active = true
+left join service_review sr2 on sr2.request_id = sr.id and sr2.is_gig_ratted = True
+where 1 = 1  and sr.status = 2
+
+
+select 
+            sr.id as service_request_id,
+            sr.service_code,
+            sr.status as service_request_status_id,
+            dl.domain_value as service_request_status,
+            sr.citizen_id,
+            concat(cc.first_name,' ', cc.middle_name,' ', cc.last_name) as citizen_name,
+            coalesce(cc.mobile_number, 'N/A') as citizen_mobile_number,
+            cc.gender as citizen_gender,
+            sr.created_on as service_request_created,
+            sr.assigned_to as service_requested_to,
+            CONCAT_WS(' ', c.first_name, c.last_name) AS gigworker_name,
+            c.mobile_no as gigworker_mobile_number,
+            c.district_id as gigworker_district_id,
+            gdm.district_name as gigworker_district,
+            c.block_id as gigworker_block_id,
+            bm.block_name as gigworker_block,
+            sr.district_id,
+            dm.district_name as service_district,
+            sr.sector_id,
+            sm.sector_name,
+            sr.service_id,
+            s.service_name,
+            sr.skill_id,
+            sm2.skill_name,
+            coalesce(sr.service_desc, 'N/A') as service_desc,
+            sr.address_id as citizen_service_address_id,
+            sr.preferred_day as service_preferred_day,
+            sr.preferred_date as service_requested_date,
+            dl2.domain_value as service_preferred_day_name,
+            ca.address_line_1 as service_address_line_1,
+            ca.address_line_2 as service_address_line_2,
+            ca.land_mark as service_land_mark,
+            ca.city as service_city,
+            ca.pincode as service_pincode,
+            ca.lattitude as service_lattitude,
+            ca.longitude as service_longitude,
+            ca.district_id,
+            ca.state as service_state,
+            ca.country as service_country,
+            ca.is_primary as service_is_primary,
+            sr2.is_gig_ratted as is_gig_ratted,
+            (select count(*) from service_review srv where srv.candidate_id = c.id) as total_reviews,
+            (select coalesce(round(AVG(srv.ratings), 1), 0) from service_review srv where srv.candidate_id = c.id) as avg_rating
+        from service_request sr 
+        left join candidates c on c.id = sr.assigned_to and c.is_active = true
+        left join citizen cc on cc.id = sr.citizen_id 
+        left join citizen_address ca on ca.id = sr.address_id
+        left join domain_lookup dl on dl.domain_code = sr.status and dl.domain_type = 'service_status'
+        left join domain_lookup dl2 on dl2.domain_code = sr.status and dl2.domain_type = 'preferred_days'
+        left join district_master dm on dm.id = sr.district_id and dm.is_active = true
+        left join district_master gdm on gdm.id = c.district_id and gdm.is_active = true
+        left join block_master bm on bm.id = c.block_id and bm.is_active = true
+        left join sector_master sm on sm.id = sr.sector_id and sm.is_active = true
+        left join services s on s.id = sr.service_id and s.is_active = true
+        left join skill_master sm2 on sm2.id = sr.skill_id and sm2.is_active = true
+        left join service_review sr2 on sr2.request_id = sr.id and sr2.is_gig_ratted = True
+        where 1 = 1  and sr.status = 2 
+     order by sr.created_on desc limit 10 offset 1 * 10

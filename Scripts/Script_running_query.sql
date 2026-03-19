@@ -553,3 +553,162 @@ FROM admin_role_master WHERE role_code = 'CADRES';
 --    END LOOP;
 --END LOOP;
 --END $$;
+
+
+
+
+
+
+
+
+---- NEW Script For Candiadtes For status 3 updates ----
+--CREATE OR REPLACE PROCEDURE public.register_candidates_v2()
+--LANGUAGE plpgsql
+--AS $$
+--DECLARE
+--    i INT;
+--    candidate_id BIGINT;
+--    first_names TEXT[] := ARRAY['Amit','Rahul','Priya','Sneha','Kunal','Riya','Arjun','Neha','Vikash','Pooja'];
+--    last_names  TEXT[] := ARRAY['Das','Sharma','Singh','Roy','Bora','Deka','Ali','Khan','Paul','Gupta'];
+--    father_first TEXT[] := ARRAY['Ravi','Suresh','Kushal','Mahesh','Ramesh','Dilip','Anil','Manoj'];
+--    mother_first TEXT[] := ARRAY['Sita','Gita','Anita','Sunita','Rekha','Mina','Kavita'];
+--    village_names TEXT[] := ARRAY['Agarpara','Gobindanagar','Borkhola','Sonapur','Barpeta Road','Rangia','Hajo','Boko','Nalbari','Tamulpur'];
+--    status_remark TEXT;
+--BEGIN
+--FOR i IN 1..50 LOOP
+--    INSERT INTO candidates (
+--        candidate_code,
+--        candidate_sys_code,
+--        kaushal_panjee_id,
+--        kb_project_id,
+--        mpr_project_id,
+--        mpr_id,
+--        first_name,
+--        last_name,
+--        father_name,
+--        mother_name,
+--        email,
+--        mobile_no,
+--        parent_mobile,
+--        dob,
+--        gender,
+--        category,
+--        minority,
+--        pwd,
+--        religion,
+--        pincode,
+--        aadhar,
+--        bank_account,
+--        state_id,
+--        district_id,
+--        block_id,
+--        gp_id,
+--        qualification_id,
+--        passout_year,
+--        permanent_address,
+--        house_no,
+--        village,
+--        interest_freelancer,
+--        status,
+--        is_verified,
+--        is_show_details,
+--        is_active,
+--        created_by,
+--        updated_by,
+--        created_on,
+--        updated_on,
+--        assigned_to,
+--        assigned_by,
+--        assigned_on,
+--        available_start_time,
+--        available_end_time
+--    )
+--    VALUES (
+--        'CAND-' || LPAD(i::text, 5, '0'),
+--        'SYS-' || LPAD(i::text, 5, '0'),
+--        'KP' || LPAD(i::text, 10, '0'),
+--        'KB' || LPAD(i::text, 6, '0'),
+--        'MPR' || LPAD(i::text, 6, '0'),
+--        'MID' || LPAD(i::text, 6, '0'),
+--        first_names[(i % 10)+1],
+--        last_names[(i % 10)+1],
+--        father_first[(i % 8)+1] || ' ' || last_names[(i % 10)+1],
+--        mother_first[(i % 7)+1] || ' ' || last_names[(i % 10)+1],
+--        'candidate' || i || '@test.com',
+--        '9' || LPAD(i::text, 9, '0'),
+--        '8' || LPAD(i::text, 9, '0'),
+--        DATE '1990-01-01' + (i * 10),
+--        (i % 2)+1,
+--        (i % 5)+1,
+--        (i % 2),
+--        (i % 2),
+--        (i % 5)+1,
+--        LPAD(i::text,6,'0'),
+--        LPAD(i::text,12,'0'),
+--        LPAD(i::text,10,'0'),
+--        1568,
+--        28,
+--        59,
+--        (i % 100)+1,
+--        (i % 8)+1,
+--        2015 + (i % 5),
+--        i || ', Main Road',
+--        i::text,
+--        village_names[(i % 10)+1],
+--        false,
+--        3, -- ✅ current status fixed
+--        true,
+--        false,
+--        true,
+--        1,
+--        1,
+--        NOW(),
+--        NOW(),
+--        1,
+--        1,
+--        NOW(),
+--        NOW(),
+--        NOW() + interval '4 hour'
+--    )
+--    RETURNING id INTO candidate_id;
+--    -- ===============================
+--    -- LIFECYCLE (ONLY 1,2,3)
+--    -- ===============================
+--
+--    FOR i IN 1..3 LOOP
+--        CASE i
+--            WHEN 1 THEN status_remark := 'Candidate YDB Registration';
+--            WHEN 2 THEN status_remark := 'Candidate KB ID Registration';
+--            WHEN 3 THEN status_remark := 'Mobilization Camp Attend';
+--        END CASE;
+--
+--        INSERT INTO candidate_lifecycle_status (
+--            candidate_id,
+--            candidate_lifecycle_status,
+--            assigned_to,
+--            assigned_by,
+--            remarks,
+--            created_by,
+--            updated_by,
+--            is_active,
+--            created_on,
+--            updated_on
+--        )
+--        VALUES (
+--            candidate_id,
+--            i,
+--            1,
+--            1,
+--            status_remark,
+--            1,
+--            1,
+--            true,
+--            NOW() - (interval '1 day' * (3 - i)),
+--            NOW()
+--        );
+--    END LOOP;
+--END LOOP;
+--END;
+--$$;
+
+--CALL register_candidates_v2();
