@@ -3582,3 +3582,55 @@ select
         left join service_review sr2 on sr2.request_id = sr.id and sr2.is_gig_ratted = True
         where 1 = 1  and sr.status = 2 
      order by sr.created_on desc limit 10 offset 1 * 10
+     
+     
+     
+     
+     select
+            btm.id as batch_id,
+            btm.batch_code,
+            btm.tc_id as batch_tc_id,
+            btm.batch_size,
+            tc.training_center_name as batch_tc_name,
+            tc.state_id as batch_state_id,
+            stm.state_name as batch_state_name,
+            tc.district_id as batch_district_id,
+            dm.district_name as batch_district_name,
+            btm.pia_id as batch_pia_id,
+            pia.pia_center_name as batch_pi_center_name,
+            pia.pia_center_code as batch_pia_center_code,
+            pia.pia_center_type as batch_pia_center_type,
+            pia.pia_center_address as batch_pia_center_address,
+            pia.pia_center_district_id as batch_pia_center_dist_id,
+            dm2.district_name as batch_pia_center_dist_name,
+            btm.sanction_order_id as batch_sanction_order_id,
+            so.sanction_order as batch_sanction_order,
+            btm.start_date,
+            btm.end_date,
+            btm.status as batch_status,
+            btm.is_active as batch_active_status,
+            btm.created_by,
+            btm.created_on,
+            btm.updated_by,
+            btm.updated_on
+        from batch_master btm
+        inner join pia_master pia on pia.id = btm.pia_id and pia.status = 1
+        inner join sanction_order so on so.id = btm.sanction_order_id and so.status = 1
+        inner join training_center tc on tc.id = btm.tc_id and tc.status = 1
+        left join district_master dm2 on pia.pia_center_district_id = dm2.id and dm2.status = 1
+        left join state_master stm on stm.id = tc.state_id and stm.status = 1
+        left join district_master dm on dm.id = tc.district_id and dm.status = 1
+        where btm.status = 1  and pia.id = 2
+--     limit 0 offset 0 * 0 
+     
+     
+     select
+            count(1) as total_batch_count
+        from batch_master btm
+        inner join pia_master pia on pia.id = btm.pia_id and pia.status = 1
+        inner join sanction_order so on so.id = btm.sanction_order_id and so.status = 1
+        inner join training_center tc on tc.id = btm.tc_id and tc.status = 1
+        left join district_master dm2 on pia.pia_center_district_id = dm2.id and dm2.status = 1
+        left join state_master stm on stm.id = tc.state_id and stm.status = 1
+        left join district_master dm on dm.id = tc.district_id and dm.status = 1
+        where btm.status = 1  and pia.id = 2
