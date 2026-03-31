@@ -3634,3 +3634,245 @@ select
         left join state_master stm on stm.id = tc.state_id and stm.status = 1
         left join district_master dm on dm.id = tc.district_id and dm.status = 1
         where btm.status = 1  and pia.id = 2
+        
+        
+        
+        
+ select * from fcm_notification fn ;
+ 
+ 
+ 
+--- need to Add Indexed in production table
+CREATE INDEX idx_candidate_active ON candidates(is_active);
+CREATE INDEX idx_candidate_verified ON candidates(is_verified);
+CREATE INDEX idx_candidate_status_interest ON candidates(status, interest_freelancer);
+CREATE INDEX idx_candidate_ddugky ON candidates(ddugky_version);
+
+
+
+UPDATE candidates
+SET ddugky_version = 2
+WHERE ddugky_version = 'false';
+
+UPDATE candidates
+SET ddugky_version = 1
+WHERE ddugky_version = 'true';
+
+
+--- Gig Worker Details Listing Backup ---
+select 
+        -- Candidate Profile Details 
+        c.id as candidate_id,
+        "user".id as candidate_user_id,
+        "user".user_type as candidate_user_type,
+        c.candidate_code as kaushal_panjee,
+        concat_ws(' ', c.first_name, c.last_name) as candidate_name,
+        c.candidate_type as candidate_type_id,
+        dl7.domain_value as candidate_type_name,
+        c.father_name as candidate_father_name,
+        c.email as candidate_email,
+        c.dob as candidate_dob,
+        c.mobile_no as candidate_mobile,
+        c.gender as gender_id,
+        dl.domain_value as candidate_gender,
+        c.category as category_id,
+        dl2.domain_value as candidate_category,
+        c.minority as minority_id,
+        dl4.domain_value as candidate_minority,
+        c.religion as religion_id,
+        dl5.domain_value as candidate_religion,
+        c.status as candidate_status_id,
+        dl6.domain_value as candidate_status,
+        c.is_active as candidate_active_status,
+        c.available_start_time,
+        c.available_end_time,
+        c.interest_freelancer,
+        c.remarks,
+        -- Candidate Address Details
+        c.state_id,
+        sm2.state_name as candidate_state_name,
+        c.district_id,
+        dm.district_name as candidate_district_name,
+        c.block_id,
+        bm.block_name as candidate_block_name,
+        c.house_no,
+        c.permanent_address as candidate_address,
+        c.village as candidate_village,
+        c.gp_id,
+        gm.name as candidate_gp_name,
+        c.pincode,		
+        c.constituency_id,
+        ac.constituency_name as candidate_constituency,
+        c.parliamentary_constituency_id,
+        pc.pconstituency_name as candidate_parliamentary_constituency,
+        -- Candidate Additional Details
+        c.pwd as pwd_id,
+        dl3.domain_value as candidate_pwd,
+        c.kaushal_panjee_id,
+        c.kb_project_id,
+        c.employer_id,
+        c.mpr_id,
+        c.mpr_project_id,
+        -- Candidate Qualification Details
+        c.qualification_id as candidate_qualification_id,
+        em.name as candidate_qualification,
+        c.batch_id,
+        bm2.batch_code,
+        -- Candidate Documnetal Details
+        c.aadhar as candidate_aadhar,
+        c.bank_account as candidate_bank_account,
+        -- Candidate Verified Data
+        c.is_verified as candidate_verified,
+        cvd.email as is_email_verified,
+        cvd.first_name as is_firstname_verified,
+        cvd.last_name as is_lastname_verified,
+        cvd.gender as is_gender_verified,
+        cvd.religion as is_religion_verified,
+        cvd.dob as is_dob_verified,
+        cvd.mobile_no as is_mobile_verified,
+        cvd.block as is_block_verified,
+        cvd.district as is_district_verified,
+        cvd.trained_sector as is_sector_verified,
+        cvd.trained_skill as is_skill_verified,
+        -- Candidate Trining Details
+        c.nature_of_training,
+        ct.sector_id as training_sector_id,
+        sm.sector_name as training_sector_name,
+        ct.skill_id as training_skill_id,
+        skm.skill_code as training_skill_code,
+        skm.skill_name as training_skill_name,
+        c.is_active as candidate_active_status,
+        (
+            select COALESCE(
+                json_agg(
+                    json_build_object(
+                        'candidate_preferred_id', cpl.id,
+                        'district_id', dm.id,
+                        'district_name', dm.district_name,
+                        'candidate_id', cpl.candidate_id
+                    )
+                ), '[]'
+            )
+            from candidate_preferred_location cpl
+            LEFT JOIN district_master dm ON dm.id = cpl.district_id AND dm.status = 1
+            WHERE cpl.candidate_id = c.id AND cpl.status = 1
+        ) AS candidate_preferred_location,
+        (
+            select COALESCE(
+                json_agg(
+                    json_build_object(
+                        'id', cps.id,
+                        'sector_id', sm.id,
+                        'sector_name', sm.sector_name,
+                        'skill_id', sm2.id,
+                        'skill_name', sm2.skill_name,
+                        'service_id', s.id,
+                        'service_name', s.service_name,
+                        'service_code', s.service_code,
+                        'candidate_id', cps.candidate_id,
+                        'others_service_name', cps.others_service_name
+                    )
+                ), '[]'
+            )
+            from candidate_preferred_services cps
+            LEFT JOIN sector_master sm ON sm.id = cps.sector_id AND sm.status = 1
+            LEFT JOIN skill_master sm2 ON sm2.id = cps.skill_id AND sm2.status = 1
+            LEFT JOIN services s ON s.id = cps.service_id
+            WHERE cps.candidate_id = c.id
+        ) AS candidate_preferred_services
+    from candidates c 
+    left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+    left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+    left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+    left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+    left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+    left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+    left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+    left join district_master dm on dm.id = c.district_id and dm.status = 1 
+    left join block_master bm on bm.id = c.block_id and bm.status = 1
+    left join batch_master bm2 on bm2.id = c.batch_id and bm2.status = 1
+    left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+    left join parliamentary_constituency pc on pc.id = c.parliamentary_constituency_id and pc.status = 1
+    left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+    left join candidate_training ct on ct.candidate_id  = c.id and ct.status = 1
+    left join sanction_master snm on snm.id = ct.sanction_id
+    left join skill_master skm on skm.id = ct.skill_id and skm.status = 1
+    left join training_center tc on tc.id = ct.training_center_id and tc.status = 1
+    left join sector_master sm on sm.id = ct.sector_id and sm.status = 1
+    left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+    left join education_master em on em.id = c.qualification_id 
+    left join "user" on "user".ref_id = c.id and "user".is_active = true
+    left join gp_master gm on gm.id = c.gp_id and gm.status = 1
+    where c.interest_freelancer = true and c.status = 10 
+    {where_sql}
+    order by c.id desc;
+
+
+
+
+select count(1) as total_count
+                from candidates c 
+            left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+            left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+            left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+            left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+            left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+            left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+            left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+            left join district_master dm on dm.id = c.district_id and dm.status = 1 
+            left join block_master bm on bm.id = c.block_id and bm.status = 1
+            left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+            left join parliamentary_constituency pc on pc.id = c.parliamentary_constituency_id and pc.status = 1
+            left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+            left join candidate_training ct on ct.candidate_id = c.id and ct.is_active = true
+            left join batch_master bam on bam.id = ct.batch_id and bam.is_active = true
+            left join sanction_order snm on snm.id = bam.sanction_order_id and snm.is_active = true
+            left join training_center tc on tc.id = bam.tc_id and tc.is_active = true
+            left join pia_master pia on pia.id = bam.pia_id and pia.is_active = true
+            left join skill_master skm on skm.id = snm.skill_id and skm.status = 1
+            left join sector_master sm on sm.id = snm.sector_id and sm.status = 1
+            left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+            left join education_master em on em.id = c.qualification_id 
+            left join "user" on "user".ref_id = c.id and "user".is_active = true
+            left join gp_master gm on gm.id = c.gp_id and gm.status = 1
+            where 1 = 1
+         and c.is_active = true
+         
+         
+         select count(*) from candidates c where c.is_active = true
+         
+         
+         SELECT
+                COUNT(*) FILTER (WHERE is_active = true) AS total_candidates,
+                COUNT(*) FILTER (WHERE ddugky_version = 1 AND is_active = true) AS total_trained,
+                COUNT(*) FILTER (WHERE is_verified = true AND is_active = true) AS total_verified,
+                COUNT(*) FILTER (WHERE is_verified = false AND is_active = true) AS total_unverified,
+                COUNT(*) FILTER (WHERE is_verified = false AND is_active = true) AS total_placed,
+                COUNT(*) FILTER (WHERE status = 10 AND interest_freelancer = true AND is_active = true) AS total_gig_willing
+            FROM candidates
+            WHERE 1=1
+            
+            
+            
+   --- Multiple entry check 
+SELECT candidate_id, batch_id, COUNT(*)
+FROM candidate_training
+WHERE is_active = true
+GROUP BY candidate_id, batch_id
+HAVING COUNT(*) > 1;
+
+
+-- delete multiple rows with duplicate entry
+--DELETE FROM candidate_training
+--WHERE id IN (
+--    SELECT id FROM (
+--        SELECT id,
+--               ROW_NUMBER() OVER (
+--                   PARTITION BY candidate_id, batch_id
+--                   ORDER BY id
+--               ) AS rn
+--        FROM candidate_training
+--        WHERE is_active = true
+--    ) t
+--    WHERE t.rn > 1
+);
