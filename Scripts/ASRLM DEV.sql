@@ -3876,3 +3876,71 @@ HAVING COUNT(*) > 1;
 --    ) t
 --    WHERE t.rn > 1
 );
+
+
+
+select count(1) as total_count
+    from candidates c 
+left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+left join district_master dm on dm.id = c.district_id and dm.status = 1 
+left join block_master bm on bm.id = c.block_id and bm.status = 1
+left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+left join parliamentary_constituency pc on pc.id = c.parliamentary_constituency_id and pc.status = 1
+left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+left join candidate_training ct on ct.candidate_id  = c.id and ct.status = 1
+left join batch_master bam on bam.id = ct.batch_id and bam.is_active = true
+left join sanction_order snm on snm.id = bam.sanction_order_id and snm.is_active = true
+left join training_center tc on tc.id = bam.tc_id and tc.is_active = true
+left join pia_master pia on pia.id = bam.pia_id and pia.is_active = true
+left join skill_master skm on skm.id = snm.skill_id and skm.status = 1
+left join sector_master sm on sm.id = snm.sector_id and sm.status = 1
+left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+left join education_master em on em.id = c.qualification_id 
+left join "user" on "user".ref_id = c.id and "user".is_active = true
+    left join gp_master gm on gm.id = c.gp_id and gm.status = 1
+    where 1 = 1
+ and c.is_verified = False and c.is_active = True and c.unverified_reason IS NOT NULL 
+ 
+ 
+ 
+ select * from candidates c where  c.unverified_reason IS NOT NULL and c.is_active = true ;
+ select * from candidates c where c.minority = 2
+ 
+ 
+ select *
+        from candidates c 
+    left join domain_lookup dl on dl.domain_code = c.gender and dl.domain_type = 'gender'
+    left join domain_lookup dl2 on dl2.domain_code = c.category and dl2.domain_type = 'category'
+    left join domain_lookup dl3 on dl3.domain_code = c.pwd and dl3.domain_type = 'pwd'
+    left join domain_lookup dl4 on dl4.domain_code = c.minority and dl4.domain_type = 'minority'
+    left join domain_lookup dl5 on dl5.domain_code = c.religion and dl5.domain_type = 'religion'
+    left join domain_lookup dl6 on dl6.domain_code = c.status::integer and dl6.domain_type = 'status'
+    left join domain_lookup dl7 on dl7.domain_code = c.candidate_type::integer and dl7.domain_type = 'candidate_type'
+    left join district_master dm on dm.id = c.district_id and dm.status = 1 
+    left join block_master bm on bm.id = c.block_id and bm.status = 1
+    left join assembly_constituency ac on ac.id = c.constituency_id and ac.status = 1
+    left join parliamentary_constituency pc on pc.id = c.parliamentary_constituency_id and pc.status = 1
+    left join state_master sm2 on sm2.id = c.state_id and sm2.status = 1
+    left join candidate_training ct on ct.candidate_id  = c.id and ct.status = 1
+    left join batch_master bam on bam.id = ct.batch_id and bam.is_active = true
+    left join sanction_order snm on snm.id = bam.sanction_order_id and snm.is_active = true
+    left join training_center tc on tc.id = bam.tc_id and tc.is_active = true
+    left join pia_master pia on pia.id = bam.pia_id and pia.is_active = true
+    left join skill_master skm on skm.id = snm.skill_id and skm.status = 1
+    left join sector_master sm on sm.id = snm.sector_id and sm.status = 1
+    left join candidate_verification_details cvd on cvd.candidate_id = c.id 
+    left join education_master em on em.id = c.qualification_id 
+    left join "user" on "user".ref_id = c.id and "user".is_active = true
+    left join gp_master gm on gm.id = c.gp_id and gm.status = 1
+    where 1 = 1
+ and c.ddugky_version = 1 and c.status = 10 AND c.interest_freelancer = true and c.is_active = true
+ 
+ 
+ select * from candidate_employments ce
+ inner join candidates c on c.id = ce.candidate_id and c.is_active = true and c.ddugky_version = 1;

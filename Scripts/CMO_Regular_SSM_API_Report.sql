@@ -1935,4 +1935,14 @@ inner join cmo_batch_run_details cbrd on cbrd.cmo_batch_run_details_id = bl.cmo_
 inner join cmo_emp_batch_run_details cebrd on cbrd.batch_date = cebrd.batch_date and cbrd.batch_id = cebrd.batch_id
         order by cbrd.batch_date asc;
 
-select distinct cbgli.cmo_batch_run_details_id from cmo_batch_grievance_line_item cbgli where cbgli.error = 'REPROCESS' order by cbgli.cmo_batch_run_details_id asc
+select distinct cbgli.cmo_batch_run_details_id from cmo_batch_grievance_line_item cbgli where cbgli.error = 'REPROCESS' order by cbgli.cmo_batch_run_details_id asc;
+
+
+
+
+-- 12174_1775113369007.jpg
+
+-- 1960369	1	12174_1775113369007.jpg	image/jpeg	/cmo-grievance-documents/production/grievance_doc/12174_1775113369007.jpg		2026-04-02 12:32:50.403 +0530		2026-04-02 12:32:50.403 +0530	2	/cmo-grievance-documents
+
+
+select * from document_master dm ;
